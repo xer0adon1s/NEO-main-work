@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "allowed_tools": [
+    "curl",
+    "dig",
+    "gobuster",
+    "nc",
+    "ncat",
+    "nikto",
+    "nmap",
+    "openssl",
+    "smbclient",
+    "ssh"
+  ]
+}

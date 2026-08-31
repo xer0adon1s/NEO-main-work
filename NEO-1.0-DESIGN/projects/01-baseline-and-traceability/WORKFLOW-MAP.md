@@ -3,6 +3,10 @@
 Status: design reference for NEO 1.0. Describes **target** behavior (prototype +
 projects). v0.5 gaps called out inline.
 
+**Mission:** End-to-end authorized engagement conduction (Metasploit-class scope) —
+see `MISSION-STATEMENT.md` and OD-016. The suggest → try → analyze loop applies at
+**every** phase, not foothold alone.
+
 ## Actors and trust boundaries
 
 ```
@@ -45,15 +49,17 @@ flowchart TD
     H -->|no| J[Borg offer]
     I --> J
     J -->|assimilate| K[Borg v2 dossier + research]
-    J -->|skip| L[Foothold planning]
+    J -->|skip| L[Exploit / foothold planning]
     K --> L
-    L --> M[ListenAssist guided listener]
-    M --> N{Shell confirmed?}
+    L --> M2[Universal workbench loop — MSF + bash tools]
+    M2 --> M[ListenAssist / handler setup when needed]
+    M --> N{Session confirmed?}
     N -->|yes| O[Session established]
     N -->|no| L
     O --> P[Post-foothold enum / FindPrivs]
-    P --> Q[Privesc ranked plan]
-    Q --> R[Post / complete]
+    P --> Q[Privesc ranked plan + MSF local modules when justified]
+    Q --> R[Post-exploitation — loot, flags, MSF post modules]
+    R --> S[Mission complete]
 ```
 
 ### Phase 0 — Bootstrap
@@ -86,7 +92,7 @@ flowchart TD
 | Operator notes | INTERACT section partial | operator-recon.sh intake | P07 |
 | Service plans | ad hoc in babysteps | plan-enum.sh → action files | P15 |
 
-**Operator gates:** pause_after recon, [d] deep, [a] ask, [b] Borg, [p] payload suggest.
+**Operator gates:** pause_after recon, [d] deep, [a] ask, [b] Borg, [p] payload suggest, **[t] try**, **[o] operator shell**.
 
 ### Phase 3 — Borg (pre-foothold)
 
@@ -95,21 +101,21 @@ flowchart TD
 | Evidence bundle | Investigation-Notes paste | Hashed artifacts + dossier schema | P04, P14 |
 | Initial dossier | AI prose in BORG section | JSON dossier: facts/hypotheses/unknowns | P04 |
 | Research | Web via model assumptions | Declared provider capability | P08 |
-| Wind-up actions | eval/bash -c from prose | Typed action schema + policy | P06 |
+| Wind-up actions | eval/bash -c from prose | Typed action schema (local) + workbench `[t]` (remote) | P06, **P20** |
 | Vector selection | Operator picks slug | Same; symlinks to knowledge/ | P04 |
 
 **Operator gates:** assimilate Y/N, vector pick, per-action confirmation.
 
-### Phase 4 — Foothold
+### Phase 4 — Exploit / foothold
 
 | Step | v0.5 today | 1.0 target | Project |
 |------|------------|------------|---------|
-| ListenAssist | 7-line stub | Full guided workflow | P02 |
-| Listener command | — | Print argv for separate pane | P02 |
-| Session confirm | — | Operator y/N/not-yet → state transition | P02, P16 |
-| Payload suggest | neo-payload advisory | Unchanged pattern; actions via P06 | P06 |
+| ListenAssist | 7-line stub | Handler + listener guidance (MSF `exploit/multi/handler` compatible) | P02 |
+| MSF exploit modules | Not orchestrated | Exact `use`/`set`/`run` via workbench `[t]` | **P21** |
+| Payload suggest | neo-payload advisory | MSF-first when module applies; msfvenom stagers | P21, P20 |
+| Workbench loop | copy/paste broken UX | Universal loop — MSF + bash in operator pane | **P20** |
 
-**Operator gates:** pause_before foothold, listener start confirmation, shell receipt confirmation.
+**Operator gates:** `[p]` suggest, `[t]` try, `[o]` operator shell, `[z]` analyze (after attempt), ListenAssist listener confirm, shell receipt confirm.
 
 ### Phase 5 — Post-foothold enumeration
 
@@ -128,15 +134,16 @@ flowchart TD
 |------|------------|------------|---------|
 | Fact normalization | FindPrivs headers | Structured privesc-facts.json | P17 |
 | Ranking | Manual + AI triage | Evidence-linked ranked plan | P17 |
-| Validation | Operator manual | Track attempts; no auto-exploit | P17 |
+| Validation | Operator manual | Workbench `[t]` + P06 for local_safe; track attempts | P17, **P20** |
 
-**Operator gates:** each validation action via P06 policy.
+**Operator gates:** each validation via workbench try or P06 action review; `[z]` analyze on failure.
 
-### Phase 7 — Post / complete
+### Phase 7 — Post-exploitation
 
 | Step | v0.5 today | 1.0 target | Project |
 |------|------------|------------|---------|
-| Flags/creds | Manual CREDS/USERFLAG sections | Same; export bundle redacted | P14 |
+| Flags/creds | Manual CREDS/USERFLAG sections | Same + workbench MSF post-module hints | P14, **P21** |
+| Loot / pivot | Manual | Guided suggest → try → analyze | P20, P21 |
 | Mission end | phase post prompt | state → complete | P16 |
 
 ## Pause menu matrix (v0.5 — preserved in 1.0)
@@ -148,7 +155,9 @@ flowchart TD
 | a | Ask AI (free text) | all |
 | b | Borg assimilate | all |
 | p | Payload suggest | recon, foothold, privesc |
-| z | Analyze failures | foothold (after attempt) |
+| t | Try command (workbench) | recon, foothold, privesc |
+| o | Operator shell pane | recon, foothold, privesc |
+| z | Analyze failures / workbench output | foothold (after attempt) |
 | s | Skip to step | all |
 | q | Quit (checkpoint) | all |
 | d | Deep recon | recon only |
@@ -165,7 +174,10 @@ Tool stdout ──▶ neo_evidence_save_artifact() ──▶ artifacts/<hash>.tx
               events.jsonl (type, source, summary, artifact ref)
                       │
                       ▼
-              Investigation-Notes.md (curated sections, human-owned)
+              Investigation-Notes.md (curated sections: PAYLOAD, WORKBENCH, …)
+                      │
+                      ▼
+              Workbench try → artifacts/ + attempts/*.json (P20)
                       │
                       ▼
               AI bundle (redacted, hash-linked inputs only)

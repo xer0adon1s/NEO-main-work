@@ -30,7 +30,7 @@ current application.
 
 ## Project set
 
-The design is divided into 19 implementation projects:
+The design is divided into 21 implementation projects:
 
 1. Baseline and requirements traceability
 2. ListenAssist workflow
@@ -51,6 +51,8 @@ The design is divided into 19 implementation projects:
 17. Privilege-escalation workflow
 18. CLI 1.0 validation and release gates
 19. GUI 2.0 boundary and API readiness
+20. **Operator workbench — core try/analyze loop** (`OPERATOR-WORKBENCH.md`)
+21. **Exploit framework conductor — Metasploit mastery** (`projects/21-exploit-framework-conductor/`)
 
 ## Snapshot integrity
 
@@ -74,6 +76,9 @@ engagement scope (educational HTB/THM labs + professional authorized assessments
 | `IMPLEMENTATION-ROADMAP.md` | Waves, checklists, time estimates |
 | `SECRETS-RUNBOOK.md` | P05 operator reference |
 | `UPGRADE-FROM-0.5.md` | Migration guide |
+| `OPERATOR-WORKBENCH.md` | **Core product loop — every phase** |
+| `MISSION-STATEMENT.md` | **End-to-end vision — full engagement conductor** |
+| `SCOPE-STATUS.md` | **Tier + project status board (complete / prototyped / …)** |
 | `AGENT-START-HERE.md` | **Home lab agent roadmap — read this first at home** |
 
 Prototype code lives in `prototype/neo-next/`. Run tests on a Linux host:

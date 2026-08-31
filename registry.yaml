@@ -74,12 +74,61 @@ neo-tmux:
   # launches, so Analyze Failures can reliably capture what was tried manually outside
   # NEO. Opt out with NEO_TMUX_WRAP=0. Never wraps piped/non-interactive runs.
 
+# Operator workbench — dedicated tmux pane + try/analyze loop (P20)
+neo-operator-pane:
+  file: lib/neo-operator-pane.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [tmux]
+  # Split neo-<project> session: conductor pane + neo-operator work pane.
+  # send-keys, capture-pane for [t] try command.
+
+neo-workbench:
+  file: lib/neo-workbench.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [jq, tmux]
+  # [t] try (permission gate) → capture → AI analyze → repeat until foothold.
+  # [o] open operator shell. Phase-gated: recon, foothold, privesc.
+  owns:
+    WORKBENCH: append
+    PAYLOAD: append
+    FOOTHOLD: append
+    LOG: append
+  finish:
+    phase: dynamic
+    log: smart
+
+neo-toolkit:
+  file: lib/neo-toolkit.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: LOCK & LOAD preflight — verify tools, SecLists paths, vendor files; optional install
+
+neo-exploit-framework:
+  file: lib/neo-exploit-framework.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: Metasploit detection, MSF-aware AI context, tool priority (P21)
+
+neo-pipeline-hooks:
+  file: lib/neo-pipeline-hooks.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: Opt-in plan-enum, operator-recon, privesc rank hooks at phase boundaries
+
 ListenAssist:
   file: foothold/ListenAssist.sh
   runs: local
   phase: foothold
   init_project: false
   requires: [tmux, ncat]
+  notes: Optional MSF handler via --handler msf when msfconsole on PATH
   owns:
     LOG: append
   finish:
@@ -138,6 +187,61 @@ LinEnum:
   finish:
     phase: privesc
     log: smart
+
+operator-recon:
+  file: recon/operator-recon.sh
+  runs: local
+  phase: recon
+  init_project: false
+  requires: [jq]
+  notes: Operator evidence before triage/Borg; no command execution
+
+scope-intake:
+  file: tools/scope-intake.sh
+  runs: local
+  phase: connect
+  init_project: false
+  requires: [jq]
+  notes: Engagement scope wizard; call before recon on new projects
+
+borg-v2:
+  file: borg/borg-v2.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [jq]
+  notes: Structured JSON Borg; invoke via borg.sh --v2
+
+plan-enum:
+  file: recon/plan-enum.sh
+  runs: local
+  phase: recon
+  init_project: false
+  requires: [jq]
+  notes: Service JSON → advisory enumeration action files
+
+review-plan:
+  file: recon/review-plan.sh
+  runs: local
+  phase: recon
+  init_project: false
+  requires: [jq]
+  notes: Review/execute plan-enum action JSON files one at a time (P15)
+
+doc-truth-check:
+  file: tools/doc-truth-check.sh
+  runs: local
+  phase: meta
+  init_project: false
+  notes: P12 release truth checks; wired in test/run-all.sh
+
+neo-vendor:
+  file: tools/neo-vendor.sh
+  runs: local
+  phase: meta
+  init_project: false
+  requires: [jq, sha256sum]
+  notes: P11 vendor manifest inventory/verify/init
 
 ovpn-connect:
   file: connect/ovpn-connect.sh

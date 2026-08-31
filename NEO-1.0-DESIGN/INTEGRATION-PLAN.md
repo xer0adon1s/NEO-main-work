@@ -33,6 +33,11 @@ Do not apply until operator approves integration on NEO-at-work branch.
 | enumerators/review-plan.sh | recon/review-plan.sh | P15 |
 | tools/neo-vendor.sh | tools/neo-vendor.sh | P11 |
 | tools/doc-truth-check.sh | tools/doc-truth-check.sh | P12 |
+| tools/neo-vendor.sh | tools/neo-vendor.sh | P11 |
+| recon/review-plan.sh | recon/review-plan.sh | P15 |
+| lib/neo-operator-pane.sh | lib/neo-operator-pane.sh | P20 |
+| lib/neo-workbench.sh | lib/neo-workbench.sh | P20 |
+| schemas/workbench-*.json | schemas/workbench-*.json | P20 |
 | lib/neo-scope.sh | lib/neo-scope.sh | P13 |
 | tools/scope-intake.sh | tools/scope-intake.sh | P13 |
 | privesc/rank-privesc-plan.sh | privesc/rank-privesc-plan.sh | P17 |
@@ -56,8 +61,9 @@ Do not apply until operator approves integration on NEO-at-work branch.
 | lib/neo-borg.sh | Remove eval; link to borg-v2 pattern | P04, P06 |
 | lib/neo-vpn.sh | Call neo_vpn_resolve_existing before pkill | P10 |
 | lib/neo-boot.sh | VPN consent before connect | P10 |
-| lib/neo-payload.sh | Emit action JSON only | P06 |
-| neo.sh | Mission state gates; operator-recon hook; **scope intake before recon** | P16, P07, P13 |
+| lib/neo-payload.sh | Emit action JSON only; suggest advisory; execute via workbench | P06, P20 |
+| lib/neo-workbench.sh | Pause [t]/[o]; try/analyze loop | P20 |
+| neo.sh | Mission state gates; operator-recon hook; scope intake; workbench menu | P16, P07, P13, P20 |
 | borg/borg.sh | Thin wrapper to borg-v2 or merge | P04 |
 | recon/analyze-recon.sh | Provider abstraction | P08 |
 | setup.sh | Manifest-aware vendor install | P11 |
@@ -77,7 +83,7 @@ Do not apply until operator approves integration on NEO-at-work branch.
 | recon/babysteps.sh | Implemented; P15 adds optional planner hook |
 | lib/notes-lib.sh | Section model; extend don't replace |
 | lib/script-lib.sh | cybersec_finish pattern |
-| lib/neo-menu.sh | Pause routing (Phase 49) |
+| lib/neo-menu.sh | Pause routing (Phase 49); [t]/[o] workbench (P20) |
 | lib/neo-interact.sh | Pre-foothold; complements P07 |
 | phases.yaml | Data-driven walk; add state checks in neo.sh |
 | knowledge/vectors/ | Borg collective unchanged |
@@ -105,6 +111,9 @@ Do not apply until operator approves integration on NEO-at-work branch.
   evidence/
     events.jsonl
     artifacts/
+  workbench/
+    attempts/*.json
+    session.json
   borg/
     initial-dossier-*.json
     assimilated-dossier-*.json

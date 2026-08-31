@@ -63,6 +63,10 @@ _No AI triage yet. Built-in: runs after babysteps when Claude API is configured.
 
 ## Ask Claude Log
 _Free-form Q&A from **[a]sk Claude** at any pause — each question + answer appends here, with the last N lines of this file (`NEO_ASK_CONTEXT_LINES`, default 800) attached as context at ask time._
+<!-- SECTION:ELI5 -->
+_No ELI5 lessons yet — press **[e] ELI5 explain** at a pause to get a beginner-friendly breakdown of suggested commands._
+<!-- /SECTION:ELI5 -->
+
 <!-- SECTION:ASK -->
 _No questions asked yet._
 <!-- /SECTION:ASK -->
@@ -78,10 +82,18 @@ _No Borg assimilations yet. After AI triage, press **[b] Assimilate with Borg** 
 ---
 
 ## Payload suggestions
-_Tool-aware suggestions from **[p]ayload suggest**, and **[z] analyze failures** at foothold (after a first attempt) — reviews what's been tried, including a tmux terminal-log capture when available._
+_Tool-aware suggestions from **[p]ayload suggest**, **[t]ry command** (operator workbench), and **[z] analyze failures** at foothold (after a first attempt) — reviews what's been tried, including workbench captures and tmux scrollback when available._
 <!-- SECTION:PAYLOAD -->
-_No payload analysis yet. After recon, use **[p]** to suggest a payload for a tool you pick, or **[z]** at foothold (once you've tried something) to analyze what's failing._
+_No payload analysis yet. After recon, use **[p]** to suggest a payload for a tool you pick, **[t]** to try a suggested command in the operator pane, or **[z]** at foothold (once you've tried something) to analyze what's failing._
 <!-- /SECTION:PAYLOAD -->
+
+---
+
+## Operator Workbench
+_The core try loop: **[t]ry command** runs a suggested command (with permission) in the operator tmux pane or via safe local argv; output is captured and analyzed by AI. Repeat until foothold._
+<!-- SECTION:WORKBENCH -->
+_No workbench attempts yet. Use **[o]perator shell** to open the work pane, **[p]** for a suggestion, then **[t]** to try it._
+<!-- /SECTION:WORKBENCH -->
 
 ---
 

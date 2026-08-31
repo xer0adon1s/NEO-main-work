@@ -22,6 +22,10 @@ printf 'NEO v%s diagnostic — %s\n\n' "$(cat VERSION 2>/dev/null | tr -d '[:spa
 
 for f in neo.sh setup.sh phases.yaml registry.yaml VERSION AGENTS.md README.md \
     lib/notes-lib.sh lib/script-lib.sh lib/neo-ai.sh lib/neo-ai-analyze.sh lib/neo-ai-cli.sh lib/neo-hud.sh lib/neo-splash.sh lib/neo-vpn.sh lib/neo-boot.sh lib/neo-borg.sh lib/neo-payload.sh lib/neo-menu.sh lib/neo-tmux.sh lib/neo-interact.sh \
+    lib/neo-core.sh lib/neo-1.0-bootstrap.sh lib/neo-secrets.sh lib/neo-evidence.sh lib/neo-actions.sh lib/neo-mission-state.sh lib/neo-scope.sh lib/neo-provider.sh lib/neo-windup-actions.sh lib/neo-vpn-consent.sh \
+    tools/neo-secret.sh tools/scope-intake.sh tools/scope-import.sh \
+    borg/borg-v2.sh recon/operator-recon.sh recon/plan-enum.sh \
+    schemas/action-policy.json schemas/action.schema.json schemas/engagement-scope.schema.json \
     recon/babysteps.sh recon/analyze-recon.sh borg/borg.sh assets/borg-splash-wide.txt \
     knowledge/README.md knowledge/INDEX.yaml templates/investigation-notes.md; do
     [[ -f "${f}" ]] && ok "exists: ${f}" || bad "missing: ${f}"
@@ -32,7 +36,7 @@ done
 
 # --- lib/ should only contain NEO scripts ---
 printf '\n--- lib/ hygiene ---\n'
-neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh)
+neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh)
 for f in "${neo_libs[@]}"; do
     [[ -f "lib/${f}" ]] && ok "neo lib: ${f}" || bad "missing neo lib: ${f}"
 done
@@ -67,6 +71,14 @@ else
     bad "missing recon/babysteps.sh"
 fi
 
+printf '\n--- NEO 1.0 production integrity gate ---\n'
+if bash test/production-integrity-gate.sh >/tmp/neo-diag-integrity-gate.log 2>&1; then
+    ok "production-integrity-gate ($(tail -1 /tmp/neo-diag-integrity-gate.log 2>/dev/null || echo pass))"
+else
+    note "production-integrity-gate not yet green (expected until Wave 3 stub replacement) — see /tmp/neo-diag-integrity-gate.log"
+    tail -8 /tmp/neo-diag-integrity-gate.log >&2 || true
+fi
+
 # --- Syntax ---
 printf '\n--- bash -n ---\n'
 syn_fail=0
@@ -95,6 +107,11 @@ run_test() {
         tail -5 /tmp/neo-diag-"${name}".log >&2 || true
     fi
 }
+run_test "workflow-scope-test" test/workflow-scope-test.sh
+run_test "core-secrets-test" test/core-secrets-test.sh
+run_test "secret-canary-test" test/secret-canary-test.sh
+run_test "injection-payload-test" test/injection-payload-test.sh
+run_test "mission-state-test" test/mission-state-test.sh
 run_test "notes-lib-test" test/notes-lib-test.sh
 run_test "recon-bundle-test" test/recon-bundle-test.sh
 run_test "borg-test" test/borg-test.sh

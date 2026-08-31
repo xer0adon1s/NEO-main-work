@@ -13,9 +13,10 @@ A new operator can, on an authorized disposable lab box:
 5. Add operator recon notes
 6. Run optional Borg assimilation
 7. Plan foothold via ListenAssist
-8. Confirm shell → post-foothold enum
-9. Work ranked privesc plan
-10. Complete without hidden automation or false success
+8. **Workbench loop:** `[p]` suggest → `[t]` try → analyze until shell
+9. Confirm shell → post-foothold enum
+10. Work ranked privesc plan (workbench `[t]` on validation steps)
+11. Complete without hidden automation or false success
 
 ## Capability checklist (18a)
 
@@ -36,6 +37,7 @@ A new operator can, on an authorized disposable lab box:
 | 13 | Privesc ranker | P17 | fixture test |
 | 14 | Doc truth | P12 | doc-truth-check |
 | 15 | Vendor manifest | P11 | verify test |
+| 16 | Operator workbench | P20 | workbench-test + E2E checklist |
 
 ## Scenario matrix (18b)
 
@@ -51,6 +53,8 @@ A new operator can, on an authorized disposable lab box:
 | No AI / manual mode | Workflow continues |
 | Provider failure | Clear message, manual path |
 | Missing tool | Advisory, not crash |
+| Workbench without tmux | Clear error; suggest NEO_TMUX_WRAP=1 |
+| Paste in conductor pane | Menu consumes input — use [t] or operator pane |
 
 ## E2E lab targets (18c)
 

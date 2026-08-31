@@ -27,7 +27,8 @@ AI triage (optional) ─┘
    knowledge/vectors/<slug>/ dossier files
          │
          ▼
-   typed action proposals (P06) — advisory only
+   typed action proposals (P06) for local attack-box steps; operator-pane execution via
+   workbench `[t]` for remote/shell metacharacter commands (P20)
 ```
 
 ## Dossier schema

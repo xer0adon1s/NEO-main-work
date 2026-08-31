@@ -2290,3 +2290,79 @@ from inside `machines_us-4` after VPN reconnect. No commit/tag pushed — operat
 
 <!-- More operator testing notes go below as they're reported -->
 
+---
+
+# Phase 61 — Session adapter + MSF post menu (2026-08-31)
+
+## Operator prompt(s)
+
+> ok we'll do the testing later- YES KEEP BUILDINGGGG haha love you
+
+## What changed
+
+**Session adapter (Tier 4.5 / P21)**
+
+- `lib/neo-operator-pane.sh` — `neo_operator_pane_offer_session_connect`: after foothold
+  confirm, offers Y/n to send SSH or MSF handler command to operator pane; optional MSF
+  session id capture (`session_connect_offered` meta skip).
+- `lib/neo-workbench.sh` — calls session adapter after foothold record.
+
+**MSF session + post menu**
+
+- `lib/neo-mission-state.sh` — `neo_mission_record_msf_session`; relaxed
+  `neo_mission_record_session` for ssh/msf transports; context block shows session id.
+- `lib/neo-exploit-framework.sh` — `neo_msf_search_command`, post module catalog/menu,
+  `neo_msf_post_module_command`.
+- `lib/neo-pipeline-hooks.sh` — `neo_pipeline_offer_msf_post` at post phase entry
+  (`msf_post_offered` meta skip).
+- `neo.sh` — wires MSF post hook before post pause menu.
+
+**Tests**
+
+- `test/session-adapter-test.sh` (new)
+- Extended `mission-state-test.sh`, `exploit-framework-test.sh`, `run-all.sh`
+- `tools/windows-static-check.ps1` — expanded checks
+
+## Verification (Windows work PC)
+
+```powershell
+powershell -File tools/windows-static-check.ps1
+```
+
+Full bash suite deferred to home Linux per operator.
+
+## Still open
+
+- Borg HUD spam (Phase 60 note)
+- P18 E2E / VERSION 1.0.0-rc after lab sign-off
+- neo-vendor URL download + real rollback
+
+---
+
+# Phase 62 — ELI5 educational mode `[e]` (2026-08-31)
+
+## Operator prompt(s)
+
+> as a side thought-- since this will be an educational tool as well-- i feel like it makes
+> sense to have an "educate me" option at certain points when it offers payloads, or CVE
+> thoughts, or anything-- basically having the program ask AI to "school you" at an "eli5
+> level" maybe we have the option called (ELI5) and it will break down what it found, why it
+> suggested things, and most importantly- EXPLAIN the linux prompt its having you offer,
+> describe the tabs, the sections, so that the user knows what the full prompt command or
+> payload is doing before they rip it.
+
+## What changed
+
+- **`lib/neo-eli5.sh`** — `[e] ELI5 explain` tutor: system prompt for plain-language lessons,
+  command walkthrough (flags, pipes, MSF paths), saves append-only **ELI5** section.
+- **`neo-menu.sh`** — `e|E` → `eli5`.
+- **`neo.sh`** — pause menus show `[e] ELI5 explain` when AI available; dispatch handler.
+- **`neo-payload.sh` / `neo-workbench.sh`** — optional Y/n ELI5 immediately after suggest/analyze.
+- **`templates/investigation-notes.md`** — **ELI5** section markers.
+- **`test/eli5-test.sh`**, **`menu-routing-test.sh`** updated.
+
+## Operator flow
+
+At any pause with AI: press **`[e]`** → NEO explains latest suggested command (or paste your own).
+After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5 level now? [y/N]**.
+

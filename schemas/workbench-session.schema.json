@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/workbench-session.schema.json",
+  "title": "NEO workbench session state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project", "last_attempt_id", "loop_count", "updated_at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "project": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "last_attempt_id": { "type": ["string", "null"], "maxLength": 64 },
+    "operator_pane_id": { "type": ["string", "null"], "maxLength": 32 },
+    "loop_count": { "type": "integer", "minimum": 0 },
+    "foothold_confirmed": { "type": "boolean" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

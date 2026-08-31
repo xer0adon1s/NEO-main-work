@@ -13,8 +13,8 @@ validation workflow. AI must not overclaim exploitability.
 FindPrivs ingest → privesc-facts.json (normalized)
                 → ranker (deterministic rules + optional AI hypotheses)
                 → privesc-plan.json (ranked items)
-                → operator validates each via P06 actions
-                → track attempts in evidence
+                → operator validates each via P06 actions **or workbench `[t]`**
+                → track attempts in evidence + workbench attempts/*.json
 ```
 
 ## privesc-facts.json fields

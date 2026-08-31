@@ -152,51 +152,8 @@ neo_ai_print_triage_brief() {
 
 neo_ai_process_tool_requests() {
     local response="$1"
-    local tool pkg ans
-    local -a tools=()
-
     [[ -t 0 ]] || return 0
-
-    mapfile -t tools < <(neo_ai_extract_tools_from_response "${response}")
-    ((${#tools[@]} == 0)) && return 0
-
-    neo_ai_analyze_init_colors
-    printf '%s  ▸ TOOL CHECK%s\n' "${C_CYAN}" "${C_RESET}"
-
-    for tool in "${tools[@]}"; do
-        [[ -n "${tool}" ]] || continue
-        if command -v "${tool}" >/dev/null 2>&1; then
-            printf '    %s[ok]%s %s — already on PATH\n' "${C_GREEN}" "${C_RESET}" "${tool}"
-            continue
-        fi
-
-        pkg="$(neo_ai_tool_to_package "${tool}")"
-        printf '    %s[—]%s %s — not found on this attack box\n' "${C_YELLOW}" "${C_RESET}" "${tool}"
-
-        if command -v pacman >/dev/null 2>&1; then
-            read -r -p "      Install with: sudo pacman -S --needed ${pkg} ? [y/N] " ans
-            if [[ "${ans}" =~ ^[Yy] ]]; then
-                if sudo pacman -S --needed "${pkg}"; then
-                    printf '      %s[ok]%s installed %s\n' "${C_GREEN}" "${C_RESET}" "${pkg}"
-                    notes_append_section TODO $'- [x] Installed '"${tool}"' (AI triage suggestion)' || true
-                else
-                    printf '      %s[!]%s install failed — install %s manually\n' \
-                        "${C_YELLOW}" "${C_RESET}" "${pkg}" >&2
-                    notes_append_section TODO $'- [ ] Install '"${tool}"' (pacman -S '"${pkg}"')' || true
-                fi
-            else
-                notes_append_section TODO $'- [ ] Install '"${tool}"' when ready (pacman -S '"${pkg}"')' || true
-            fi
-        elif command -v apt-get >/dev/null 2>&1; then
-            read -r -p "      Install with: sudo apt install ${pkg} ? [y/N] " ans
-            if [[ "${ans}" =~ ^[Yy] ]]; then
-                sudo apt install -y "${pkg}" || notes_append_section TODO \
-                    $'- [ ] Install '"${tool}"' (apt install '"${pkg}"')' || true
-            fi
-        else
-            printf '      Install %s with your distro package manager, then re-run the suggested step.\n' "${tool}"
-            notes_append_section TODO $'- [ ] Install '"${tool}"' (not on PATH — AI triage suggestion)' || true
-        fi
-    done
-    printf '\n'
+    # shellcheck source=neo-toolkit.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-toolkit.sh"
+    neo_toolkit_offer_after_suggest "${response}" "${PROJECT_NAME:-}"
 }

@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # neo-ai.sh — Claude API helpers for NEO recon triage.
 #
-# Requires: curl, jq. Set ANTHROPIC_API_KEY or put key in ~/.config/neo/anthropic.key
+# Requires: curl, jq. Secrets via neo-secrets broker (env or ~/.config/neo/secrets/).
+
+NEO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=neo-secrets.sh
+source "${NEO_LIB_DIR}/neo-secrets.sh"
 
 NEO_AI_MODEL="${NEO_AI_MODEL:-claude-sonnet-4-6}"
 NEO_AI_MAX_TOKENS="${NEO_AI_MAX_TOKENS:-4096}"
@@ -23,6 +27,12 @@ neo_ai_load_workspace_id() {
     if [[ -n "${ANTHROPIC_WORKSPACE_ID:-}" ]]; then
         return 0
     fi
+    if neo_secret_load ANTHROPIC_WORKSPACE_ID; then
+        ANTHROPIC_WORKSPACE_ID="${NEO_SECRET_VALUE}"
+        export ANTHROPIC_WORKSPACE_ID
+        NEO_SECRET_VALUE=""
+        return 0
+    fi
     local wsfile
     wsfile="$(neo_ai_workspace_file_path)"
     if [[ -f "${wsfile}" ]]; then
@@ -31,29 +41,24 @@ neo_ai_load_workspace_id() {
         [[ -n "${ANTHROPIC_WORKSPACE_ID}" ]]
         return $?
     fi
-    if [[ -f "${NEO_HOME:-}/.env" ]]; then
-        # shellcheck disable=SC1090
-        source "${NEO_HOME}/.env"
-        [[ -n "${ANTHROPIC_WORKSPACE_ID:-}" ]]
-        return $?
-    fi
     return 1
 }
 
 neo_ai_save_workspace_id() {
-    local ws="$1" wsfile dir
-    wsfile="$(neo_ai_workspace_file_path)"
-    dir="$(dirname "${wsfile}")"
-    mkdir -p "${dir}"
-    chmod 700 "${dir}"
-    printf '%s' "${ws}" > "${wsfile}"
-    chmod 600 "${wsfile}"
+    local ws="$1"
+    neo_secret_store ANTHROPIC_WORKSPACE_ID "${ws}" || return 1
     ANTHROPIC_WORKSPACE_ID="${ws}"
     export ANTHROPIC_WORKSPACE_ID
 }
 
 neo_ai_load_api_key() {
     if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+        return 0
+    fi
+    if neo_secret_load ANTHROPIC_API_KEY; then
+        ANTHROPIC_API_KEY="${NEO_SECRET_VALUE}"
+        export ANTHROPIC_API_KEY
+        NEO_SECRET_VALUE=""
         return 0
     fi
     local keyfile
@@ -64,23 +69,12 @@ neo_ai_load_api_key() {
         [[ -n "${ANTHROPIC_API_KEY}" ]]
         return $?
     fi
-    if [[ -f "${NEO_HOME:-}/.env" ]]; then
-        # shellcheck disable=SC1090
-        source "${NEO_HOME}/.env"
-        [[ -n "${ANTHROPIC_API_KEY:-}" ]]
-        return $?
-    fi
     return 1
 }
 
 neo_ai_save_api_key() {
-    local key="$1" keyfile dir
-    keyfile="$(neo_ai_keyfile_path)"
-    dir="$(dirname "${keyfile}")"
-    mkdir -p "${dir}"
-    chmod 700 "${dir}"
-    printf '%s' "${key}" > "${keyfile}"
-    chmod 600 "${keyfile}"
+    local key="$1"
+    neo_secret_store ANTHROPIC_API_KEY "${key}" || return 1
     ANTHROPIC_API_KEY="${key}"
     export ANTHROPIC_API_KEY
 }
@@ -164,7 +158,7 @@ neo_ai_ensure_api_key() {
     keyfile="$(neo_ai_keyfile_path)"
 
     printf '\nClaude API key not found.\n'
-    printf '  Checked: ANTHROPIC_API_KEY, %s, %s/.env\n' "${keyfile}" "${NEO_HOME:-~/Neo}"
+    printf '  Checked: ANTHROPIC_API_KEY env, %s, %s/ANTHROPIC_API_KEY\n' "${keyfile}" "${NEO_SECRET_DIR}"
     read -r -s -p 'Enter Anthropic API key for AI recon triage (Enter to skip): ' key
     printf '\n'
     [[ -n "${key}" ]] || return 1
@@ -395,65 +389,45 @@ neo_ai_call_claude() {
     local user_prompt="$1"
     local system_prompt="${2:-$(neo_ai_recon_system_prompt)}"
     local allow_ws_prompt="${3:-1}"
-    local tmp_body tmp_out http_code model="${NEO_AI_MODEL}"
+    local tmp_sys tmp_user tmp_out rc saved_provider
+
+    NEO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # shellcheck source=neo-provider.sh
+    source "${NEO_LIB_DIR}/neo-provider.sh"
 
     neo_ai_load_api_key || {
-        echo "neo-ai: ANTHROPIC_API_KEY not set (env, $(neo_ai_keyfile_path), or NEO_HOME/.env)" >&2
+        echo "neo-ai: ANTHROPIC_API_KEY not set (env, ${NEO_SECRET_DIR}/ANTHROPIC_API_KEY, or $(neo_ai_keyfile_path))" >&2
         return 1
     }
 
-    tmp_body="$(mktemp)"
-    tmp_out="$(mktemp)"
-    # Double-quoted so ${tmp_body}/${tmp_out} expand NOW, baked into the trap command as
-    # literal paths — not deferred to when the trap fires. A single-quoted 'rm -f
-    # "${tmp_body}" "${tmp_out}"' RETURN trap looks up those locals at fire time, and RETURN
-    # traps aren't function-scoped: if this trap outlives this call (e.g. this function
-    # returns normally, then the *caller* returns before anything re-arms/clears the trap),
-    # it fires again in a scope where these locals no longer exist — "unbound variable"
-    # under set -u. Confirmed root cause of a live crash: neo_ai_verify_setup()'s own
-    # `return 0` right after a successful retry call re-triggered this stale trap. The
-    # trailing `trap - RETURN` clears it once it's fired, so it can never leak into a later,
-    # unrelated function's return at all — not just made harmless if it does.
-    trap "rm -f '${tmp_body}' '${tmp_out}'; trap - RETURN" RETURN
-
     neo_ai_load_workspace_id || true
 
-    jq -n \
-        --arg model "${model}" \
-        --arg system "${system_prompt}" \
-        --arg user "${user_prompt}" \
-        --argjson max_tokens "${NEO_AI_MAX_TOKENS}" \
-        '{
-            model: $model,
-            max_tokens: $max_tokens,
-            system: $system,
-            messages: [{role: "user", content: $user}]
-        }' > "${tmp_body}"
+    tmp_sys="$(mktemp)"
+    tmp_user="$(mktemp)"
+    tmp_out="$(mktemp)"
+    trap "rm -f '${tmp_sys}' '${tmp_user}' '${tmp_out}'; trap - RETURN" RETURN
 
-    local -a curl_hdr=(
-        -H "x-api-key: ${ANTHROPIC_API_KEY}"
-        -H "anthropic-version: 2023-06-01"
-        -H "content-type: application/json"
-    )
-    if [[ -n "${ANTHROPIC_WORKSPACE_ID:-}" ]]; then
-        curl_hdr+=(-H "anthropic-workspace-id: ${ANTHROPIC_WORKSPACE_ID}")
+    printf '%s' "${system_prompt}" > "${tmp_sys}"
+    printf '%s' "${user_prompt}" > "${tmp_user}"
+
+    saved_provider="${NEO_AI_PROVIDER:-anthropic-api}"
+    NEO_AI_PROVIDER=anthropic-api
+    if neo_provider_request "${tmp_sys}" "${tmp_user}" "${tmp_out}"; then
+        NEO_AI_PROVIDER="${saved_provider}"
+        cat "${tmp_out}"
+        return 0
     fi
+    rc=$?
+    NEO_AI_PROVIDER="${saved_provider}"
 
-    http_code="$(curl -sS -o "${tmp_out}" -w '%{http_code}' \
-        https://api.anthropic.com/v1/messages \
-        "${curl_hdr[@]}" \
-        --data @"${tmp_body}")"
-
-    if [[ "${http_code}" != "200" ]]; then
-        echo "neo-ai: Claude API HTTP ${http_code}" >&2
-        local err_msg
+    if [[ -f "${tmp_out}" ]]; then
+        local err_msg http_hint=""
         err_msg="$(jq -r '.error.message // empty' "${tmp_out}" 2>/dev/null || true)"
         if [[ -n "${err_msg}" ]]; then
             echo "neo-ai: ${err_msg}" >&2
-        else
-            cat "${tmp_out}" >&2
+            [[ "${err_msg}" == *workspace* ]] && http_hint=workspace
         fi
-        if [[ "${http_code}" == "400" && "${err_msg}" == *workspace* ]]; then
+        if [[ "${http_hint}" == workspace ]]; then
             cat >&2 <<EOF
 neo-ai: Your Console key is valid but not scoped to one workspace (Default Workspace shows ID as "—").
   Fix A — named workspace (recommended):
@@ -461,7 +435,7 @@ neo-ai: Your Console key is valid but not scoped to one workspace (Default Works
       ./tools/neo-claude-setup.sh wrkspc_...
   Fix B — scoped API key:
     Console → Settings → API keys → Create key → pick ONE workspace when creating
-    Replace ~/.config/neo/anthropic.key with the new key (no workspace file needed)
+    Replace secret broker entry with the new key (no workspace file needed)
 EOF
             if [[ -t 0 && "${allow_ws_prompt}" == "1" ]]; then
                 local ws_retry
@@ -475,8 +449,6 @@ EOF
                 fi
             fi
         fi
-        return 1
     fi
-
-    jq -r '[.content[] | select(.type=="text") | .text] | join("\n")' "${tmp_out}"
+    return "${rc}"
 }

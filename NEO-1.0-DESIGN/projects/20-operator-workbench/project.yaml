@@ -1,0 +1,15 @@
+id: P20
+title: Operator Workbench — try/analyze loop
+priority: P0
+status: in_progress
+depends_on:
+  - P06
+  - P08
+  - P16
+acceptance:
+  - Operator pane exists in neo-<project> tmux session
+  - "[t] try sends command with y/N permission and captures output"
+  - "[o] opens operator shell with SSH hint when known"
+  - AI analyzes captured output and writes next command to notes
+  - foothold_attempt mission transition on first try; session_established on confirm
+  - Loop visible on recon, foothold, privesc pauses

@@ -51,6 +51,6 @@ Document in README:
 
 ## Deliverables at integration
 
-- tools/doc-truth-check.sh
-- Generated TEST-COUNTS.md from CI
-- CHANGELOG.md entries per release
+- `tools/doc-truth-check.sh` — **integrated (Tier 3)**
+- Generated TEST-COUNTS.md from CI (deferred)
+- CHANGELOG.md entries per release (see RELEASE-NOTES.md)

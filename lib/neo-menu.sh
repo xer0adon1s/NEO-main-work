@@ -23,7 +23,9 @@ neo_menu_classify() {
         r|R) echo repeat ;;
         s|S) echo skip-to-step ;;
         k|K) echo skip-phase ;;
-        q|Q) echo quit ;;
+        t|T) echo try-command ;;
+        o|O) echo open-operator ;;
+        e|E) echo eli5 ;;
         *) echo unmatched ;;
     esac
 }

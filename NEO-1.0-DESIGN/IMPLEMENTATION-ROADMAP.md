@@ -55,11 +55,14 @@ bash test/neo-diagnostic.sh
 - [ ] borg-v2 integration
 - [ ] privesc normalizer + ranker
 
-### Wave 5 checklist (P11, P12, P18)
+### Wave 5 checklist (P11, P12, P18, P20)
 
-- [ ] neo-vendor manifest
-- [ ] doc-truth-check
-- [ ] VERSION 1.0.0, RELEASE-NOTES
+- [x] neo-vendor manifest CLI
+- [x] doc-truth-check
+- [x] OPERATOR-WORKBENCH design + libs (P20)
+- [x] RELEASE-NOTES, KNOWN-LIMITATIONS, E2E-CHECKLIST
+- [ ] VERSION 1.0.0-rc bump (operator)
+- [ ] P18 E2E on 3 lab boxes
 
 ## Phase D — E2E validation (P18)
 

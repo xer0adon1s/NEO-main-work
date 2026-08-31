@@ -13,7 +13,7 @@ must support open shells, optional SSH, and file paste without executing untrust
 
 | Mode | When | NEO action |
 |------|------|------------|
-| `existing-shell` | Operator already has shell in tmux pane | Print copy/paste instructions for `bash -s < FindPrivs.sh` |
+| `existing-shell` | Operator already has shell in operator tmux pane | Workbench `[t]` or paste `bash -s < FindPrivs.sh` in operator pane |
 | `ssh` | ssh_target in meta | Run wrapper: `ssh target 'bash -s' < FindPrivs.sh \| ingest` |
 | `file-ingest` | Operator saved output | `notes-lib ingest` or evidence ingest from path |
 

@@ -49,7 +49,7 @@ Replace setup.sh download block with manifest-aware installer; keep same 6 defau
 ## Prototype artifacts
 
 - `projects/11-tool-acquisition/DESIGN.md` (this file)
-- `prototype/neo-next/tools/neo-vendor.sh` (to implement at integration)
+- `tools/neo-vendor.sh` — **integrated (Tier 3)**
 
 ## Acceptance
 

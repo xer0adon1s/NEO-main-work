@@ -94,7 +94,6 @@ NEO_TMUX_ENV_FORWARD=(
     NEO_AI_HUD NEO_AI_TIMER NEO_AI_WAIT_TIMER_SEC NEO_BORG_HUD NEO_TMUX_WRAP
     NEO_DEEP_RECON NEO_SESSION_PROMPT NEO_VPN_WAIT NEO_BOOT_INTRO_SEC
     NEO_ASK_CONTEXT_LINES NEO_ANALYZE_TERM_LINES
-    ANTHROPIC_API_KEY ANTHROPIC_WORKSPACE_ID
 )
 
 neo_tmux_wrap_if_needed() {
@@ -117,7 +116,7 @@ neo_tmux_wrap_if_needed() {
     # Confirmed empirically (not assumed): a brand-new tmux session does NOT inherit the
     # launching client's exported env vars — only NEO_HOME/NEO_DIR self-heal (neo.sh
     # recomputes them from $0 + cwd when unset); everything else the operator has
-    # exported (NEO_SPLASH, ANTHROPIC_API_KEY, etc.) must be forwarded explicitly or it
+    # exported (NEO_SPLASH, NEO_AI flags, etc.) must be forwarded explicitly or it
     # silently reverts to defaults inside the wrapped session.
     for var in "${NEO_TMUX_ENV_FORWARD[@]}"; do
         val="${!var:-}"

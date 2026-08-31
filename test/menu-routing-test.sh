@@ -53,6 +53,12 @@ assert_classify k skip-phase
 assert_classify K skip-phase
 assert_classify q quit
 assert_classify Q quit
+assert_classify t try-command
+assert_classify T try-command
+assert_classify o open-operator
+assert_classify O open-operator
+assert_classify e eli5
+assert_classify E eli5
 
 # --- unmatched input (numeric script choices, garbage, empty) falls through cleanly ---
 assert_classify 1 unmatched
@@ -63,7 +69,7 @@ assert_classify "" unmatched
 #     regression crept back in) ---
 declare -A seen_actions=()
 collision=false
-for letter in c C a A b B p P z Z d D r R s S k K q Q; do
+for letter in c C a A b B p P z Z d D r R s S k K q Q t T o O e E; do
     action="$(neo_menu_classify "${letter}")"
     lower="$(tr '[:upper:]' '[:lower:]' <<< "${letter}")"
     if [[ -n "${seen_actions[${lower}]:-}" && "${seen_actions[${lower}]}" != "${action}" ]]; then

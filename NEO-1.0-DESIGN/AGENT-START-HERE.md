@@ -11,7 +11,7 @@
 | Area | Path | Status |
 |------|------|--------|
 | **v0.5 production reference** | repo root (`neo.sh`, `lib/`, `recon/`, …) | Read-only reference — **unchanged** during design |
-| **NEO 1.0 design workspace** | `NEO-1.0-DESIGN/` | **Complete** — 19 projects `review_ready` |
+| **NEO 1.0 design workspace** | `NEO-1.0-DESIGN/` | **Complete** — 20 projects (P01–P20) |
 | **1.0 prototype code** | `NEO-1.0-DESIGN/prototype/neo-next/` | Runnable on Linux; not wired to `neo.sh` |
 | **Planning history** | `CLAUDE-COLLAB.md`, `CURSOR-REVIEW-LOG.md` | Operator context |
 | **Professional scope template** | `NEO-1.0-DESIGN/templates/scope-policy-template.md` | Fill → `scope-import.sh` |
@@ -57,6 +57,7 @@ Key prototypes already written (not integrated):
 | `borg-v2.sh` | P04 |
 | `operator-recon.sh`, `plan-enum.sh` | P07, P15 |
 | `neo-vpn-consent.sh` | P10 |
+| `neo-operator-pane.sh`, `neo-workbench.sh` | **P20 (core loop)** |
 | `production-integrity-gate.sh` | P09 |
 
 ### Cross-cutting docs
@@ -83,6 +84,7 @@ P01 ✓ (design done)
   → P07, P08, P10, P11, P12
   → P15
   → P02, P03, P04    ListenAssist, FindPrivs, Borg
+  → P20              operator workbench (core try/analyze loop)
   → P17              privesc ranker
   → P18              E2E validation → release 1.0
   → P19              GUI boundary (docs only for 1.0)
@@ -156,6 +158,7 @@ against production target, port changes, run tests, update `CURSOR-REVIEW-LOG.md
 Before merging to personal NEO:
 
 - [ ] 3 easy HTB boxes completed with scope intake
+- [ ] Workbench loop: `[p]` → `[t]` → analyze → foothold on at least one box
 - [ ] `production-integrity-gate.sh` passes
 - [ ] `neo-diagnostic.sh` passes
 - [ ] Secret canary audit clean

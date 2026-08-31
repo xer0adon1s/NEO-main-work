@@ -7,11 +7,11 @@ neo_ai_cli_available() {
     command -v claude >/dev/null 2>&1
 }
 
-# Run claude -p with stdin; prefer subscription (unset API key for this call).
+# Run claude -p with stdin via provider layer (subscription; API key unset for call).
 neo_ai_cli_call() {
     local prompt="$1"
     local stdin_content="${2:-}"
-    local tmp_in rc saved_key="${ANTHROPIC_API_KEY:-}"
+    local tmp_sys tmp_user tmp_out rc saved_provider saved_key="${ANTHROPIC_API_KEY:-}"
 
     if ! neo_ai_cli_available; then
         echo "neo-ai-cli: claude not found on PATH (install Claude Code)" >&2
@@ -22,21 +22,32 @@ neo_ai_cli_call() {
         stdin_content="${stdin_content:0:NEO_AI_CLI_MAX}"$'\n\n[truncated for claude -p stdin cap — full notes in Investigation-Notes.md]'
     fi
 
-    tmp_in="$(mktemp)"
-    printf '%s' "${stdin_content}" > "${tmp_in}"
-    # Same fix as lib/neo-ai.sh's neo_ai_call_claude — see that comment for why the
-    # single-quoted deferred-expansion form crashes with "unbound variable" if this RETURN
-    # trap ever fires after this function's own scope is gone (untriggered here so far, but
-    # the same landmine for mode A/claude -p).
-    trap "rm -f '${tmp_in}'; trap - RETURN" RETURN
+    NEO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # shellcheck source=neo-provider.sh
+    source "${NEO_LIB_DIR}/neo-provider.sh"
+
+    tmp_sys="$(mktemp)"
+    tmp_user="$(mktemp)"
+    tmp_out="$(mktemp)"
+    trap "rm -f '${tmp_sys}' '${tmp_user}' '${tmp_out}'; trap - RETURN" RETURN
+
+    printf '%s' "${prompt}" > "${tmp_sys}"
+    printf '%s' "${stdin_content}" > "${tmp_user}"
 
     unset ANTHROPIC_API_KEY
+    saved_provider="${NEO_AI_PROVIDER:-claude-cli}"
+    NEO_AI_PROVIDER=claude-cli
     set +e
-    claude -p "${prompt}" < "${tmp_in}"
+    neo_provider_request "${tmp_sys}" "${tmp_user}" "${tmp_out}"
     rc=$?
     set -e
-
+    NEO_AI_PROVIDER="${saved_provider}"
     [[ -n "${saved_key}" ]] && export ANTHROPIC_API_KEY="${saved_key}"
+
+    if (( rc == 0 )); then
+        cat "${tmp_out}"
+        return 0
+    fi
     return "${rc}"
 }
 

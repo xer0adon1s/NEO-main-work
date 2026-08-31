@@ -34,7 +34,7 @@ meta_init t 10.10.10.10 "${NEO_HOME}/projects/t"
 # --- [p]ayload suggest visibility ---
 neo_payload_suggest_visible recon && ok "suggest visible: recon" || bad "suggest visible: recon"
 neo_payload_suggest_visible privesc && ok "suggest visible: privesc" || bad "suggest visible: privesc"
-neo_payload_suggest_visible post && bad "suggest visible: post should hide" || ok "suggest hidden: post"
+neo_payload_suggest_visible post && ok "suggest visible: post" || bad "suggest visible: post"
 neo_payload_suggest_visible foothold && ok "suggest visible: foothold before shell" || bad "suggest visible: foothold before shell"
 
 notes_set_section FOOTHOLD $'```text\nuser@box via ssh\n```' 2>/dev/null || true

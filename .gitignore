@@ -17,6 +17,12 @@ wordlists/*.txt
 vendor/*
 !vendor/.gitkeep
 
+# Secrets — never commit API keys or credential material
+.env
+.env.*
+*.pem
+*.key
+
 # lib/ must only contain NEO scripts — ignore accidental system-lib pollution
 lib/*
 !lib/notes-lib.sh
@@ -33,6 +39,22 @@ lib/*
 !lib/neo-menu.sh
 !lib/neo-boot.sh
 !lib/neo-vpn.sh
+!lib/neo-vpn-consent.sh
+!lib/neo-core.sh
+!lib/neo-1.0-bootstrap.sh
+!lib/neo-secrets.sh
+!lib/neo-evidence.sh
+!lib/neo-actions.sh
+!lib/neo-mission-state.sh
+!lib/neo-scope.sh
+!lib/neo-provider.sh
+!lib/neo-windup-actions.sh
+!lib/neo-operator-pane.sh
+!lib/neo-workbench.sh
+!lib/neo-toolkit.sh
+!lib/neo-exploit-framework.sh
+!lib/neo-pipeline-hooks.sh
+!lib/neo-eli5.sh
 
 # Temp / editor
 *.swp

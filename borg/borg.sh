@@ -22,7 +22,9 @@ cybersec_init_colors
 
 usage() {
     cat <<EOF
-Usage: borg.sh <project> [--vector=description]
+Usage: borg.sh <project> [--vector=description] [--v2]
+
+  --v2 / --structured   JSON dossier Borg (borg-v2.sh) — no command execution
 
 BORG assimilates ONE attack vector: Claude researches it, publishes to the shared
 collective at knowledge/vectors/<slug>/, symlinks projects/<project>/assimilated/<slug>/,
@@ -36,10 +38,12 @@ EOF
 
 PROJECT=""
 VECTOR=""
+BORG_V2=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help) usage; exit 0 ;;
+        --v2|--structured) BORG_V2=1; shift ;;
         --vector=*) VECTOR="${1#*=}"; shift ;;
         --vector) VECTOR="${2:-}"; shift 2 ;;
         -*) echo "borg: unknown option $1" >&2; exit 1 ;;
@@ -60,6 +64,10 @@ MF="${OUTDIR}/project.meta"
     echo "borg: no Investigation-Notes.md for ${PROJECT} — run recon first." >&2
     exit 1
 }
+
+if (( BORG_V2 == 1 )); then
+    exec bash "${NEO_DIR}/borg/borg-v2.sh" --project "${PROJECT}" --notes "${NOTES_FILE}"
+fi
 
 phase="$(grep '^phase=' "${MF}" 2>/dev/null | cut -d= -f2- | head -n1)"
 phase="${phase:-recon}"

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/vendor-manifest.schema.json",
+  "title": "NEO vendor tool manifest",
+  "type": "object",
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "url", "resolved_at", "sha256", "destination", "installer"],
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "resolved_version": { "type": "string" },
+          "resolved_at": { "type": "string", "format": "date-time" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "destination": { "type": "string" },
+          "installer": { "type": "string" }
+        }
+      }
+    }
+  }
+}

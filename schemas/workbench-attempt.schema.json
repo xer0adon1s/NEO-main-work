@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/workbench-attempt.schema.json",
+  "title": "NEO workbench command attempt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "at", "phase", "source", "command", "transport", "outcome"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^wb-[0-9]+-[0-9]+$" },
+    "at": { "type": "string", "format": "date-time" },
+    "phase": { "enum": ["recon", "foothold", "privesc", "connect", "service-enum", "on-box-enum", "post"] },
+    "source": { "enum": ["workbench", "payload", "borg", "manual", "triage"] },
+    "command": { "type": "string", "minLength": 1, "maxLength": 8192 },
+    "transport": { "enum": ["local_safe", "operator_pane", "manual_only"] },
+    "artifact": { "type": ["string", "null"], "maxLength": 4096 },
+    "exit_code": { "type": ["integer", "null"], "minimum": 0, "maximum": 255 },
+    "outcome": { "enum": ["pending", "success", "partial", "failure", "unknown", "manual"] },
+    "ai_analysis_ref": { "type": ["string", "null"], "maxLength": 256 }
+  }
+}

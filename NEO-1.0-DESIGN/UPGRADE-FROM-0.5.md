@@ -8,7 +8,8 @@ Design document for integration branch. Not executed on production yet.
 |------|------|------|
 | API keys | `~/Neo/.env` or env | `~/.config/neo/secrets/` broker |
 | Mission state | `project.meta phase` only | `mission.json` canonical |
-| Borg wind-up | y/N eval of AI commands | Typed action JSON only |
+| Borg wind-up | y/N eval of AI commands | Typed action JSON (local) + workbench `[t]` (remote) |
+| Payload suggest | Copy/paste in conductor pane | `[t]` in operator tmux pane |
 | ListenAssist | Stub | Full guided workflow |
 | run-findprivs | Smoke ingest | Transport-aware real wrapper |
 | VPN | May pkill openvpn | Explicit consent required |
@@ -46,11 +47,17 @@ neo-mission-migrate <project>   # integration script (to be written)
 | privesc | privesc_planning |
 | post | post |
 
-### 4. Evidence backfill (optional)
+### 4. Workbench (new projects)
+
+New projects get `WORKBENCH` section from template. Existing notes: first `[t]` try appends section.
+
+Attempt records: `~/.local/state/neo/projects/<project>/workbench/attempts/`
+
+### 5. Evidence backfill (optional)
 
 Existing Investigation-Notes LOG entries remain. New runs append to `events.jsonl`.
 
-### 5. Verify
+### 6. Verify
 
 ```bash
 ./neo.sh --version          # 1.0.0
@@ -72,6 +79,7 @@ restore ~/Neo/projects from backup
 | NEO_MISSION_STATE | 1 | Use mission.json gates |
 | NEO_SECRET_BROKER | 1 | Broker required for API |
 | NEO_BORG_V2 | 1 | borg-v2 pipeline |
+| NEO_TMUX_WRAP | 1 | Required for operator workbench `[t]` |
 
 Set to `0` to fall back to v0.5 behavior during debugging.
 

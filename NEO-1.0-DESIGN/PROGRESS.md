@@ -6,8 +6,9 @@ Last updated: 2026-08-31
 
 | Metric | Count |
 |--------|-------|
-| Projects total | 19 |
+| Projects total | 20 |
 | review_ready | 19 |
+| in_progress | 1 (P20 workbench — integrated in production tree) |
 | deferred | 0 |
 | Prototype modules | 15 shell libs/scripts |
 | Prototype tests | 6 suites |
@@ -36,6 +37,7 @@ Last updated: 2026-08-31
 | P17 | Privesc workflow | review_ready | ✓ | partial |
 | P18 | CLI validation | review_ready | ✓ | n/a |
 | P19 | GUI boundary | review_ready | ✓ | n/a |
+| P20 | Operator workbench | in_progress | ✓ | ✓ (Tier 2.5) |
 
 ## Blockers
 

@@ -13,7 +13,8 @@ advances.
 1. **Intake:** project, target, callback IP (auto-detect via `ip route get`), port,
    tool (ncat/nc/socat), mode (reverse/bind).
 2. **Planning mode (default):** print exact argv for operator's listener pane; record
-   plan to evidence; no listener launch.
+   plan to evidence; no listener launch. Exploit/stager attempts use **workbench `[t]`**
+   in the operator pane (P20), not the conductor pane.
 3. **Optional `--start`:** detached tmux session only after `start-listener` typed.
 4. **Session gate:** operator answers y/N/not-yet; never auto-advance mission state.
 5. **Evidence:** foothold_plan artifact (JSON) + observation events.
@@ -40,8 +41,8 @@ ListenAssist.sh --project NAME --target HOST [--callback-ip IP] [--port PORT]
 
 ## Mission state transitions (P16)
 
-- `foothold_planning` → `foothold_attempt` when plan recorded
-- `foothold_attempt` → `session_established` on operator y/yes
+- `foothold_planning` → `foothold_attempt` when plan recorded **or first workbench `[t]`**
+- `foothold_attempt` → `session_established` on operator y/yes **or workbench foothold confirm**
 - `foothold_attempt` → `foothold_planning` on retry
 
 ## Acceptance mapping

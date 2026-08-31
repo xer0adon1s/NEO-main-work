@@ -99,3 +99,17 @@ without them, then Project 01 must ingest them and update traceability when avai
 NEO 1.0 is a functional CLI that works with AI agents and can guide an operator through easy,
 authorized CTF/HTB-style boxes, with engagement scope captured at project creation for both
 educational and professional use. NEO 2.0 adds a GUI after the 1.0 core has stable interfaces.
+
+## OD-016 — End-to-end engagement conductor
+
+NEO's product mission is **full-lifecycle authorized engagement conduction** — from enum
+through post-exploitation — not a foothold-only or privesc-only helper.
+
+The operator loop (suggest → LOCK & LOAD → try → analyze → repeat) applies at **every phase**.
+
+**Metasploit analogy:** MSF is a vehicle for exploit-module work; NEO is the vehicle for
+the **whole engagement**. NEO orchestrates all tools (nmap, gobuster, curl, msfconsole,
+FindPrivs, etc.) and uses Metasploit **when that step calls for it** — not as the center
+of the product.
+
+See **`NEO-1.0-DESIGN/MISSION-STATEMENT.md`**.

@@ -131,6 +131,8 @@ LOG only. Prevents clobber wars as the toolkit grows.
 | `AI-TRIAGE` | analyze-recon (+ manual paste) | append | accumulate; fed back into next triage bundle |
 | `BORG` | borg/borg.sh | append | per-mission links; canonical dossiers in `knowledge/vectors/` |
 | `PAYLOAD` | neo-payload (pause `[p]`/`[z]`) | append | Borg analysis, payload suggest, failure analysis |
+| `WORKBENCH` | neo-workbench (pause `[t]`/`[o]`) | append | try/analyze loop, command attempts, captures |
+| `ELI5` | neo-eli5 (pause `[e]`) | append | beginner-friendly command/evidence lessons |
 | `LOG` | every script | append | never dedupe |
 
 `notes_set_section` / `notes_append_section` warn on stderr and return
@@ -236,7 +238,9 @@ Resume / `NEO_SPLASH=0` / `--no-splash` skips intro and VPN ASCII banners (A/B/C
 Saved as `ai_triage=subscription|api|manual` in `project.meta`. **`[a]sk Claude`**
 at any pause runs `claude -p` when Claude Code is installed.
 
-**Pause menus** (every letter is case-insensitive — one meaning each): **`[c]`** continue · **`[r]`** repeat · **`[a]`** ask Claude · **`[b]`** Assimilate with Borg · **`[p]`**ayload suggest · **`[z]`** analyze failures · **`[s]`** skip to step · **`[q]`** quit · recon also **`[d]`** deep enum. **`[p]`** shows on **recon**, **foothold** (until shell), and **privesc**; **`[z]`** shows on **foothold only, and only after a first attempt has been made there** (`foothold_attempted` in `project.meta`, set by ListenAssist or Suggest — Phase 51). Both post-phase and `pause_before` script-choice menus use **`neo_compute_pause_extras()`** so options stay in sync; both dispatch letters via **`neo_menu_classify()`** in **`lib/neo-menu.sh`** (Phase 49).
+**Pause menus** (every letter is case-insensitive — one meaning each): **`[c]`** continue · **`[r]`** repeat · **`[a]`** ask Claude · **`[b]`** Assimilate with Borg · **`[p]`**ayload suggest · **`[t]`**ry command · **`[o]`**perator shell · **`[e]`** ELI5 explain · **`[z]`** analyze failures · **`[s]`** skip to step · **`[q]`** quit · recon also **`[d]`** deep enum. **`[p]`** shows on **recon**, **foothold** (until shell), and **privesc**; **`[t]`/`[o]`** on those same phases (operator workbench — P20). **`[z]`** shows on **foothold only, after a first attempt** (`foothold_attempted` or any workbench try). Both post-phase and `pause_before` script-choice menus use **`neo_compute_pause_extras()`**; both dispatch via **`neo_menu_classify()`** in **`lib/neo-menu.sh`**.
+
+**Operator workbench (P20):** NEO's conductor pane owns stdin during pauses — run suggested commands in the **operator tmux pane** (`[o]` then `[t]`), not by pasting into the menu. Safe single-line attack-box commands may run via typed argv (`local_safe` transport). Loop: suggest → try (y/N) → capture → AI analyze → repeat until foothold → `[c]` continues pipeline. See **`NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md`**.
 
 **tmux auto-wrap (Phase 51, `lib/neo-tmux.sh`; skip-gate Phase 56; switch-client Phase 57; `--fresh` kill Phase 58):** real interactive launches (`-t 0 && -t 1`, `NEO_TMUX_WRAP` not `0`) re-exec `neo.sh` inside a named `neo-<project>` tmux session, right after project-name validation and before any heavy state (`OUTDIR`/`meta_init`) — so the wrapped process owns checkpoints. Skips wrapping only when already inside **that exact** `neo-<project>` session — **not** just "`$TMUX` is set." Being inside some other foreign tmux session (e.g. an OpenVPN session left over from `connect/ovpn-connect.sh`) is not "already wrapped": NEO **switches this terminal's view** to the mission session via `tmux new-session -d` + `switch-client` (the foreign session keeps running in the background; plain `new-session`/`attach` fail outright when already inside another tmux client — confirmed via `test/neo-tmux-integration-test.sh`). **`--fresh` with an existing `neo-<project>` session** (from outside that session) kills and recreates it so the wipe and current env-forwarding actually run; already inside the mission session → in-process wipe only. Normal resume (no `--fresh`) reattaches/switches only. Env vars a launching shell exported are **not** inherited by a fresh tmux session by default (confirmed empirically); `NEO_TMUX_ENV_FORWARD` explicitly forwards the relevant ones via `%q`-quoted prefixes on the re-exec command string. Manual exploit attempts need to happen in the same tmux session (new pane, `Ctrl-b %`) to be visible to Analyze Failures. Piped/non-interactive runs (tests, automation) never wrap.
 
@@ -352,3 +356,14 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
 - 2026-08-30 — **Integration test validity fix (Phase 59):** reinstated `script` fake-attach with
   `TERM=xterm-256color`; `list-clients` + pane grep assertions; `kill-session` error on `--fresh`;
   switch-client recovery message. Diagnostic **61** checks · unit **162** passed. **v0.5**.
+- 2026-08-31 — **Operator workbench (P20 / Tier 2.5):** `lib/neo-operator-pane.sh` +
+  `lib/neo-workbench.sh`; pause `[t]ry` / `[o]perator shell`; suggest→try→capture→analyze loop;
+  `WORKBENCH` notes section; mission `foothold_attempt` hooks; design in
+  `NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md`.
+- 2026-08-31 — **Toolkit preflight (Tier 3.14):** `lib/neo-toolkit.sh` LOCK & LOAD checks
+  tools, SecLists/wordlist paths, vendor files after suggest/triage; optional install before `[t] try`.
+- 2026-08-31 — **Attack plan waves 1–4:** post workbench, pipeline hooks (`neo-pipeline-hooks.sh`),
+  MSF handler in ListenAssist, mission handler_plan stub, neo-vendor install/rollback, new tests.
+- 2026-08-31 — **ELI5 tutor (`[e]`):** `lib/neo-eli5.sh` — educational mode at pauses; explains
+  evidence, suggestions, and command flags before the operator runs them; **ELI5** notes section;
+  optional prompt after payload suggest and workbench analyze.

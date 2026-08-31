@@ -19,7 +19,10 @@ case "${1:-}" in
     -V|--version) printf 'NEO v%s\n' "${NEO_VERSION}"; exit 0 ;;
 esac
 
-NEO_LIB_SCRIPTS=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh)
+# shellcheck source=lib/neo-1.0-bootstrap.sh
+source "${NEO_DIR}/lib/neo-1.0-bootstrap.sh"
+
+NEO_LIB_SCRIPTS=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh)
 
 neo_lib_hygiene_warn() {
     local extra=0 path rel base f skip
@@ -187,6 +190,19 @@ neo_assimilate_at_pause() {
     # shellcheck source=lib/neo-borg.sh
     source "${NEO_DIR}/lib/neo-borg.sh"
     neo_borg_at_pause "${project}" "${phase}"
+}
+
+neo_eli5_at_pause() {
+    local project="$1" phase="$2"
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
+    # shellcheck source=lib/script-lib.sh
+    source "${NEO_DIR}/lib/script-lib.sh"
+    # shellcheck source=lib/neo-eli5.sh
+    source "${NEO_DIR}/lib/neo-eli5.sh"
+    cybersec_init_colors
+    printf '\n[*] ELI5 — explain before you run…\n\n'
+    neo_eli5_run "${project}" "${phase}" "" ""
 }
 
 neo_prompt_ai_mode() {
@@ -578,6 +594,24 @@ resolve_ssh_target() {
     echo "${t}"
 }
 
+neo_scope_ensure() {
+    local project="$1" target="$2"
+    local scope_file="${NEO_STATE_ROOT}/projects/${project}/engagement-scope.json"
+    [[ -f "${scope_file}" ]] && return 0
+    [[ -t 0 ]] || {
+        printf '[!] No engagement scope — run: ./tools/scope-intake.sh --project %s\n' "${project}" >&2
+        return 0
+    }
+    printf '\n[*] Engagement scope required (NEO 1.0).\n\n'
+    bash "${NEO_DIR}/tools/scope-intake.sh" --project "${project}" --target "${target}" || return 1
+}
+
+neo_mission_bootstrap() {
+    local project="$1" target="$2"
+    neo_mission_init "${project}" "${target}" "${NEO_STATE_ROOT}/projects" 2>/dev/null || true
+    neo_evidence_init "${project}" "${NEO_STATE_ROOT}/projects" 2>/dev/null || true
+}
+
 resolve_target_ip() {
     local project="$1" cli_target="${2:-}"
 
@@ -633,7 +667,7 @@ run_script() {
             bash "${script_path}" --project="${project}"
             ;;
         ListenAssist)
-            bash "${script_path}" 4444 "${project}" "${project}"
+            bash "${script_path}" --project="${project}" --target="${target_ip}" --port=4444
             # A first foothold attempt happened regardless of whether it succeeded —
             # that's exactly when Analyze Failures becomes useful, so flip its
             # visibility gate here rather than only from the Suggest flow (an operator
@@ -691,9 +725,10 @@ neo_run_deep_recon() {
 # vs Suggest payload) used to mean *different* things, which made a stray Shift or
 # caps-lock risk triggering the wrong action.
 neo_compute_pause_extras() {
-    local phase="$1"
+    local phase="$1" project="${2:-${PROJECT_NAME:-}}"
     NEO_PAUSE_HAS_CLAUDE=false
     NEO_PAUSE_HAS_BORG=false
+    NEO_PAUSE_HAS_ELI5=false
     NEO_PAUSE_EXTRA=""
 
     command -v claude >/dev/null 2>&1 && NEO_PAUSE_HAS_CLAUDE=true
@@ -701,18 +736,31 @@ neo_compute_pause_extras() {
     source "${NEO_DIR}/lib/neo-borg.sh"
     # shellcheck source=lib/neo-payload.sh
     source "${NEO_DIR}/lib/neo-payload.sh"
+    # shellcheck source=lib/neo-workbench.sh
+    source "${NEO_DIR}/lib/neo-workbench.sh"
+    # shellcheck source=lib/neo-eli5.sh
+    source "${NEO_DIR}/lib/neo-eli5.sh"
     neo_borg_ai_available && NEO_PAUSE_HAS_BORG=true
+    neo_eli5_ai_available && NEO_PAUSE_HAS_ELI5=true
 
     ${NEO_PAUSE_HAS_CLAUDE} && NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA} / [a]sk Claude"
     ${NEO_PAUSE_HAS_BORG} && NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA} / [b] Assimilate with Borg"
-    NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA}$(neo_payload_menu_fragment "${phase}")"
+    ${NEO_PAUSE_HAS_ELI5} && NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA}$(neo_eli5_menu_fragment)"
+    NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA}$(neo_payload_menu_fragment "${phase}" "${project}")"
+    NEO_PAUSE_EXTRA="${NEO_PAUSE_EXTRA}$(neo_workbench_menu_fragment "${phase}" "${project}")"
 }
 
 neo_post_phase_menu() {
     local phase="$1" project="$2" target_ip="${3:-}" ran="${4:-false}"
     local prompt choice menu_extra=""
 
-    neo_compute_pause_extras "${phase}"
+    if [[ "${phase}" == "recon" && -n "${target_ip}" ]]; then
+        # shellcheck source=lib/neo-pipeline-hooks.sh
+        source "${NEO_DIR}/lib/neo-pipeline-hooks.sh"
+        neo_pipeline_offer_plan_enum "${project}" "${target_ip}" || true
+    fi
+
+    neo_compute_pause_extras "${phase}" "${project}"
     menu_extra="${NEO_PAUSE_EXTRA}"
 
     if phase_bool "${phase}" "pause_after"; then
@@ -752,6 +800,19 @@ neo_post_phase_menu() {
                 fi
                 printf 'Payload tools need Claude Code or ANTHROPIC_API_KEY.\n'
                 ;;
+            try-command|open-operator)
+                if neo_workbench_handle_choice "${choice}" "${project}" "${phase}"; then
+                    continue
+                fi
+                printf 'Workbench unavailable for this phase.\n'
+                ;;
+            eli5)
+                if ${NEO_PAUSE_HAS_ELI5:-false}; then
+                    neo_eli5_at_pause "${project}" "${phase}"
+                    continue
+                fi
+                printf 'ELI5 needs Claude Code (claude) or ANTHROPIC_API_KEY.\n'
+                ;;
             deep-enum)
                 if [[ "${phase}" == "recon" ]]; then
                     neo_run_deep_recon "${project}" "${target_ip}" || return 3
@@ -781,6 +842,9 @@ walk_phase() {
     local cp resume_idx=0 resume_at_menu=false
 
     NEO_MISSION_PHASE="${phase}"
+    if neo_mission_open "${project}" 2>/dev/null; then
+        neo_mission_sync_pipeline_phase "${phase}" || true
+    fi
 
     if neo_checkpoint_parse "$(meta_get neo_checkpoint 2>/dev/null || true)"; then
         if [[ "${NEO_CP_PHASE}" == "${phase}" ]]; then
@@ -803,6 +867,9 @@ walk_phase() {
     if [[ "${phase}" == "post" ]]; then
         prompt="$(phase_val "${phase}" "prompt_before")"
         [[ -n "${prompt}" ]] && printf '\n%s\n\n' "${prompt}"
+        # shellcheck source=lib/neo-pipeline-hooks.sh
+        source "${NEO_DIR}/lib/neo-pipeline-hooks.sh"
+        neo_pipeline_offer_msf_post "${project}" || true
         neo_post_phase_menu "${phase}" "${project}" "${target_ip}" "false"
         return $?
     fi
@@ -811,10 +878,16 @@ walk_phase() {
         prompt="$(phase_val "${phase}" "prompt_before")"
         [[ -n "${prompt}" ]] && printf '\n%s\n\n' "${prompt}"
 
+        if [[ "${phase}" == "privesc" ]]; then
+            # shellcheck source=lib/neo-pipeline-hooks.sh
+            source "${NEO_DIR}/lib/neo-pipeline-hooks.sh"
+            neo_pipeline_offer_privesc_rank "${project}" || true
+        fi
+
         if [[ "${#scripts[@]}" -eq 0 || -z "${scripts[0]:-}" ]]; then
             : # post phase — no scripts
         else
-            neo_compute_pause_extras "${phase}"
+            neo_compute_pause_extras "${phase}" "${project}"
             while true; do
                 for i in "${!scripts[@]}"; do
                     printf '  %d) %s\n' "$((i + 1))" "${scripts[$i]}"
@@ -853,6 +926,19 @@ walk_phase() {
                     payload-suggest|analyze-failures)
                         neo_payload_handle_choice "${choice}" "${project}" "${phase}" || \
                             printf 'Payload tools need Claude Code or ANTHROPIC_API_KEY.\n'
+                        continue
+                        ;;
+                    try-command|open-operator)
+                        neo_workbench_handle_choice "${choice}" "${project}" "${phase}" || \
+                            printf 'Workbench unavailable for this phase.\n'
+                        continue
+                        ;;
+                    eli5)
+                        if ${NEO_PAUSE_HAS_ELI5:-false}; then
+                            neo_eli5_at_pause "${project}" "${phase}"
+                        else
+                            printf 'ELI5 needs Claude Code (claude) or ANTHROPIC_API_KEY.\n'
+                        fi
                         continue
                         ;;
                     *)
@@ -1015,6 +1101,9 @@ if ${NEO_BOOT_SEQUENCE}; then
     meta_set target "${TARGET}" 2>/dev/null || true
 fi
 
+neo_scope_ensure "${PROJECT}" "${TARGET}" || exit 1
+neo_mission_bootstrap "${PROJECT}" "${TARGET}"
+
 if ${NEO_BOOT_SEQUENCE}; then
     # shellcheck source=lib/neo-splash.sh
     source "${NEO_DIR}/lib/neo-splash.sh"
@@ -1059,6 +1148,9 @@ while (( idx < ${#PHASE_ORDER[@]} )); do
         # shellcheck source=lib/neo-interact.sh
         source "${NEO_DIR}/lib/neo-interact.sh"
         neo_interact_pause_before_foothold "${PROJECT}" || true
+        # shellcheck source=lib/neo-pipeline-hooks.sh
+        source "${NEO_DIR}/lib/neo-pipeline-hooks.sh"
+        neo_pipeline_offer_operator_recon "${PROJECT}" || true
     fi
 
     meta_set phase "${next}" 2>/dev/null || true

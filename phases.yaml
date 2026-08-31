@@ -68,4 +68,4 @@ post:
   choice: none
   pause_before: true
   pause_after: false
-  prompt_before: Post-exploitation is manual for now — no automated script. Add creds/flags/attack-path/lessons to Investigation-Notes.md by hand. NEO's automated part ends here.
+  prompt_before: Post-exploitation — loot, flags, creds, MSF post modules (guided). Use [p]/[t] workbench loop; add findings to Investigation-Notes.md. Automated scripts end at privesc; post is conductor-guided.

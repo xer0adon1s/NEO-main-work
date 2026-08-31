@@ -106,8 +106,19 @@ neo_vpn_connect_profile() {
     fi
 
     if pgrep -x openvpn >/dev/null 2>&1; then
-        sudo pkill -x openvpn 2>/dev/null || true
-        sleep 1
+        # shellcheck source=neo-vpn-consent.sh
+        source "${NEO_DIR:-${NEO_HOME}}/lib/neo-vpn-consent.sh"
+        neo_vpn_resolve_existing
+        rc=$?
+        if (( rc == 2 )); then
+            printf 'neo-vpn: keeping existing OpenVPN session(s); not starting a new profile.\n' >&2
+            return 0
+        elif (( rc == 3 )); then
+            printf 'neo-vpn: VPN profile change cancelled by operator.\n' >&2
+            return 1
+        elif (( rc != 0 )); then
+            return "${rc}"
+        fi
     fi
 
     tmux new-session -d -s "${session}" "sudo openvpn --config '${dest}'"

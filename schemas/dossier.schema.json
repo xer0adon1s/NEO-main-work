@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/dossier.schema.json",
+  "title": "NEO initial dossier",
+  "type": "object",
+  "required": ["schema_version", "mission_summary", "evidence_gaps", "candidate_vectors", "tool_needs"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "mission_summary": { "type": "string" },
+    "evidence_gaps": { "type": "array", "items": { "type": "string" } },
+    "candidate_vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "confidence", "rationale", "evidence_refs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+          "title": { "type": "string" },
+          "confidence": { "enum": ["low", "medium", "high"] },
+          "rationale": { "type": "string" },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } },
+          "research_queries": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "tool_needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "purpose"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[A-Za-z0-9._+-]{1,80}$" },
+          "purpose": { "type": "string" }
+        }
+      }
+    }
+  }
+}

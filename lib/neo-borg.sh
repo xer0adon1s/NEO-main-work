@@ -819,14 +819,11 @@ neo_borg_windup_parse_tag() {
 }
 
 neo_windup_run_command() {
-    local cmd="$1"
-    local out rc
-    set +e
-    out="$(eval "${cmd}" 2>&1)"
-    rc=$?
-    set -e
-    printf '%s' "${out}"
-    return "${rc}"
+    local cmd="$1" slug="${2:-step}" project="${3:-}"
+    project="${project:-${NEO_MISSION_PROJECT:-}}"
+    # shellcheck source=neo-windup-actions.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-windup-actions.sh"
+    neo_windup_execute_safe "${cmd}" "${slug}" "${project}"
 }
 
 neo_windup_extract_actions() {
@@ -942,8 +939,8 @@ neo_windup_loop() {
                         printf '\n'
                         continue
                     fi
-                    printf '    %s→%s executing payload…\n' "${C_DIM}" "${C_RESET}"
-                    out="$(neo_windup_run_command "${payload}")"
+                    printf '    %s→%s executing via typed action (argv, no shell)…\n' "${C_DIM}" "${C_RESET}"
+                    out="$(neo_windup_run_command "${payload}" "${slug}" "${project}" 2>&1)"
                     rc=$?
                     if (( rc == 0 )); then
                         printf '    %s[ok]%s payload succeeded (exit 0)\n' "${C_GREEN}" "${C_RESET}"
@@ -974,8 +971,8 @@ neo_windup_loop() {
                     printf '\n'
                     continue
                 fi
-                printf '    %s→%s executing…\n' "${C_DIM}" "${C_RESET}"
-                out="$(neo_windup_run_command "${payload}")"
+                printf '    %s→%s executing via typed action (argv, no shell)…\n' "${C_DIM}" "${C_RESET}"
+                out="$(neo_windup_run_command "${payload}" "${slug}" "${project}" 2>&1)"
                 rc=$?
                 if (( rc == 0 )); then
                     printf '    %s[ok]%s exit 0\n' "${C_GREEN}" "${C_RESET}"
@@ -997,8 +994,10 @@ neo_windup_loop() {
                     "${C_GREEN}" "${C_RESET}" "${desc}"
                 read -r -p '    Run this NEO command now? [y/N] ' ans
                 if [[ "${ans}" =~ ^[Yy]$ ]]; then
+                    # shellcheck source=neo-windup-actions.sh
+                    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-windup-actions.sh"
                     set +e
-                    out="$(bash -c "cd '${NEO_HOME}' && ${payload}" 2>&1)"
+                    out="$(neo_windup_run_neo_script "${desc}" 2>&1)"
                     rc=$?
                     set -e
                     if (( rc == 0 )); then

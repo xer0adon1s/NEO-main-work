@@ -44,7 +44,8 @@ action.json → validate (jq) → render → confirm (run / run-state-change)
 | File | Remove | Add |
 |------|--------|-----|
 | lib/neo-borg.sh | eval wind-up | neo_action_execute on JSON files |
-| lib/neo-payload.sh | any execute loop | advisory action file emission |
+| lib/neo-payload.sh | any execute loop | advisory suggest; execute via workbench `[t]` |
+| lib/neo-workbench.sh | — | core try/analyze loop (P20) |
 | enumerators/*.sh | — | emit action JSON not shell |
 
 ## Confirmation UX
