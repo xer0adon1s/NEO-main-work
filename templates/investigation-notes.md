@@ -163,6 +163,11 @@ _No workbench attempts yet. Use **[o]perator shell** to open the work pane, **[p
 ```
 <!-- /SECTION:FILES -->
 
+### AI privesc plan
+<!-- SECTION:PRIVESC-PLAN -->
+_No privesc AI triage yet._
+<!-- /SECTION:PRIVESC-PLAN -->
+
 ---
 
 ## Flags

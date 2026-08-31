@@ -847,6 +847,43 @@ neo_payload_suggest_at_pause() {
     fi
 }
 
+# Conductor loop step — tool preset; skips interactive tool/focus pick when possible.
+neo_payload_suggest_loop_step() {
+    local project="$1" phase="$2" tool="${3:-}"
+    local bundle response ts kind
+
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
+    # shellcheck source=script-lib.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/script-lib.sh"
+    # shellcheck source=neo-ai.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai.sh"
+    # shellcheck source=neo-borg.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg.sh" 2>/dev/null || true
+
+    [[ -n "${tool}" ]] || return 1
+    neo_payload_init_colors
+
+    bundle="$(neo_payload_build_bundle "${project}" "${phase}" "${tool}")"
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")")"; then
+        return 1
+    fi
+
+    ts="$(date '+%Y-%m-%d %H:%M:%S')"
+    kind="Payload suggest (${tool})"
+    [[ "${tool}" == "borg-guided" ]] && kind="Payload suggest (Borg-guided)"
+    neo_payload_save_section "${kind} [loop]" "${response}"
+    neo_payload_print_brief "${response}" "PAYLOAD SUGGEST — ${tool} — TERMINAL BRIEF"
+
+    [[ "${phase}" == "foothold" ]] && neo_payload_mark_foothold_attempted
+
+    cybersec_finish "payload-suggest" "${phase}" \
+        "Payload suggestions saved (conductor loop)" \
+        "=== payload-suggest-loop ${ts} (tool: ${tool}) ===\n${response}"
+
+    return 0
+}
+
 neo_payload_analyze_failures_at_pause() {
     local project="$1" phase="$2"
     local bundle response ts

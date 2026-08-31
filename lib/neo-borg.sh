@@ -1461,6 +1461,11 @@ project_link: projects/${project}/assimilated/${slug}"
     if declare -F neo_payload_offer_after_borg >/dev/null 2>&1; then
         neo_payload_offer_after_borg "${project}" "${phase}" || true
     fi
+    # shellcheck source=neo-conductor-loop.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor-loop.sh" 2>/dev/null || true
+    if declare -F neo_conductor_on_event >/dev/null 2>&1; then
+        neo_conductor_on_event borg.assimilate_complete "${project}" "${phase}" "${slug}" || true
+    fi
     return 0
 }
 

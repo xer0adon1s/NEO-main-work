@@ -219,3 +219,46 @@ neo_mission_require_state() {
         return 1
     }
 }
+
+# --- Conductor playbook state (Tier B) ---
+
+neo_mission_conductor_get() {
+    local field="$1" default="${2:-}"
+    [[ -f "${NEO_MISSION_FILE}" ]] || { printf '%s' "${default}"; return 0; }
+    neo_core_need jq || { printf '%s' "${default}"; return 0; }
+    jq -r --arg f "${field}" --arg d "${default}" \
+        'if .conductor then (.conductor[$f] // $d) else $d end' "${NEO_MISSION_FILE}" 2>/dev/null || printf '%s' "${default}"
+}
+
+neo_mission_conductor_patch() {
+    local field="$1" value="$2" tmp dir
+    [[ -f "${NEO_MISSION_FILE}" ]] || return 1
+    neo_core_need jq || return 1
+    dir="$(dirname "${NEO_MISSION_FILE}")"
+    tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
+    jq --arg f "${field}" --arg v "${value}" --arg now "$(neo_core_iso_timestamp)" \
+        '.conductor = (.conductor // {}) | .conductor[$f] = $v | .updated_at = $now' \
+        "${NEO_MISSION_FILE}" > "${tmp}"
+    mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
+    chmod 600 -- "${NEO_MISSION_FILE}"
+}
+
+neo_mission_conductor_patch_int() {
+    local field="$1" value="$2" tmp dir
+    [[ -f "${NEO_MISSION_FILE}" ]] || return 1
+    neo_core_need jq || return 1
+    dir="$(dirname "${NEO_MISSION_FILE}")"
+    tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
+    jq --arg f "${field}" --argjson v "${value}" --arg now "$(neo_core_iso_timestamp)" \
+        '.conductor = (.conductor // {}) | .conductor[$f] = $v | .updated_at = $now' \
+        "${NEO_MISSION_FILE}" > "${tmp}"
+    mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
+    chmod 600 -- "${NEO_MISSION_FILE}"
+}
+
+neo_mission_conductor_reset_loop() {
+    neo_mission_conductor_patch active_playbook ""
+    neo_mission_conductor_patch_int loop_count 0
+    neo_mission_conductor_patch playbook_state idle
+    neo_mission_conductor_patch stopped_reason ""
+}

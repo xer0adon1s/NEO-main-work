@@ -77,3 +77,7 @@ summary="Operator supplied ${CATEGORY} recon ($(wc -c <<< "${content}" | tr -d '
 artifact="$(printf '%s' "${content}" | neo_evidence_record_artifact operator_recon operator "${summary}" "${CATEGORY}")"
 printf 'Saved operator recon as %s\n' "${artifact}"
 printf 'This evidence will be included in AI triage and offered to Borg before foothold.\n'
+# shellcheck source=../lib/neo-operator-recon-ai.sh
+source "${NEO_DIR}/lib/neo-operator-recon-ai.sh" 2>/dev/null || true
+declare -F neo_operator_recon_ai_offer >/dev/null 2>&1 && \
+    neo_operator_recon_ai_offer "${PROJECT}" "${content}" "operator-recon" || true

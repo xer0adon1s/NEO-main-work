@@ -9,6 +9,7 @@
 # Scan modes (neo.sh passes --speed by default; [d] at recon pause runs --deep):
 #   --speed  ~2–3 min: rustscan + nmap -p- cross-check + sC/sV + quick gobuster (~45s/step)
 #   --deep   Full enum: long budgets; nikto; full gobuster wordlist
+#   --targets-file  Targeted deep enum: JSON array [{port,proto,reason}] or one port per line
 #   --quick  Alias for --speed (legacy)
 #
 # The findings file uses ANSI color codes on purpose (view it with `cat` or
@@ -34,6 +35,7 @@ SPEED=false
 DEEP=false
 TARGET=""
 PROJECT_NAME=""
+TARGETS_FILE=""
 SCAN_MODE="deep"
 
 for arg in "$@"; do
@@ -58,6 +60,7 @@ Options:
   --speed   Standard pass (~2–3 min): rustscan + nmap -p- union + sC/sV; 1000-word gobuster
   --deep    Full enum: longer budgets; nikto; full gobuster wordlist
   --quick   Same as --speed (legacy)
+  --targets-file=PATH  Targeted ports only (skip rustscan/nmap -p-); use with --deep
   --reuse   Reuse existing project folder without prompting (neo.sh)
   --project=<name>  Project folder name (neo.sh)
 EOF
@@ -66,6 +69,7 @@ EOF
         --quick) QUICK=true; SPEED=true ;;
         --speed) SPEED=true ;;
         --deep)  DEEP=true ;;
+        --targets-file=*) TARGETS_FILE="${arg#*=}" ;;
         --reuse) REUSE=true ;;
         --project=*) PROJECT_NAME="${arg#*=}" ;;
         -*) echo "Unknown option: ${arg}" >&2; exit 1 ;;
@@ -75,6 +79,8 @@ done
 
 if ${DEEP}; then
     SCAN_MODE="deep"
+elif [[ -n "${TARGETS_FILE}" ]]; then
+    SCAN_MODE="targeted"
 elif ${SPEED} || ${QUICK}; then
     SCAN_MODE="speed"
 fi
@@ -276,6 +282,22 @@ log "Findings file -> ${FINDINGS}"
 
 section "Port scan"
 log "Scan mode: ${SCAN_MODE}"
+
+if [[ -n "${TARGETS_FILE}" ]]; then
+    [[ -f "${TARGETS_FILE}" ]] || { bad "targets file not found: ${TARGETS_FILE}"; exit 1; }
+    log "Targeted mode — loading ports from ${TARGETS_FILE} (skipping rustscan / nmap -p-)"
+    if command -v jq >/dev/null 2>&1 && jq -e 'type=="array"' "${TARGETS_FILE}" >/dev/null 2>&1; then
+        DISCOVERY_PORTS="$(jq -r '.[] | (.port // empty) | tostring' "${TARGETS_FILE}" 2>/dev/null \
+            | grep -E '^[0-9]+$' | sort -nu | paste -sd, - || true)"
+    else
+        DISCOVERY_PORTS="$(grep -oE '^[0-9]+' "${TARGETS_FILE}" 2>/dev/null | sort -nu | paste -sd, - || true)"
+    fi
+    if [[ -z "${DISCOVERY_PORTS}" ]]; then
+        bad "No ports parsed from ${TARGETS_FILE}"
+        exit 1
+    fi
+    log "Targeted ports: ${DISCOVERY_PORTS}"
+else
 log "Running rustscan (fast full-range TCP sweep), up to ${RUSTSCAN_BUDGET}s"
 
 rustscan_status=0
@@ -319,7 +341,12 @@ else
     log "Speed mode — running nmap -p- cross-check (catches ports rustscan drops on HTB VPN)."
 fi
 
-DISCOVERY_PORTS="$(printf '%s\n%s\n' "${RUSTSCAN_PORTS}" "${NMAP_FULL_PORTS}" | grep -v '^$' | sort -nu | paste -sd, - || true)"
+DISCOVERY_PORTS="${DISCOVERY_PORTS:-}"
+if [[ -z "${DISCOVERY_PORTS}" ]]; then
+    DISCOVERY_PORTS="$(printf '%s\n%s\n' "${RUSTSCAN_PORTS}" "${NMAP_FULL_PORTS}" | grep -v '^$' | sort -nu | paste -sd, - || true)"
+fi
+
+fi  # end non-targeted port discovery
 
 if [[ -z "${DISCOVERY_PORTS}" ]]; then
     bad "No open ports found by either scan."

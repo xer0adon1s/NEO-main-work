@@ -123,13 +123,19 @@ Conductor Y/n prompts name the matching pause letter so operator learns the mapp
 
 ---
 
-## Tier B+ (not in Tier A)
+## Tier B+ (partial — v0.6)
 
-- AI enum planner (replace `plan-enum.sh` case)
-- AI privesc triage after FindPrivs ingest
-- Adaptive babysteps (AI picks deep targets)
-- Provider web research during Borg (`NEO_PROVIDER_WEB_RESEARCH=1`)
-- Post-AI disclosure lint on all educational outputs
+**Implemented (Wave 1–2 core):**
+- Workbench automation loop (`lib/neo-conductor-loop.sh`) — guided vs assisted by `engagement_mode`
+- Variable attempt cap (default 5) + batch failure review (`analyze-failures-batch`)
+- AI privesc triage (`lib/neo-conductor-privesc.sh`) — jq ranker feeds bundle; operator sees **PRIVESC-PLAN** only
+- Handler pane C (`lib/neo-handler-pane.sh`) for visible listeners
+- Borg post-assimilate library research hook
+- `neo_conductor_on_event` dispatcher
+
+**Still planned:** adaptive babysteps, AI enum planner rank, provider web research, Borg v2 JSON.
+
+See `NEO-1.0-DESIGN/TIER-B-PLAN.md`.
 
 ---
 

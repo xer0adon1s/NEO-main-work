@@ -153,6 +153,10 @@ neo_interact_pause_before_foothold() {
 
     if [[ -n "${findings}" ]]; then
         neo_interact_save "Manual pre-foothold findings" "${findings}"
+        # shellcheck source=neo-operator-recon-ai.sh
+        source "${NEO_DIR:-${NEO_HOME}}/lib/neo-operator-recon-ai.sh" 2>/dev/null || true
+        declare -F neo_operator_recon_ai_offer >/dev/null 2>&1 && \
+            neo_operator_recon_ai_offer "${project}" "${findings}" "interact" || true
         printf '%s[+]%s Saved to projects/%s/Investigation-Notes.md → Pre-Foothold Findings\n' \
             "${C_GREEN}" "${C_RESET}" "${project}"
     fi

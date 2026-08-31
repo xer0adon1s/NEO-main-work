@@ -172,6 +172,117 @@ neo_workbench_confirm_yes() {
     [[ "${ans}" =~ ^[yY] ]]
 }
 
+# Tier B conductor loop: try last suggested command; assisted skips execute/analyze Y/n.
+neo_workbench_try_loop_step() {
+    local project="$1" phase="$2" assisted="${3:-false}"
+    local cmd transport id artifact_dir artifact_path output rc outcome tk_ans auto_analyze=false
+
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
+    # shellcheck source=script-lib.sh
+    source "${NEO_DIR}/lib/script-lib.sh"
+
+    neo_workbench_init_colors
+    cmd="$(neo_workbench_extract_last_command "${project}" 2>/dev/null || true)"
+    [[ -n "${cmd}" ]] || {
+        printf 'No ## Exact next command in notes — skipping try.\n'
+        return 1
+    }
+    transport="$(neo_workbench_classify_transport "${cmd}")"
+
+    # shellcheck source=neo-toolkit.sh
+    source "${NEO_LIB_DIR}/neo-toolkit.sh"
+    if [[ "${assisted}" != true ]]; then
+        if ! neo_workbench_confirm_yes 'Send to operator pane and run?'; then
+            return 1
+        fi
+        read -r -p 'Verify tools & wordlists for this command before trying? [Y/n]: ' tk_ans
+        case "${tk_ans}" in
+            n|N) ;;
+            *) neo_toolkit_preflight_command "${cmd}" "${project}" 1 || true ;;
+        esac
+    else
+        # shellcheck source=neo-feedback.sh
+        source "${NEO_LIB_DIR}/neo-feedback.sh" 2>/dev/null || true
+        declare -F neo_feedback_ack_action >/dev/null 2>&1 && neo_feedback_ack_action try-command
+        neo_toolkit_preflight_command "${cmd}" "${project}" 0 || true
+        auto_analyze=true
+    fi
+
+    printf '\nCommand:\n  %s\nTransport: %s\n' "${cmd}" "${transport}"
+    if [[ "${assisted}" != true && "${transport}" == local_safe ]]; then
+        neo_workbench_confirm_yes 'Second confirm (runs on attack box via argv)' || return 1
+    fi
+
+    artifact_dir="${NEO_HOME}/projects/${project}/artifacts"
+    mkdir -p "${artifact_dir}"
+    artifact_path="${artifact_dir}/workbench-$(date +%Y%m%d-%H%M%S).txt"
+    id="$(neo_workbench_new_attempt_id)"
+    rc=0
+    outcome=pending
+
+    case "${transport}" in
+        local_safe)
+            if output="$(neo_windup_execute_safe "${cmd}" "workbench-${id}" "${project}" 2>&1)"; then
+                rc=0; outcome=success
+            else
+                rc=$?; outcome=failure
+            fi
+            printf '%s' "${output}" > "${artifact_path}"
+            ;;
+        operator_pane)
+            if ! neo_operator_pane_send_command "${cmd}"; then
+                printf 'Could not send to operator pane.\n' >&2
+                return 1
+            fi
+            printf '%s[*]%s Command sent to operator pane — watch the right-hand pane.\n' "${C_CYAN:-}" "${C_RESET:-}"
+            read -r -p 'Press Enter when the command has finished (output will be captured)…' _
+            output="$(neo_operator_pane_capture "${NEO_WORKBENCH_CAPTURE_LINES:-300}" 2>/dev/null || true)"
+            if [[ -z "${output}" ]]; then
+                output="_operator pane capture empty_"
+                outcome=unknown
+            else
+                outcome=partial
+            fi
+            printf '%s' "${output}" > "${artifact_path}"
+            rc=0
+            ;;
+        *)
+            printf 'Manual transport — copy yourself:\n  %s\n' "${cmd}"
+            artifact_path=""
+            outcome=manual
+            ;;
+    esac
+
+    neo_workbench_save_attempt_json "${project}" "${id}" "${phase}" "conductor-loop" "${cmd}" \
+        "${transport}" "${artifact_path}" "${rc}" "${outcome}"
+    neo_workbench_append_notes "${project}" "Try (${id})" "$(cat <<EOF
+- **Command:** \`${cmd}\`
+- **Transport:** ${transport}
+- **Outcome:** ${outcome}
+- **Artifact:** ${artifact_path:-none}
+EOF
+)"
+    neo_workbench_mark_foothold_attempted
+    neo_workbench_mission_on_try "${project}" "${phase}"
+
+    cybersec_finish "workbench-try" "${phase}" \
+        "Workbench try recorded (${id})" \
+        "=== workbench-try (loop) ===\nid: ${id}\ncmd: ${cmd}\n"
+
+    if [[ -n "${artifact_path}" && -f "${artifact_path}" ]]; then
+        if [[ "${auto_analyze}" == true ]]; then
+            declare -F neo_feedback_ack_action >/dev/null 2>&1 && neo_feedback_ack_action analyze-output
+            neo_workbench_analyze_last "${project}" "${phase}" "${id}" || \
+                printf 'Analysis failed.\n'
+        elif neo_workbench_confirm_yes 'Analyze captured output now'; then
+            neo_workbench_analyze_last "${project}" "${phase}" "${id}" || \
+                printf 'Analysis failed.\n'
+        fi
+    fi
+    return 0
+}
+
 neo_workbench_prompt_command() {
     local project="$1" cmd
     cmd="$(neo_workbench_extract_last_command "${project}" 2>/dev/null || true)"

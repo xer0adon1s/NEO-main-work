@@ -128,6 +128,10 @@ neo_pipeline_offer_plan_enum() {
         if neo_pipeline_prompt_yn 'Review enum plan now (interactive)?' n; then
             bash "${NEO_DIR}/recon/review-plan.sh" "${plan_root}/actions" || true
         fi
+        # shellcheck source=neo-enum-ai.sh
+        source "${NEO_DIR}/lib/neo-enum-ai.sh" 2>/dev/null || true
+        declare -F neo_enum_ai_offer_after_plan >/dev/null 2>&1 && \
+            neo_enum_ai_offer_after_plan "${project}" "${target}" || true
     fi
 }
 
@@ -228,5 +232,15 @@ neo_pipeline_offer_msf_post() {
         return 0
     fi
     meta_set msf_post_offered 1 2>/dev/null || true
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR}/lib/neo-conductor.sh" 2>/dev/null || true
+    if declare -F neo_conductor_ai_available >/dev/null 2>&1 && neo_conductor_ai_available && \
+        neo_conductor_prompt_yn 'AI-suggest MSF post modules first?' y; then
+        neo_msf_ai_suggest_post "${project}" || true
+        if neo_pipeline_prompt_yn 'Also open static MSF post menu?' n; then
+            neo_msf_offer_post_module_menu "${project}" || true
+        fi
+        return 0
+    fi
     neo_msf_offer_post_module_menu "${project}" || true
 }

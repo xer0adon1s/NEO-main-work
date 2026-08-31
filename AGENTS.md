@@ -419,5 +419,11 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
 - 2026-08-31 — **Borg library AI harvest (Phase 68):** `lib/neo-borg-library-ai.sh`;
  `--research` drives Claude + `borg_research_index`; mechanical fetch is context-only;
  `borg_research_index` wired into Borg assimilate bundle.
+- 2026-08-31 — **Tier B conductor automation (Waves 1–2):** `neo-conductor-loop.sh` workbench
+  playbooks (guided/educational vs assisted/professional), variable loop cap, batch failure review;
+  `neo-conductor-privesc.sh` AI triage; `neo-handler-pane.sh` pane C; Borg library hook;
+  `test/conductor-automation-test.sh`.
+- 2026-08-31 — **Tier B Wave 3:** `neo-adaptive-scan.sh` targeted deep enum; `neo-operator-recon-ai.sh`
+  structure operator text; MSF AI post suggest; babysteps `--targets-file`; locked decisions
+  #6–8 (enum no-remove, aggressive deferred, P08 wave 4).
 - 2026-08-31 — **Phase 63 batch:** Borg HUD spam fix; SCOPE/PROGRESS/CURRENT-STATE doc sync;
-  neo-diagnostic + registry expansion; neo-vendor file rollback; ELI5 after Borg + AI triage.

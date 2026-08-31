@@ -55,6 +55,7 @@ for test_file in \
     borg-library-ingest-test.sh \
     borg-library-ai-test.sh \
     conductor-test.sh \
+    conductor-automation-test.sh \
     neo-feedback-test.sh \
     payload-test.sh \
     neo-report-test.sh \

@@ -22,7 +22,7 @@ esac
 # shellcheck source=lib/neo-1.0-bootstrap.sh
 source "${NEO_DIR}/lib/neo-1.0-bootstrap.sh"
 
-NEO_LIB_SCRIPTS=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-report.sh neo-conductor.sh neo-feedback.sh)
+NEO_LIB_SCRIPTS=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-handler-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-report.sh neo-conductor.sh neo-conductor-loop.sh neo-conductor-privesc.sh neo-enum-ai.sh neo-adaptive-scan.sh neo-operator-recon-ai.sh neo-feedback.sh)
 
 neo_lib_hygiene_warn() {
     local extra=0 path rel base f skip
@@ -1042,6 +1042,13 @@ walk_phase() {
     fi
 
     if [[ "${ran}" == true ]] || phase_bool "${phase}" "pause_after" || [[ "${#scripts[@]}" -gt 0 ]]; then
+        if [[ "${ran}" == true && "${phase}" == "privesc" ]]; then
+            # shellcheck source=lib/neo-conductor-loop.sh
+            source "${NEO_DIR}/lib/neo-conductor-loop.sh" 2>/dev/null || true
+            if declare -F neo_conductor_on_event >/dev/null 2>&1; then
+                neo_conductor_on_event privesc.ingest_complete "${project}" privesc || true
+            fi
+        fi
         neo_post_phase_menu "${phase}" "${project}" "${target_ip}" "${ran}"
         return $?
     fi
