@@ -1,0 +1,16 @@
+id: P19
+title: GUI 2.0 boundary and API readiness
+priority: P3
+status: review_ready
+objective: Keep 1.0 domain logic independent from terminal rendering so a GUI can consume the same safe workflow later.
+requirements:
+  - {id: 19a, text: Separate domain state, provider calls, action policy, evidence, and presentation.}
+  - {id: 19b, text: Give every long-running operation an ID, status, progress, and cancel behavior.}
+  - {id: 19c, text: Emit structured events rather than scraping colored terminal text.}
+  - {id: 19d, text: Represent prompts and approvals as typed requests with expiry.}
+  - {id: 19e, text: Keep credentials in a backend broker and never return them through a UI API.}
+  - {id: 19f, text: Version state and schemas so 1.0 projects can migrate into 2.0.}
+acceptance:
+  - CLI remains a thin consumer of the same application services
+  - no business rule exists only in a prompt string or terminal menu
+

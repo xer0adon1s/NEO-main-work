@@ -1,0 +1,21 @@
+id: P05
+title: Zero-exposure secrets and credential handling
+priority: P0
+status: review_ready
+objective: Keep API keys and discovered credentials out of the repository, process listings, tmux command strings, logs, prompts, and evidence.
+requirements:
+  - {id: 5a, text: Store provider secrets outside the repository with owner-only permissions.}
+  - {id: 5b, text: Never source a repository .env file as shell code.}
+  - {id: 5c, text: Never forward API keys inside tmux command construction.}
+  - {id: 5d, text: Keep Authorization headers out of command-line arguments.}
+  - {id: 5e, text: Redact known values before logs, evidence, AI prompts, and support bundles are written.}
+  - {id: 5f, text: Add a repository audit that fails on .env and private-key material.}
+  - {id: 5g, text: Define rotation and incident steps for suspected exposure.}
+artifacts:
+  prototype: prototype/neo-next/lib/neo-secrets.sh
+acceptance:
+  - secret load writes nothing to stdout
+  - secrets do not appear in ps command lines or tmux pane commands
+  - known canary values cannot survive evidence serialization
+  - current unsafe tmux forwarding is caught by a release gate
+

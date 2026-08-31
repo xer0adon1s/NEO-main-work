@@ -1,0 +1,20 @@
+id: P02
+title: Interactive ListenAssist workflow
+priority: P1
+status: review_ready
+objective: Guide the operator from callback selection through verified shell receipt while keeping commands visible and under operator control.
+requirements:
+  - {id: 2a, text: Ask for project, target, callback address, port, listener tool, and operating mode; accept safe CLI overrides.}
+  - {id: 2b, text: Print the exact command for the separate listener window and explain the expected connection signal.}
+  - {id: 2c, text: Auto-detect callback address from the target route but require confirmation when ambiguous.}
+  - {id: 2d, text: Support ncat, nc, and socat without building commands through eval.}
+  - {id: 2e, text: Never claim a foothold until the operator explicitly records success.}
+  - {id: 2f, text: Record the plan and outcome as redacted evidence.}
+artifacts:
+  prototype: prototype/neo-next/foothold/ListenAssist.sh
+acceptance:
+  - invalid ports and unsafe project names are rejected
+  - planning mode performs no listener launch
+  - start-listener mode requires a deliberate operator action
+  - every outcome can transition mission state without guessing
+

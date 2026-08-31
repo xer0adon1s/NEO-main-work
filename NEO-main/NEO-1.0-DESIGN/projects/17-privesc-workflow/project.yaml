@@ -1,0 +1,18 @@
+id: P17
+title: Privilege-escalation workflow
+priority: P1
+status: review_ready
+objective: Turn post-foothold facts into a ranked, operator-controlled validation workflow without overclaiming exploitability.
+requirements:
+  - {id: 17a, text: Normalize OS, identity, groups, sudo rules, services, scheduled tasks, writable paths, capabilities, SUID, secrets, and network context.}
+  - {id: 17b, text: Separate confirmed misconfiguration from exploit hypothesis.}
+  - {id: 17c, text: Rank by confidence, impact, reversibility, prerequisites, and evidence.}
+  - {id: 17d, text: Present manual validation before any intrusive action.}
+  - {id: 17e, text: Track current shell stability and privilege after every material step.}
+  - {id: 17f, text: Cover Linux first; represent Windows as a later adapter rather than intermixing commands.}
+  - {id: 17g, text: Preserve GTFOBins and similar references as cited knowledge, not automatic recipes.}
+acceptance:
+  - every recommendation links to observed evidence
+  - no privilege change is inferred solely from exit code or AI prose
+  - actions reuse P06 policy and P14 evidence
+

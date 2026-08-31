@@ -1,0 +1,422 @@
+# Borg research resource index — canonical (merged Cursor + Claude, 2026-08-30)
+# Load into Borg/Payload AI bundles as "where to look first" — not exploit payloads.
+# Live-verified 2026-08-30: AttackerKB → Rapid7 VulnDB (sunset 2026-08-18);
+#   gtfobins.github.io → gtfobins.org; packetstormsecurity.com → packetstorm.news
+
+meta:
+  id: borg-research-index-v1
+  name: borg_research_index
+  neo_version: "0.4"
+  merged_from: [cursor, claude]
+  created: "2026-08-30"
+  verified: "2026-08-30"
+  purpose: >
+    Starting-point directory of CVE/exploit/technique research sources. Describes what
+    each source IS and how to query it — not vulnerability specifics. Borg references
+    this before ad-hoc web search.
+  neo_rules:
+    - authorized_labs_only
+    - no_auto_clone_poc_repos
+    - no_auto_run_exploits
+    - verify_target_controlled_content
+  fetch_notes: >
+    Several sites (vulners.com, vuldb.com, cvedetails.com, cisa.gov) may 403 a default
+    fetch agent but work with a browser User-Agent — not a sign the source is unreliable.
+  research_flow:
+    - question: Have a CVE number — need authoritative facts (CVSS, versions, description)
+      go_to: [nvd, mitre-cve, cisa-kev, epss]
+    - question: Have a CVE/product — need exploit code or PoC to adapt
+      go_to: [exploit-db, poc-in-github, trickest-cve, metasploit, sploitus]
+    - question: Need technique/cheat-sheet, not a specific CVE
+      go_to: [hacktricks, gtfobins, lolbas, wadcoms, payloads-all-the-things, seclists, revshells]
+    - question: Need automated scanner coverage for this CVE
+      go_to: [nuclei-templates]
+    - question: HTB/CTF box specifically
+      go_to: [0xdf, ippsec-rocks, htb-official-writeups, ctftime]
+    - question: Active exploitation in the wild or ATT&CK framing
+      go_to: [greynoise, shodan, mitre-attack, vulncheck-kev]
+    - note: >
+        When one source is empty, widen adjacent (no nuclei template → Exploit-DB;
+        NVD not enriched yet → CVE.org). Check knowledge/vectors/ before external search.
+
+categories:
+
+  cve_authoritative:
+    description: Canonical CVE records, CPE/version mapping, official descriptions
+    resources:
+      - id: nvd
+        name: NIST National Vulnerability Database (NVD)
+        url: "https://nvd.nist.gov/vuln/detail/<CVE-ID>"
+        api: "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=<CVE-ID>"
+        api_docs: https://nvd.nist.gov/developers/vulnerabilities
+        contains: [cvss_v2_v3_v4, cpe_version_ranges, cwe, curated_references]
+        when_to_use: Primary US-gov enrichment; API supports keywordSearch=, cpeName=, date ranges
+        auth: optional API key for higher rate limits
+        notes: CVSS/CPE lags initial disclosure by hours-to-days
+      - id: mitre-cve
+        name: CVE.org (MITRE CVE Program)
+        url: "https://www.cve.org/CVERecord?id=<CVE-ID>"
+        api: "https://cveawg.mitre.org/api/cve/<CVE-ID>"
+        contains: [cve_json_5_1, cna_description, references]
+        when_to_use: Authoritative record; often published before NVD enrichment
+        auth: none
+      - id: cvelistv5
+        name: CVEProject/cvelistV5
+        url: https://github.com/CVEProject/cvelistV5
+        contains: [bulk_official_cve_json]
+        when_to_use: Offline/bulk clone; upstream for Trickest, OpenCVE, sploitscan
+      - id: mitre-cve-services
+        name: MITRE CVE Services API docs
+        url: https://cveawg.mitre.org/api-docs/
+        when_to_use: Programmatic CVE record management reference
+      - id: ghsa
+        name: GitHub Security Advisories
+        url: "https://github.com/advisories?query=<terms>"
+        git: https://github.com/github/advisory-database
+        contains: [npm_pypi_maven_go_rubygems_nuget_crates]
+        when_to_use: "OSS package vulns; query=CVE-XXXX-XXXXX, ecosystem:npm, severity:critical"
+        notes: Not for OS/infra/hardware CVEs
+      - id: osv
+        name: OSV.dev
+        url: "https://osv.dev/vulnerability/<CVE-or-GHSA-or-OSV-ID>"
+        api: https://api.osv.dev/v1/query
+        contains: [860k_plus_unified_package_vulns]
+        when_to_use: "Best with package+version; POST {package:{name,ecosystem}, version}"
+        auth: none
+      - id: cve-details
+        name: CVE Details
+        url: "https://www.cvedetails.com/cve/<CVE-ID>/"
+        browse: "https://www.cvedetails.com/vulnerability-list/vendor_id-<id>/product_id-<id>/"
+        contains: [nvd_mirror, epss, kev_flag, vendor_product_browse]
+        when_to_use: Browse all CVEs for a vendor/product
+        fetch_note: may 403 default fetch agent; use browser User-Agent
+      - id: vulners
+        name: Vulners.com
+        url: "https://vulners.com/cve/<CVE-ID>"
+        api: "POST https://vulners.com/api/v3/search/lucene/"
+        api_docs: https://docs.vulners.com/
+        contains: [220_plus_source_graph, exploitdb, metasploit, ghsa, epss, kev]
+        when_to_use: "Cross-source Lucene, e.g. type:cve AND cvss.score:[9 TO 10]"
+        auth: free-tier API key (X-Api-Key) for volume
+        fetch_note: may 403 default fetch agent
+      - id: vuldb
+        name: VulDB
+        url: "https://vuldb.com/?id.<numeric-id>"
+        kb: https://vuldb.com/kb/cve
+        contains: [exploit_maturity, vuldb_score, cve_crossref]
+        when_to_use: Secondary pointer only; detail mostly paywalled
+        auth: 50 credits/day free tier
+        fetch_note: may 403 default fetch agent
+      - id: snyk-vulndb
+        name: Snyk Vulnerability Database
+        url: "https://security.snyk.io/vuln/<SNYK-ID>"
+        browse_package: "https://security.snyk.io/package/<ecosystem>/<package>"
+        contains: [oss_packages, containers, iac_rules]
+        when_to_use: Package-ecosystem vulns with Snyk severity alongside CVSS
+      - id: rapid7-vulndb
+        name: Rapid7 Vulnerability & Exploit Database
+        url: "https://www.rapid7.com/db/vulnerabilities/cve-<year>-<number>"
+        search: "https://www.rapid7.com/db/?q=<CVE-ID>"
+        contains: [cvss_epss, metasploit_module_xref, exploitability_writeups]
+        when_to_use: Fast "is there a Metasploit module for this"
+        notes: >
+          Absorbed AttackerKB (sunset 2026-08-18) — old AttackerKB URLs redirect here.
+          Do NOT list AttackerKB as standalone; community assessment archive may be reduced.
+
+  cve_prioritization:
+    description: Exploitation likelihood and confirmed in-the-wild signals
+    resources:
+      - id: cisa-kev
+        name: CISA Known Exploited Vulnerabilities Catalog
+        url: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+        feed: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+        feed_csv: https://www.cisa.gov/sites/default/files/feeds/csv/known_exploited_vulnerabilities.csv
+        contains: [confirmed_exploitation, remediation_deadlines, ransomware_use]
+        when_to_use: First check after CVE ID — high-signal live-threat flag
+        fetch_note: may 403 default fetch agent
+      - id: epss
+        name: FIRST EPSS
+        url: https://www.first.org/epss/
+        api: "https://api.first.org/data/v1/epss?cve=<CVE-ID>"
+        contains: [exploitation_probability_30d, percentile]
+        when_to_use: Rank CVE backlogs; pairs with KEV, does not replace it
+        auth: none
+      - id: nist-lev
+        name: NIST Likely Exploited Vulnerabilities (CSWP 41)
+        url: https://csrc.nist.gov/pubs/cswp/41/likely-exploited-vulnerabilities/final
+        when_to_use: Secondary when KEV silent but exploitation likely
+      - id: vulncheck-kev
+        name: VulnCheck KEV
+        url: https://vulncheck.com/kev
+        contains: [superset_cisa_kev, extra_exploit_intel]
+        when_to_use: Broader KEV; nuclei tags kev,vkev
+        auth: free tier + API token
+      - id: vulncheck-intel
+        name: VulnCheck Exploit & Vulnerability Intelligence
+        url: https://vulncheck.com/
+        api_docs: https://docs.vulncheck.com/
+        api_example: "https://api.vulncheck.com/v4/advisory?cve_id=<CVE-ID>"
+        when_to_use: Deep enrichment when NVD sparse; sploitscan integration
+        auth: API token
+
+  exploit_aggregators:
+    description: Exploit code and cross-source exploit search
+    resources:
+      - id: exploit-db
+        name: Exploit Database
+        url: "https://www.exploit-db.com/search?cve=<year>-<number>"
+        git: https://gitlab.com/exploit-database/exploitdb
+        cli: "searchsploit --cve <CVE-ID>  ;  searchsploit -m <EDB-ID>"
+        contains: [dos_local_remote_webapps_shellcode, verified_flag]
+        when_to_use: Classic EDB archive; offline via searchsploit on Kali
+        notes: Review unverified entries — can be broken or malicious
+      - id: poc-in-github
+        name: nomi-sec/PoC-in-GitHub
+        url: https://github.com/nomi-sec/PoC-in-GitHub
+        web: https://poc-in-github.motikan2010.net/
+        api: "https://poc-in-github.motikan2010.net/api/v1/?cve_id=<CVE-ID>"
+        files: "<year>/<CVE-ID>.json"
+        when_to_use: First GitHub PoC index stop for a CVE
+        notes: Unvetted — malware risk; never auto-clone/run
+      - id: trickest-cve
+        name: trickest/cve
+        url: https://github.com/trickest/cve
+        files: "<year>/<CVE-ID>.md"
+        also: hot_cves.csv
+        when_to_use: Markdown PoC links per CVE; actively maintained
+        notes: Same unvetted caveat as poc-in-github
+      - id: trickest-find-gh-poc
+        name: trickest/find-gh-poc
+        url: https://github.com/trickest/find-gh-poc
+        when_to_use: Live GitHub GraphQL search when indexes stale
+        auth: GitHub token recommended
+      - id: pats-cve-exploits
+        name: PayloadsAllTheThings/CVE Exploits
+        url: https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/CVE%20Exploits
+        when_to_use: Famous CVE writeups (Log4Shell, etc.)
+      - id: hackerone-pocs
+        name: zeroc00I/AllVideoPocsFromHackerOne
+        url: https://github.com/zeroc00I/AllVideoPocsFromHackerOne
+        when_to_use: H1 disclosure reference mining
+      - id: metasploit
+        name: Metasploit Framework
+        url: https://github.com/rapid7/metasploit-framework/tree/master/modules/exploits
+        docs: https://docs.metasploit.com/
+        unleashed: https://www.offensive-security.com/metasploit-unleashed/
+        cli: "msfconsole → search cve:<CVE-ID>  or  search type:exploit <product>"
+        when_to_use: Module tree is by platform not CVE — use msfconsole search
+        notes: High trust vs random PoCs; small CVE coverage fraction
+      - id: packetstorm
+        name: Packet Storm Security
+        url: "https://packetstorm.news/search/?q=<query>"
+        legacy_url: https://packetstormsecurity.com/
+        contains: [exploits, advisories, tools, papers]
+        when_to_use: Older/advisory-linked material
+        notes: packetstormsecurity.com redirects to packetstorm.news (canonical)
+      - id: sploitus
+        name: Sploitus
+        url: "https://sploitus.com/<CVE-ID>"
+        search: "https://sploitus.com/?query=<terms>"
+        contains: [meta_edb_metasploit_packetstorm_github]
+        when_to_use: One-query triage across exploit sources
+
+  multi_source_cli:
+    description: Optional attack-box CLIs (not shipped with NEO)
+    resources:
+      - id: searchsploit
+        name: SearchSploit
+        url: https://www.exploit-db.com/searchsploit
+        when_to_use: Offline Exploit-DB
+      - id: sploitscan
+        name: sploitscan
+        url: https://github.com/GuiMatosInfra/explorer2sectool
+        contains: [exploitdb, github_poc, vulncheck, nuclei, cvelistv5_local]
+        auth: optional VulnCheck API key
+      - id: pochunter
+        name: PoC_Hunter
+        url: https://github.com/jturini/PoC_Hunter
+        contains: [github, exploitdb, nvd, cisa_kev, trust_scoring]
+        auth: GitHub PAT recommended
+      - id: cve2poc
+        name: cve2poc
+        url: https://github.com/0xP1ckl3d/cve2poc
+        when_to_use: Minimal nomi-sec index lookup (Go)
+      - id: nodesearch
+        name: NodeSearch
+        url: https://github.com/onlyluphy/NodeSearch
+        contains: [nvd, searchsploit, snyk, github, packetstorm]
+
+  scanner_templates:
+    description: CVE-indexed detection templates — verification naming, not autopilot
+    resources:
+      - id: nuclei-templates
+        name: projectdiscovery/nuclei-templates
+        url: https://github.com/projectdiscovery/nuclei-templates
+        cve_path: "http/cves/<year>/CVE-<year>-<number>.yaml"
+        search_ui: [https://templatesearch.io/, https://cloud.projectdiscovery.io/templates]
+        cli: "nuclei -tags cve -id CVE-<year>-<number>"
+        contains: [~12k_cve_templates, kev_vkev_tags, cves_json_metadata]
+        when_to_use: Template YAML info.reference is a structured vector summary
+        notes: NEO may suggest [RUN:nuclei -t ...] with operator y/N
+      - id: nmap-nse
+        name: Nmap NSE Scripts
+        url: https://nmap.org/nsedoc/
+        when_to_use: Script names from babysteps nmap output
+
+  technique_references:
+    description: Methodology, cheat sheets, payloads — not CVE-specific
+    resources:
+      - id: hacktricks
+        name: HackTricks
+        url: https://book.hacktricks.xyz/
+        mirrors: [https://book.hacktricks.wiki/, https://cloud.hacktricks.wiki/]
+        git: https://github.com/HackTricks-wiki/hacktricks
+        when_to_use: Default Borg EXPLOIT.md technique reference
+      - id: internal-all-the-things
+        name: InternalAllTheThings
+        url: https://swisskyrepo.github.io/InternalAllTheThings/
+        when_to_use: AD / internal network
+      - id: payloads-all-the-things
+        name: PayloadsAllTheThings
+        url: https://github.com/swisskyrepo/PayloadsAllTheThings
+        contains: [70_plus_vuln_class_folders, intruder_wordlists]
+        when_to_use: Browse folder matching vuln class (SQLi, SSTI, SSRF, …)
+      - id: portswigger-web-security
+        name: PortSwigger Web Security Academy
+        url: https://portswigger.net/web-security
+      - id: owasp-wstg
+        name: OWASP Web Security Testing Guide
+        url: https://owasp.org/www-project-web-security-testing-guide/
+      - id: gtfobins
+        name: GTFOBins
+        url: "https://gtfobins.org/gtfobins/<binary>/"
+        git: https://github.com/GTFOBins/GTFOBins.github.io
+        contains: [linux_binary_privesc, suid, capabilities, shell_breakout]
+        notes: gtfobins.github.io permanently redirects to gtfobins.org
+      - id: lolbas
+        name: LOLBAS
+        url: "https://lolbas-project.github.io/lolbas/<Category>/<BinaryName>/"
+        git: https://github.com/LOLBAS-Project/LOLBAS
+        contains: [windows_lolbins, attck_mapped]
+      - id: loldrivers
+        name: LOLDrivers
+        url: https://www.loldrivers.io/
+        when_to_use: Abusable/vulnerable Windows drivers
+      - id: wadcoms
+        name: WADComs
+        url: https://wadcoms.github.io/
+        git: https://github.com/WADComs/WADComs.github.io
+        when_to_use: AD command templates filtered by creds/service/phase
+      - id: seclists
+        name: SecLists
+        url: https://github.com/danielmiessler/SecLists
+        when_to_use: "Wordlists by path, e.g. Discovery/Web-Content/common.txt"
+      - id: revshells
+        name: revshells.com
+        url: https://revshells.com/
+        when_to_use: Shell one-liner + listener syntax reference (client-side generator)
+
+  service_specific:
+    description: HackTricks network-services chapters — map PORTS/SERVICES to path
+    base: https://book.hacktricks.wiki/network-services-pentesting/
+    resources:
+      - { id: hacktricks-smb, path: pentesting-smb }
+      - { id: hacktricks-ldap, path: pentesting-ldap }
+      - { id: hacktricks-mssql, path: pentesting-mssql-microsoft-sql-server }
+      - { id: hacktricks-redis, path: pentesting-redis }
+      - { id: hacktricks-ftp, path: pentesting-ftp }
+      - { id: hacktricks-snmp, path: pentesting-snmp }
+      - { id: hacktricks-http, path: pentesting-web }
+      - { id: hacktricks-ssh, path: pentesting-ssh }
+      - { id: hacktricks-rdp, path: pentesting-rdp }
+      - { id: hacktricks-kerberos, path: ../windows-hardening/active-directory-methodology/kerberos-attacks }
+
+  vendor_advisories:
+    description: Vendor bulletins — often clearer than NVD CPE alone
+    resources:
+      - { id: microsoft-msrc, name: Microsoft MSRC, url: https://msrc.microsoft.com/update-guide/vulnerability }
+      - { id: redhat-errata, name: Red Hat Advisories, url: https://access.redhat.com/security/security-updates }
+      - { id: ubuntu-usn, name: Ubuntu Security Notices, url: https://ubuntu.com/security/notices }
+      - { id: debian-security, name: Debian Security Tracker, url: https://security-tracker.debian.org/tracker/ }
+      - { id: cisco-psirt, name: Cisco PSIRT, url: https://sec.cloudapps.cisco.com/security/center/publicationListing.x }
+      - { id: fortiguard, name: Fortinet FortiGuard PSIRT, url: https://www.fortiguard.com/psirt }
+      - { id: vmware-vmsa, name: VMware Security Advisories, url: https://www.vmware.com/security/advisories.html }
+
+  ctf_htb_indices:
+    description: HTB/CTF writeup and video indices
+    resources:
+      - id: 0xdf
+        name: 0xdf.gitlab.io
+        url: https://0xdf.gitlab.io/
+        post_path: "/<year>/<month>/<day>/<machine-name>.html"
+        when_to_use: Retired HTB full-chain writeups; use Tags page
+      - id: ippsec-rocks
+        name: ippsec.rocks
+        url: "https://ippsec.rocks/?binP=<search term>"
+        when_to_use: Timestamped IppSec video transcript search
+      - id: htb-official-writeups
+        name: HackTheBox official writeups
+        url: "https://www.hackthebox.com/machines/<machine-name>"
+        community: https://forum.hackthebox.com/c/tutorials/writeups/15
+        notes: Retired machines only; VIP-gated official writeups
+      - id: ctftime
+        name: CTFtime.org writeups
+        url: "https://ctftime.org/event/<event-id>/tasks/"
+        search: https://ctftime.org/writeups
+        when_to_use: CTF-style challenges vs real-world infra CVE
+
+  threat_context:
+    description: Live exploitation signals and TTP framing
+    resources:
+      - id: greynoise
+        name: GreyNoise
+        url: https://viz.greynoise.io/
+        docs: https://docs.greynoise.io/docs/greynoise-tags
+        when_to_use: CVE-specific mass-scan / opportunistic exploitation tags
+        auth: free viz limits; API for deeper queries
+      - id: shodan
+        name: Shodan
+        url: "https://www.shodan.io/search?query=<query>"
+        cvedb: https://cvedb.shodan.io/
+        when_to_use: "Filters vuln:<CVE-ID>, cve:<CVE-ID>, port:/product:/version:"
+        auth: full search paid; CVEDB API free
+      - id: mitre-attack
+        name: MITRE ATT&CK
+        url: "https://attack.mitre.org/techniques/<technique-id>/"
+        navigator: https://mitre-attack.github.io/attack-navigator/
+        when_to_use: Classify technique once mechanism known; cross-ref LOLBAS IDs
+      - id: opencve-kb
+        name: OpenCVE Knowledge Base
+        url: https://github.com/opencve/opencve-kb
+        when_to_use: Reference schema for merged MITRE/NVD/Red Hat/CISA JSON per CVE
+      - id: cisa-advisories
+        name: CISA Cybersecurity Advisories
+        url: https://www.cisa.gov/news-events/cybersecurity-advisories
+
+  meta_awesome_lists:
+    description: Discover sources not yet in this index
+    resources:
+      - { id: awesome-hacking, url: https://github.com/Hack-with-Github/Awesome-Hacking }
+      - { id: awesome-pentest, url: https://github.com/enaqx/awesome-pentest }
+      - { id: awesome-web-hacking, url: https://github.com/infoslack/awesome-web-hacking }
+      - { id: awesome-threat-intelligence, url: https://github.com/hslatman/awesome-threat-intelligence }
+      - { id: awesome-security, url: https://github.com/sbilly/awesome-security }
+      - { id: h4cker, name: The-Art-of-Hacking/h4cker, url: https://github.com/The-Art-of-Hacking/h4cker }
+
+  neo_collective:
+    description: NEO-local knowledge — check before external search
+    resources:
+      - id: neo-borg-vectors
+        path: ~/Neo/knowledge/vectors/
+        when_to_use: Assimilated dossiers from prior missions
+      - id: neo-borg-index
+        path: ~/Neo/knowledge/INDEX.yaml
+        when_to_use: Slug index of assimilated vectors (not this file)
+
+borg_research_checklist:
+  - Read mission PORTS, SERVICES, AI-TRIAGE, knowledge/vectors/
+  - Resolve CVE — NVD, CVE.org, vendor advisory, or OSV for packages
+  - Prioritize — CISA KEV, EPSS, VulnCheck KEV
+  - PoC discovery — poc-in-github API, trickest/cve, searchsploit, sploitus
+  - Verification — nuclei template path, Metasploit aux/check, nmap NSE
+  - Technique — HackTricks service chapter; PoC repos as [MANUAL] clone only

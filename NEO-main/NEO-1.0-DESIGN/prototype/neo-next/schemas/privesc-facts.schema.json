@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/privesc-facts.schema.json",
+  "title": "NEO post-foothold privilege facts",
+  "type": "object",
+  "required": ["schema_version", "source_artifact", "captured_at", "identity", "observations"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_artifact": { "type": "string" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "identity": {
+      "type": "object",
+      "required": ["user", "hostname"],
+      "properties": {
+        "user": { "type": "string" },
+        "hostname": { "type": "string" },
+        "uid": { "type": "integer" },
+        "groups": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "observations": {
+      "type": "object",
+      "properties": {
+        "sudo_rules": { "type": "array", "items": { "type": "string" } },
+        "suid_binaries": { "type": "array", "items": { "type": "string" } },
+        "capabilities": { "type": "array", "items": { "type": "string" } },
+        "cron_jobs": { "type": "array", "items": { "type": "string" } },
+        "writable_paths": { "type": "array", "items": { "type": "string" } },
+        "kernel": { "type": "string" },
+        "os": { "type": "string" }
+      }
+    },
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "category", "confidence", "evidence_refs"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "category": { "enum": ["misconfiguration", "hypothesis"] },
+          "confidence": { "enum": ["low", "medium", "high"] },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } },
+          "impact": { "enum": ["user", "root", "unknown"] }
+        }
+      }
+    }
+  }
+}

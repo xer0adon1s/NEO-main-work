@@ -1,0 +1,21 @@
+id: P15
+title: Service-specific enumeration framework
+priority: P1
+status: review_ready
+objective: Convert discovered services into transparent, reviewable enumeration plans with normalized findings.
+requirements:
+  - {id: 15a, text: Normalize service observations into a versioned JSON schema.}
+  - {id: 15b, text: Generate plans for HTTP, HTTPS, SSH, SMB, FTP, DNS, and a generic fallback.}
+  - {id: 15c, text: Produce typed action files rather than shell snippets.}
+  - {id: 15d, text: Explain purpose, expected output, noise, prerequisites, and risk for each action.}
+  - {id: 15e, text: Normalize results back into facts and candidate follow-ups.}
+  - {id: 15f, text: Support deterministic planners before adding AI suggestions.}
+artifacts:
+  planner: prototype/neo-next/enumerators/plan-enum.sh
+  reviewer: prototype/neo-next/enumerators/review-plan.sh
+  schema: prototype/neo-next/schemas/service.schema.json
+acceptance:
+  - unknown services get a safe generic plan
+  - planning never performs network activity
+  - execution still passes through P06 confirmation and policy
+

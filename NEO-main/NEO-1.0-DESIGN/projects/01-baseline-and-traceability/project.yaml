@@ -1,0 +1,24 @@
+id: P01
+title: Baseline and requirements traceability
+status: review_ready
+priority: P0
+goal: Establish one evidence-backed source of truth connecting operator intent, documentation, current code, tests, and future projects.
+in_scope:
+  - complete repository inventory
+  - current workflow and trust-boundary map
+  - documentation-to-code discrepancy register
+  - placeholder and stub inventory
+  - operator decision IDs and project routing
+  - later ingestion of local Claude and Cursor histories
+out_of_scope:
+  - changing production source
+  - executing network or exploitation tools
+source_touchpoints: [AGENTS.md, CLAUDE.md, README.md, phases.yaml, registry.yaml, neo.sh, lib/, recon/, foothold/, privesc/, test/]
+required_outputs: [CURRENT-STATE.md, REQUIREMENTS-TRACEABILITY.yaml, DISCREPANCIES.yaml, WORKFLOW-MAP.md]
+acceptance_criteria:
+  - every current production entry point is classified as implemented partial placeholder or broken
+  - every operator decision is linked to one or more implementation projects
+  - documentation claims are compared with actual code behavior
+  - missing historical inputs are explicitly marked rather than inferred
+  - all findings distinguish confirmed evidence from proposed design
+open_inputs: [CLAUDE-COLLAB.md, CURSOR-REVIEW-LOG.md]

@@ -1,0 +1,71 @@
+# phases.yaml — mission order + pause policy for neo.sh.
+#
+# This is DATA, read by neo.sh's own hand-rolled awk parser (no yq dependency
+# for the MVP). It answers "what order do phases run in, and when does NEO
+# stop to ask the operator" (the product decision). registry.yaml
+# separately answers "how do I actually run this script" (file path,
+# requires, wrapper, section ownership). neo.sh reads both: this file for
+# sequencing/pauses, registry.yaml for invocation. Do not duplicate
+# registry.yaml's file/requires/owns fields here.
+#
+# "connect" (ovpn-connect.sh) is deliberately NOT a walked phase below — it's
+# project-agnostic (registry.yaml: init_project: false, notes: false) and is
+# a one-time VPN preflight, not a per-mission step. neo.sh invokes ovpn-connect
+# only during the boot VPN ritual when tun0 is down and the operator confirms,
+# then begins the walk below at "recon".
+#
+# Fields:
+#   scripts        — script names from registry.yaml, in offer order
+#   choice         — "one_of" (operator picks one to run) or "none" (no script,
+#                    informational phase only)
+#   pause_before   — true: prompt (see prompt_before) before running anything
+#                    in this phase
+#   pause_after    — true: prompt (see prompt_after) after the chosen script
+#                    finishes, before advancing
+#   prompt_before / prompt_after — exact operator-facing prompt text (MVP: a
+#                    plain `read -p`, not a TUI — see CLAUDE-COLLAB.md section 11)
+#
+# IMPORTANT — plain single-line strings ONLY for prompt_before/prompt_after.
+# neo.sh's phase_val() is a single-line awk field extractor, not a real YAML
+# parser: it does not follow YAML's `>-` folded block-scalar continuation
+# lines, so a multi-line value here silently renders as the literal text
+# ">-" at runtime instead of the prompt (confirmed 2026-08-30 — see
+# CURSOR-REVIEW-LOG.md Phase 5). Keep every prompt on one line until neo.sh
+# either gains real YAML parsing or its own multi-line convention.
+#
+# Every phase's post-run menu (after pause_after, or immediately if
+# pause_after is false) is the same choice set, not repeated per phase below:
+#   [c]ontinue to next phase (default)
+#   [r]epeat this phase (e.g. run privesc again after a new shell)
+#   [s]kip to step — jump to any mission phase (recon/foothold/privesc/post)
+#   [q]uit — saves checkpoint; `neo.sh <project>` resumes here later
+# pause_before menus also offer [k] skip phase (advance without running).
+
+recon:
+  scripts: [babysteps, analyze-recon]
+  choice: all
+  pause_before: false
+  pause_after: true
+  prompt_after: Recon complete (speed scan). Review notes — use [d]eep enum for full nmap/nikto, or share Investigation-Notes.md with your AI if not using built-in triage. Continue to foothold?
+
+foothold:
+  scripts: [ListenAssist]
+  choice: one_of
+  pause_before: true
+  pause_after: false
+  prompt_before: Ready to start a listener for foothold? Choose [k] skip phase if you already have a shell — ListenAssist is one path in, not the only one.
+
+privesc:
+  scripts: [run-findprivs, run-linpeas, run-linenum]
+  choice: one_of
+  pause_before: true
+  pause_after: true
+  prompt_before: Ready for privesc enum. FindPrivs is recommended first (curated); linpeas/LinEnum are noisier second opinions. Needs user@target — cached in project.meta after the first run.
+  prompt_after: Privesc enum complete. Review WHOAMI/SUDO/SUID/etc. above. Repeat with a different tool, continue, or stop here.
+
+post:
+  scripts: []
+  choice: none
+  pause_before: true
+  pause_after: false
+  prompt_before: Post-exploitation is manual for now — no automated script. Add creds/flags/attack-path/lessons to Investigation-Notes.md by hand. NEO's automated part ends here.

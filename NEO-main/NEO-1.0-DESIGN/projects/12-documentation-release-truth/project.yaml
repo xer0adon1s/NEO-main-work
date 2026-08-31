@@ -1,0 +1,17 @@
+id: P12
+title: Documentation and release truth
+priority: P1
+status: review_ready
+objective: Make version, capability, test, and workflow claims match the release artifact exactly.
+requirements:
+  - {id: 12a, text: Generate version references from one authoritative version source.}
+  - {id: 12b, text: Verify README phase descriptions against registry and implementation.}
+  - {id: 12c, text: Mark prototypes, optional tools, and unavailable capabilities plainly.}
+  - {id: 12d, text: Generate test counts and supported-platform claims from CI evidence.}
+  - {id: 12e, text: Document secrets, evidence retention, recovery, and provider limitations.}
+  - {id: 12f, text: Maintain migration notes for every state or schema change.}
+acceptance:
+  - no conflicting version strings remain
+  - documented scan behavior matches each speed mode
+  - stubbed workflows cannot be advertised as complete
+

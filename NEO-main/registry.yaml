@@ -1,0 +1,154 @@
+# Pipeline registry — what scripts exist, where they run, and what they own.
+# Paths are relative to repo root (NEO_HOME / NEO_DIR).
+# Agents: read this + AGENTS.md before adding or modifying scripts.
+
+babysteps:
+  file: recon/babysteps.sh
+  runs: local
+  phase: recon
+  init_project: true
+  requires: [rustscan, nmap, gobuster, smbclient, curl]
+  owns:
+    PORTS: set
+    NMAP: set
+    SERVICES: append
+    TODO: append
+  finish:
+    phase: recon
+    log: smart
+
+analyze-recon:
+  file: recon/analyze-recon.sh
+  runs: local
+  phase: recon
+  init_project: false
+  requires: [curl, jq]
+  # API: ANTHROPIC_API_KEY + optional anthropic.workspace (wrkspc_...) for identity-linked keys
+  owns:
+    AI-TRIAGE: append
+  finish:
+    phase: recon
+    log: smart
+
+borg:
+  file: borg/borg.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [curl, jq]
+  # Claude Code (claude -p) or ANTHROPIC_API_KEY; gated downloads (human y/N)
+  owns:
+    BORG: append
+    TODO: append
+  finish:
+    phase: dynamic
+    log: smart
+
+# Pause-menu library (not a standalone script — wired from neo.sh)
+neo-payload:
+  file: lib/neo-payload.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [curl, jq]
+  # Claude Code (claude -p) or ANTHROPIC_API_KEY; [p] payload suggest (tool-picker,
+  # copy-paste output) / [z] analyze failures (foothold only, after a first attempt —
+  # reviews NEO's log plus a tmux terminal-log capture when available)
+  # Phase-gated: recon, foothold (until shell), privesc
+  owns:
+    PAYLOAD: append
+    TODO: append
+    LOG: append
+  finish:
+    phase: dynamic
+    log: smart
+
+# tmux auto-wrap + terminal-log capture (not a standalone script — wired from neo.sh)
+neo-tmux:
+  file: lib/neo-tmux.sh
+  runs: local
+  phase: any
+  init_project: false
+  requires: [tmux]
+  # Re-execs neo.sh into a named tmux session (neo-<project>) on real interactive
+  # launches, so Analyze Failures can reliably capture what was tried manually outside
+  # NEO. Opt out with NEO_TMUX_WRAP=0. Never wraps piped/non-interactive runs.
+
+ListenAssist:
+  file: foothold/ListenAssist.sh
+  runs: local
+  phase: foothold
+  init_project: false
+  requires: [tmux, ncat]
+  owns:
+    LOG: append
+  finish:
+    phase: foothold
+    log: smart
+
+FindPrivs:
+  file: privesc/FindPrivs.sh
+  runs: target
+  phase: privesc
+  init_project: false
+  # Ingest map lives in neo/lib/notes-lib.sh (_notes_ingest_default_map).
+  wrapper: privesc/run-findprivs.sh
+  finish:
+    phase: privesc
+    ingest: true
+
+run-findprivs:
+  file: privesc/run-findprivs.sh
+  runs: local
+  phase: privesc
+  needs_ssh: true
+
+run-linpeas:
+  file: privesc/run-linpeas.sh
+  runs: local
+  phase: privesc
+  needs_ssh: true
+
+run-linenum:
+  file: privesc/run-linenum.sh
+  runs: local
+  phase: privesc
+  needs_ssh: true
+
+linpeas:
+  file: vendor/linpeas.sh
+  runs: target
+  phase: privesc
+  third_party: true
+  wrapper: privesc/run-linpeas.sh
+  owns:
+    LOG: append
+  finish:
+    phase: privesc
+    log: smart
+
+LinEnum:
+  file: vendor/LinEnum.sh
+  runs: target
+  phase: privesc
+  third_party: true
+  wrapper: privesc/run-linenum.sh
+  owns:
+    LOG: append
+  finish:
+    phase: privesc
+    log: smart
+
+ovpn-connect:
+  file: connect/ovpn-connect.sh
+  runs: local
+  phase: connect
+  init_project: false
+  notes: false
+
+status:
+  file: tools/status.sh
+  runs: local
+  phase: meta
+  init_project: false
+  notes: false

@@ -1,0 +1,19 @@
+id: P09
+title: Test integrity and production-entry guards
+priority: P0
+status: review_ready
+objective: Ensure a green suite means production entrypoints are substantive, secure, and runnable rather than skipped or replaced by smoke stubs.
+requirements:
+  - {id: 9a, text: Fail release validation when a production entrypoint is a stub.}
+  - {id: 9b, text: Distinguish pass, fail, and skip; required integration skips fail release validation.}
+  - {id: 9c, text: Test behavior in disposable projects instead of relying only on source-text assertions.}
+  - {id: 9d, text: Add secret canaries and command-injection payloads to integration tests.}
+  - {id: 9e, text: Run ShellCheck, formatting, schemas, unit tests, integration tests, and docs gates.}
+  - {id: 9f, text: Publish a machine-readable test result summary.}
+artifacts:
+  tests: prototype/neo-next/test
+acceptance:
+  - the reviewed v0.5 snapshot fails the production integrity gate
+  - the prototype tests can run without executable file bits by invoking Bash explicitly
+  - CI tests use no real credentials or external targets
+

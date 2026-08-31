@@ -1,0 +1,213 @@
+schema_version: 1
+project: P01
+generated: 2026-08-31
+evidence_types:
+  confirmed: static review of v0.5 source + registry + tests
+  historical: CURSOR-REVIEW-LOG.md or CLAUDE-COLLAB.md
+  proposed: NEO-1.0-DESIGN prototype target behavior
+
+discrepancies:
+  - id: D-001
+    current_state_id: CS-001
+    category: placeholder_vs_documentation
+    severity: high
+    evidence: confirmed
+    summary: ListenAssist advertised as foothold workflow but is 7-line phase setter
+    documentation_claims:
+      - README.md lists ListenAssist as tmux listener workflow
+      - registry.yaml requires tmux, ncat
+      - AGENTS.md lists FOOTHOLD as manual but ListenAssist in foothold phase
+    actual_behavior:
+      - Sets meta phase foothold only
+      - No listener, no questions, no evidence capture
+    routed_projects: [P02, P09, P12, P16]
+    prototype_resolution: prototype/neo-next/foothold/ListenAssist.sh
+
+  - id: D-002
+    current_state_id: CS-002
+    category: placeholder_vs_documentation
+    severity: high
+    evidence: confirmed
+    summary: run-findprivs ingests hard-coded smoke verdict
+    documentation_claims:
+      - AGENTS.md documents SSH wrapper pattern
+      - registry.yaml wrapper for FindPrivs with ingest
+    actual_behavior:
+      - notes_ingest with static 'Smoke privesc path.'
+      - Never invokes FindPrivs.sh or accepts file transport
+    routed_projects: [P03, P09, P12, P17]
+    prototype_resolution: prototype/neo-next/privesc/run-findprivs.sh
+
+  - id: D-003
+    current_state_id: CS-003
+    category: test_integrity
+    severity: critical
+    evidence: confirmed
+    summary: Diagnostic guards babysteps content but not other production stubs
+    documentation_claims:
+      - test/neo-diagnostic.sh claims production integrity
+      - OD-005 requires stub prevention
+    actual_behavior:
+      - ListenAssist and run-findprivs pass existence/syntax checks
+      - No semantic minimum-line or behavior-marker gates
+    routed_projects: [P09, P18]
+    prototype_resolution: prototype/neo-next/test/production-integrity-gate.sh
+
+  - id: D-004
+    current_state_id: CS-004
+    category: secrets
+    severity: critical
+    evidence: confirmed
+    summary: .env can live in repo and is sourced as shell code
+    documentation_claims:
+      - README documents NEO_HOME/.env for API key
+    actual_behavior:
+      - lib/neo-ai.sh sources .env when present
+      - .gitignore does not exclude .env
+    routed_projects: [P05, P09, P12]
+    prototype_resolution: prototype/neo-next/lib/neo-secrets.sh
+
+  - id: D-005
+    current_state_id: CS-005
+    category: secrets
+    severity: critical
+    evidence: confirmed
+    summary: API keys forwarded in tmux re-exec command string
+    documentation_claims:
+      - OD-006 zero-exposure requirement
+    actual_behavior:
+      - lib/neo-tmux.sh NEO_TMUX_ENV_FORWARD includes ANTHROPIC_API_KEY
+      - Value visible in tmux pane command and ps
+    routed_projects: [P05, P08, P10]
+    prototype_resolution: neo_secret_load + env scrub in provider layer
+
+  - id: D-006
+    current_state_id: CS-006
+    category: ai_safety
+    severity: critical
+    evidence: confirmed
+    summary: Borg parses and executes AI prose via eval/bash -c
+    documentation_claims:
+      - Wind-up y/N model documented
+      - Prompt-injection warnings present
+    actual_behavior:
+      - Arbitrary shell from model text can run after confirmation
+      - No schema validation or argv-only execution
+    routed_projects: [P04, P06, P09]
+    prototype_resolution: prototype/neo-next/lib/neo-actions.sh
+
+  - id: D-007
+    current_state_id: CS-007
+    category: vpn_consent
+    severity: high
+    evidence: confirmed
+    summary: OpenVPN termination without explicit informed consent
+    documentation_claims:
+      - OD-011 requires explain + ask before kill
+    actual_behavior:
+      - lib/neo-vpn.sh can sudo pkill -x openvpn affecting all matches
+    routed_projects: [P10]
+    prototype_resolution: prototype/neo-next/lib/neo-vpn-consent.sh
+
+  - id: D-008
+    current_state_id: CS-008
+    category: provenance
+    severity: medium
+    evidence: confirmed
+    summary: setup.sh downloads latest without recorded checksum
+    documentation_claims:
+      - OD-010 accepts latest but requires provenance
+    actual_behavior:
+      - GitHub latest URLs with no manifest file
+    routed_projects: [P11]
+    prototype_resolution: projects/11-tool-acquisition/DESIGN.md
+
+  - id: D-009
+    current_state_id: CS-009
+    category: documentation
+    severity: medium
+    evidence: confirmed
+    summary: Version strings and test totals stale in README
+    documentation_claims:
+      - README mentions v0.4 and v0.5 in different places
+      - Test counts do not match diagnostic (61 + 162)
+      - AI bundle says full nmap cross-check is deep-only
+    actual_behavior:
+      - VERSION file is 0.5
+      - Speed mode runs nmap -p- union (Phase 46)
+    routed_projects: [P12, P09]
+    historical_reference: CURSOR-REVIEW-LOG Phase 46
+
+  - id: D-010
+    current_state_id: CS-010
+    category: traceability
+    severity: low
+    evidence: historical
+    summary: Gitignored collab logs unavailable on GitHub clone
+    status: resolved_locally
+    resolution: CLAUDE-COLLAB.md and CURSOR-REVIEW-LOG.md now in workspace root
+    routed_projects: [P01]
+
+  - id: D-011
+    category: phase_model
+    severity: medium
+    evidence: proposed
+    summary: Mission progress inferred from filesystem/meta rather than explicit state machine
+    documentation_claims:
+      - project.meta phase field updated per script
+      - neo_checkpoint resume
+    actual_behavior:
+      - No canonical transition validation
+      - Foothold can be skipped without recorded reason
+    routed_projects: [P16]
+    prototype_resolution: prototype/neo-next/lib/neo-mission-state.sh
+
+  - id: D-012
+    category: evidence_model
+    severity: medium
+    evidence: proposed
+    summary: Investigation notes mix raw LOG, curated sections, and AI prose without provenance chain
+    documentation_claims:
+      - Section ownership in AGENTS.md
+      - artifacts/ for large output
+    actual_behavior:
+      - No SHA-256 artifact index
+      - No JSONL event log separate from markdown
+      - AI-TRIAGE not linked to input artifact hashes
+    routed_projects: [P14]
+    prototype_resolution: prototype/neo-next/lib/neo-evidence.sh
+
+  - id: D-013
+    category: ai_provider
+    severity: medium
+    evidence: confirmed
+    summary: Workflows hard-code Claude CLI and Anthropic HTTP
+    documentation_claims:
+      - A/B/C mode selection
+    actual_behavior:
+      - lib/neo-ai.sh, neo-ai-cli.sh, neo-borg.sh call claude/curl directly
+      - No capability declaration or structured JSON contract
+    routed_projects: [P08]
+    prototype_resolution: prototype/neo-next/lib/neo-provider.sh
+
+documentation_vs_implementation:
+  - doc: README.md version banner
+    claim: mixed v0.4/v0.5 references
+    truth_source: VERSION file
+    fix_project: P12
+  - doc: README.md test totals
+    claim: stale counts
+    truth_source: test/neo-diagnostic.sh output
+    fix_project: P12
+  - doc: lib/neo-ai.sh recon bundle text
+    claim: nmap -p- deep-only
+    truth_source: recon/babysteps.sh --speed path
+    fix_project: P12
+  - doc: registry.yaml ListenAssist
+    claim: functional listener
+    truth_source: foothold/ListenAssist.sh
+    fix_project: P02, P12
+  - doc: registry.yaml run-findprivs
+    claim: SSH + ingest wrapper
+    truth_source: privesc/run-findprivs.sh
+    fix_project: P03, P12

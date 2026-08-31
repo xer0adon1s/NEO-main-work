@@ -1,0 +1,203 @@
+# Investigation Notes — {{PROJECT}}
+
+<!-- SECTION:STATUS -->
+_No runs logged yet._
+<!-- /SECTION:STATUS -->
+
+## Target
+- Project: `{{PROJECT}}`
+- IP: `{{TARGET}}`
+- Started: `{{DATE}}`
+- OS: `[ ]`
+- Difficulty: `[ ]`
+
+---
+
+## Port Scan
+
+### Open Ports
+<!-- SECTION:PORTS -->
+```text
+[PORT]  [STATE]  [SERVICE]  [VERSION]
+```
+<!-- /SECTION:PORTS -->
+
+### Raw Nmap
+<!-- SECTION:NMAP -->
+```text
+[PUT NMAP RESULTS HERE]
+```
+<!-- /SECTION:NMAP -->
+
+---
+
+## Service Enumeration
+_Per-service findings (web apps, FTP, SMB, etc.) accumulate here as scripts discover and probe each one — newest at the bottom._
+<!-- SECTION:SERVICES -->
+<!-- /SECTION:SERVICES -->
+
+---
+
+## Things to Investigate
+_Auto-populated leads from fingerprinting, plus anything you add by hand._
+<!-- SECTION:TODO -->
+<!-- /SECTION:TODO -->
+
+---
+
+## Pre-Foothold Findings
+_The pre-foothold check-in framework's log — offered once, right before recon hands off to foothold, whenever something worth poking at by hand was found (a web server today; more detectors can be added later). Manual exploration + free-text findings + optional **[a]sk Claude**, all folded in here for foothold planning._
+<!-- SECTION:INTERACT -->
+_No pre-foothold check-in yet._
+<!-- /SECTION:INTERACT -->
+
+---
+
+## AI Triage (Claude / external AI)
+_All AI analysis for this case lives here — built-in Claude triage appends each run; in manual mode paste your assistant's output below. Future triage runs read this section back in._
+<!-- SECTION:AI-TRIAGE -->
+_No AI triage yet. Built-in: runs after babysteps when Claude API is configured. Manual mode: paste your assistant's analysis here between NEO pause points._
+<!-- /SECTION:AI-TRIAGE -->
+
+---
+
+## Ask Claude Log
+_Free-form Q&A from **[a]sk Claude** at any pause — each question + answer appends here, with the last N lines of this file (`NEO_ASK_CONTEXT_LINES`, default 800) attached as context at ask time._
+<!-- SECTION:ASK -->
+_No questions asked yet._
+<!-- /SECTION:ASK -->
+
+---
+
+## Borg Assimilations
+_Per-mission links into the shared collective at \`~/Neo/knowledge/vectors/\`. Canonical dossiers live once in the collective; project \`assimilated/\` entries symlink there._
+<!-- SECTION:BORG -->
+_No Borg assimilations yet. After AI triage, press **[b] Assimilate with Borg** at a pause, or run \`./borg/borg.sh <project>\` — finds new attack angles for a vuln and flags tools you don't have installed._
+<!-- /SECTION:BORG -->
+
+---
+
+## Payload suggestions
+_Tool-aware suggestions from **[p]ayload suggest**, and **[z] analyze failures** at foothold (after a first attempt) — reviews what's been tried, including a tmux terminal-log capture when available._
+<!-- SECTION:PAYLOAD -->
+_No payload analysis yet. After recon, use **[p]** to suggest a payload for a tool you pick, or **[z]** at foothold (once you've tried something) to analyze what's failing._
+<!-- /SECTION:PAYLOAD -->
+
+---
+
+## Credentials / Users
+<!-- SECTION:CREDS -->
+```text
+[USERNAME] :
+[PASSWORD] :
+```
+<!-- /SECTION:CREDS -->
+
+### Known Users
+- [ ]
+
+---
+
+## Foothold
+<!-- SECTION:FOOTHOLD -->
+```text
+[How initial access was obtained]
+```
+<!-- /SECTION:FOOTHOLD -->
+
+---
+
+## Privilege Escalation
+
+### Current User
+<!-- SECTION:WHOAMI -->
+```text
+[ ]
+```
+<!-- /SECTION:WHOAMI -->
+
+### Sudo
+<!-- SECTION:SUDO -->
+```text
+[RESULTS]
+```
+<!-- /SECTION:SUDO -->
+
+### SUID
+<!-- SECTION:SUID -->
+```text
+[RESULTS]
+```
+<!-- /SECTION:SUID -->
+
+### Capabilities
+<!-- SECTION:CAPS -->
+```text
+[RESULTS]
+```
+<!-- /SECTION:CAPS -->
+
+### Cron / Scheduled Jobs
+<!-- SECTION:CRON -->
+```text
+[RESULTS]
+```
+<!-- /SECTION:CRON -->
+
+### Interesting Files
+<!-- SECTION:FILES -->
+```text
+[PATH] - [WHY INTERESTING]
+```
+<!-- /SECTION:FILES -->
+
+---
+
+## Flags
+
+### User Flag
+<!-- SECTION:USERFLAG -->
+```text
+[ ]
+```
+<!-- /SECTION:USERFLAG -->
+
+### Root Flag
+<!-- SECTION:ROOTFLAG -->
+```text
+[ ]
+```
+<!-- /SECTION:ROOTFLAG -->
+
+---
+
+## Attack Path Summary
+<!-- SECTION:ATTACKPATH -->
+```text
+Initial Recon
+     ↓
+[Discovery]
+     ↓
+[Initial Foothold]
+     ↓
+[User]
+     ↓
+[Privilege Escalation]
+     ↓
+root
+```
+<!-- /SECTION:ATTACKPATH -->
+
+---
+
+## Lessons / Things I Learned
+<!-- SECTION:LESSONS -->
+-
+<!-- /SECTION:LESSONS -->
+
+---
+
+## Enumeration Log
+_Every script run appends a timestamped, attributed entry here — the full raw trail behind the curated sections above. Never edit this section by hand; add manual notes to the sections above instead._
+<!-- SECTION:LOG -->
+<!-- /SECTION:LOG -->

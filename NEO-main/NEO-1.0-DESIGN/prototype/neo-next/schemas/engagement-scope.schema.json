@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/engagement-scope.schema.json",
+  "title": "NEO engagement scope",
+  "type": "object",
+  "required": ["schema_version", "mode", "created_at", "project", "purpose", "attestation", "in_scope"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "mode": { "enum": ["educational", "professional"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "project": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" },
+    "platform": {
+      "type": "string",
+      "enum": ["htb", "tryhackme", "home_lab", "course", "other"]
+    },
+    "platform_label": { "type": "string", "maxLength": 120 },
+    "purpose": { "type": "string", "minLength": 3, "maxLength": 500 },
+    "attestation": {
+      "type": "object",
+      "required": ["phrase", "confirmed_at"],
+      "properties": {
+        "phrase": { "type": "string" },
+        "confirmed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "in_scope": {
+      "type": "object",
+      "required": ["hosts"],
+      "properties": {
+        "hosts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "networks": { "type": "array", "items": { "type": "string" } },
+        "domains": { "type": "array", "items": { "type": "string" } },
+        "ports": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "exclusions": { "type": "array", "items": { "type": "string" } },
+    "authorization": {
+      "type": ["object", "null"],
+      "required": ["client_name", "reference", "authorized_by", "valid_from", "valid_until"],
+      "properties": {
+        "client_name": { "type": "string", "minLength": 1 },
+        "reference": { "type": "string", "minLength": 1 },
+        "document_path": { "type": "string" },
+        "authorized_by": { "type": "string", "minLength": 1 },
+        "valid_from": { "type": "string", "format": "date" },
+        "valid_until": { "type": "string", "format": "date" }
+      }
+    },
+    "pending_targets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "source", "discovered_at"],
+        "properties": {
+          "value": { "type": "string" },
+          "source": { "type": "string" },
+          "discovered_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "expansions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "reason", "added"],
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string" },
+          "added": { "type": "object" }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "professional" } } },
+      "then": { "required": ["authorization"] }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "educational" } } },
+      "then": { "required": ["platform"] }
+    }
+  ]
+}

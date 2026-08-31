@@ -1,0 +1,19 @@
+id: P08
+title: Provider-neutral AI interface
+priority: P1
+status: review_ready
+objective: Remove Claude-specific assumptions from workflows while keeping provider capabilities and credential handling explicit.
+requirements:
+  - {id: 8a, text: Expose one interface for text and structured JSON completion.}
+  - {id: 8b, text: Keep Claude CLI and Anthropic HTTP implementations behind adapters.}
+  - {id: 8c, text: Declare capabilities such as structured output, web research, context size, and streaming.}
+  - {id: 8d, text: Keep credentials in the secret broker and outside argv.}
+  - {id: 8e, text: Apply timeouts, bounded retries, and actionable error categories.}
+  - {id: 8f, text: Record provider and model metadata without recording credentials or private request headers.}
+artifacts:
+  prototype: prototype/neo-next/lib/neo-provider.sh
+acceptance:
+  - workflows do not invoke claude or curl directly
+  - missing capability produces a clear fallback rather than fabricated results
+  - provider output is validated before downstream use
+

@@ -1,0 +1,59 @@
+schema_version: 1
+workspace: NEO-1.0-DESIGN
+product:
+  name: NEO
+  current_snapshot_version: "0.5"
+  target_release: "1.0"
+  future_release: "2.0 GUI"
+source_policy:
+  mode: read_only
+  existing_file_count_at_start: 64
+  existing_tree_manifest_sha256: 16A2897DB8CA38F92A6B8B6437597DDF268DE56161BB056D3722350C8A481E46
+  proposal_root: NEO-1.0-DESIGN
+priorities:
+  P0: blocks safe or truthful operation
+  P1: required for reliable CLI 1.0
+  P2: important hardening or extensibility
+  P3: intended or future work
+projects:
+  - {id: P01, slug: baseline-and-traceability, title: Baseline and requirements traceability, priority: P0, status: review_ready, depends_on: []}
+  - {id: P02, slug: listen-assist, title: Interactive ListenAssist workflow, priority: P1, status: review_ready, depends_on: [P01, P14, P16]}
+  - {id: P03, slug: post-foothold-enum, title: Post-foothold enumeration transport and FindPrivs, priority: P1, status: review_ready, depends_on: [P01, P14, P16]}
+  - {id: P04, slug: borg-assimilation, title: Borg pre-foothold assimilation pipeline, priority: P1, status: review_ready, depends_on: [P01, P06, P07, P08, P11, P14]}
+  - {id: P05, slug: secrets-and-credentials, title: Zero-exposure secrets and credential handling, priority: P0, status: review_ready, depends_on: [P01]}
+  - {id: P06, slug: safe-action-execution, title: Typed AI actions and safe execution, priority: P0, status: review_ready, depends_on: [P01, P05]}
+  - {id: P07, slug: operator-recon-intake, title: Operator-supplied recon intake before Borg, priority: P1, status: review_ready, depends_on: [P01, P14]}
+  - {id: P08, slug: ai-provider-interface, title: Provider-neutral AI interface, priority: P1, status: review_ready, depends_on: [P01, P05, P06]}
+  - {id: P09, slug: test-integrity, title: Test integrity and production-entry guards, priority: P0, status: review_ready, depends_on: [P01]}
+  - {id: P10, slug: vpn-lifecycle, title: VPN lifecycle detection and consent, priority: P1, status: review_ready, depends_on: [P01, P09]}
+  - {id: P11, slug: tool-acquisition, title: Latest-tool acquisition with provenance, priority: P2, status: review_ready, depends_on: [P01, P05, P09]}
+  - {id: P12, slug: documentation-release-truth, title: Documentation and release truth, priority: P1, status: review_ready, depends_on: [P01, P09]}
+  - {id: P13, slug: engagement-scope-policy, title: Engagement scope policy, priority: P1, status: review_ready, depends_on: [P01, P06, P14, P16]}
+  - {id: P14, slug: evidence-and-notes, title: Evidence provenance and investigation notes, priority: P1, status: review_ready, depends_on: [P01, P05]}
+  - {id: P15, slug: service-enumeration, title: Service-specific enumeration framework, priority: P1, status: review_ready, depends_on: [P01, P06, P14]}
+  - {id: P16, slug: foothold-session-state, title: Foothold and session state machine, priority: P1, status: review_ready, depends_on: [P01, P06, P14]}
+  - {id: P17, slug: privesc-workflow, title: Privilege-escalation workflow, priority: P1, status: review_ready, depends_on: [P03, P06, P14, P16]}
+  - {id: P18, slug: cli-1.0-validation, title: CLI 1.0 validation and release gates, priority: P1, status: review_ready, depends_on: [P02, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17]}
+  - {id: P19, slug: gui-2.0-boundary, title: GUI 2.0 boundary and API readiness, priority: P3, status: review_ready, depends_on: [P08, P14, P16, P18]}
+execution_order:
+  - [P01]
+  - [P05, P09]
+  - [P06, P13, P14, P16]
+  - [P07, P08, P10, P11, P12]
+  - [P15]
+  - [P02, P03, P04]
+  - [P17]
+  - [P18]
+  - [P19]
+missing_inputs: []
+history_ingested:
+  - CLAUDE-COLLAB.md
+  - CURSOR-REVIEW-LOG.md
+design_session:
+  completed: 2026-08-31
+  agent: cursor
+  deliverables: [P01-P19 DESIGN.md, INTEGRATION-PLAN, IMPLEMENTATION-ROADMAP, PROGRESS, prototype extensions]
+validation_limitations:
+  - current Windows review host has no installed Bash or WSL distribution
+  - runtime and integration verification must occur later in a disposable Linux lab
+  - production source intentionally untouched per OD-001

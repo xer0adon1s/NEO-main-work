@@ -1,0 +1,30 @@
+id: P13
+title: Engagement scope policy
+priority: P1
+status: review_ready
+objective: Capture educational or professional engagement scope at project creation and enforce it before network actions execute.
+depends_on: [P01, P06, P14, P16]
+requirements:
+  - {id: 13a, text: Represent in-scope hosts, networks, domains, ports, and exclusions in engagement-scope.json.}
+  - {id: 13b, text: Require mode, purpose, and attestation at project creation (educational or professional profile).}
+  - {id: 13c, text: Check every proposed network action against scope before approval.}
+  - {id: 13d, text: Make scope expansion an explicit audited operation.}
+  - {id: 13e, text: Default imported targets and redirects to pending until operator approves.}
+  - {id: 13f, text: Educational profile — platform picker (HTB, THM, home lab) with override phrase for OOS targets.}
+  - {id: 13g, text: Professional profile — client, authorization reference, validity dates; block OOS without expansion.}
+  - {id: 13h, text: Never store signed authorization documents in the git repository.}
+artifacts:
+  prototype:
+    - prototype/neo-next/lib/neo-scope.sh
+    - prototype/neo-next/tools/scope-intake.sh
+    - prototype/neo-next/tools/scope-import.sh
+    - prototype/neo-next/schemas/engagement-scope.schema.json
+  templates:
+    - templates/scope-policy-template.md
+acceptance:
+  - new projects cannot start recon without completed scope intake
+  - educational and professional modes produce valid engagement-scope.json
+  - professional mode blocks out-of-scope network targets
+  - educational mode requires scope-override phrase for out-of-scope targets
+  - professional scope policy import parses templates/scope-policy-template.md
+  - scope-import.sh populates engagement-scope.json from filled policy file

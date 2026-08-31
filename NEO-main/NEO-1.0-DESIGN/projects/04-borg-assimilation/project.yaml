@@ -1,0 +1,23 @@
+id: P04
+title: Borg pre-foothold assimilation pipeline
+priority: P1
+status: review_ready
+objective: Combine tool evidence and operator recon into a dossier, then optionally research selected attack hypotheses before foothold planning.
+requirements:
+  - {id: 4a, text: Create the initial dossier from babysteps evidence plus operator-supplied recon.}
+  - {id: 4b, text: Treat all target output and pasted text as untrusted data rather than instructions.}
+  - {id: 4c, text: Ask whether Borg should assimilate before any research stage.}
+  - {id: 4d, text: Let the operator select which candidate vectors deserve research.}
+  - {id: 4e, text: Separate facts, hypotheses, unknowns, citations, tool inventory, and next checks.}
+  - {id: 4f, text: Produce structured JSON conforming to a versioned schema.}
+  - {id: 4g, text: Never execute AI-authored commands or install AI-suggested tools.}
+  - {id: 4h, text: Degrade to curated offline knowledge when live research is unavailable.}
+artifacts:
+  prototype: prototype/neo-next/borg/borg-v2.sh
+  schema: prototype/neo-next/schemas/dossier.schema.json
+acceptance:
+  - Borg can stop after the initial dossier
+  - research capability is declared by the provider adapter
+  - citations are attached to claims rather than listed without linkage
+  - final output contains no executable action objects
+

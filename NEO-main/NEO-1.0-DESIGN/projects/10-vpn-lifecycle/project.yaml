@@ -1,0 +1,19 @@
+id: P10
+title: VPN lifecycle detection and consent
+priority: P1
+status: review_ready
+objective: Detect existing OpenVPN sessions, explain them, and obtain explicit consent before terminating any connection.
+requirements:
+  - {id: 10a, text: Enumerate detected OpenVPN processes before presenting a decision.}
+  - {id: 10b, text: Offer keep existing, terminate all detected, or cancel.}
+  - {id: 10c, text: Require the exact phrase terminate-all-openvpn for the destructive choice.}
+  - {id: 10d, text: Terminate only the PIDs shown and approved, never a refreshed wildcard set.}
+  - {id: 10e, text: Recheck routes, interface address, and target reachability after the decision.}
+  - {id: 10f, text: Record consent and result without capturing credentials.}
+artifacts:
+  prototype: prototype/neo-next/lib/neo-vpn-consent.sh
+acceptance:
+  - no VPN process is killed on Enter or an invalid response
+  - PID reuse is mitigated by verifying process identity immediately before signaling
+  - sudo failure leaves the workflow in a truthful non-connected state
+

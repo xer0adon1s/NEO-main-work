@@ -1,0 +1,248 @@
+schema_version: 1
+project: P01
+generated: 2026-08-31
+source_snapshot:
+  version: "0.5"
+  manifest_sha256: 16A2897DB8CA38F92A6B8B6437597DDF268DE56161BB056D3722350C8A481E46
+  history_ingested:
+    - CLAUDE-COLLAB.md
+    - CURSOR-REVIEW-LOG.md
+
+operator_decisions:
+  - id: OD-001
+    text: Isolated design work in NEO-1.0-DESIGN only
+    projects: [P01, P18, P19]
+    evidence: OPERATOR-DECISIONS.md
+  - id: OD-002
+    text: Codex designs; Cursor/Claude implement later
+    projects: [P01, P18]
+    evidence: OPERATOR-DECISIONS.md
+  - id: OD-003
+    text: ListenAssist is intentionally a placeholder today
+    projects: [P02, P09, P12, P16]
+    evidence: foothold/ListenAssist.sh (7 lines), CURSOR-REVIEW-LOG Phase 60
+  - id: OD-004
+    text: Post-foothold enum must support open shell, not only SSH
+    projects: [P03, P16, P17]
+    evidence: AGENTS.md, privesc/FindPrivs.sh header
+  - id: OD-005
+    text: Production-integrity tests must block stub entrypoints
+    projects: [P09, P12, P18]
+    evidence: test/neo-diagnostic.sh babysteps guard only
+  - id: OD-006
+    text: API keys must never be exposed
+    projects: [P05, P08, P09, P12, P18]
+    evidence: lib/neo-ai.sh .env sourcing, lib/neo-tmux.sh key forwarding
+  - id: OD-007
+    text: Borg pre-foothold pipeline redesign
+    projects: [P04, P07, P08, P11, P14, P15]
+    evidence: lib/neo-borg.sh eval loop, CLAUDE-COLLAB.md section 4
+  - id: OD-008
+    text: Replace free-form AI command execution
+    projects: [P06, P04, P15, P17]
+    evidence: lib/neo-borg.sh, lib/neo-payload.sh
+  - id: OD-009
+    text: Engagement scope at project creation — educational and professional profiles
+    projects: [P13, P06, P16, P18]
+    evidence: OPERATOR-DECISIONS.md (revised 2026-08-31)
+  - id: OD-015
+    text: Dual product vision — same core for labs and professional pentests
+    projects: [P13, P18, P19]
+    evidence: OPERATOR-DECISIONS.md
+  - id: OD-010
+    text: Latest tools OK with provenance
+    projects: [P11]
+    evidence: setup.sh unversioned downloads
+  - id: OD-011
+    text: VPN termination requires explicit consent
+    projects: [P10]
+    evidence: lib/neo-vpn.sh pkill behavior
+  - id: OD-012
+    text: Documentation must match behavior
+    projects: [P12, P09, P18]
+    evidence: README version drift, AI bundle nmap claim
+  - id: OD-013
+    text: Missing local history now provided
+    projects: [P01]
+    evidence: CLAUDE-COLLAB.md, CURSOR-REVIEW-LOG.md (root)
+  - id: OD-014
+    text: NEO 1.0 CLI milestone; 2.0 GUI later
+    projects: [P18, P19]
+    evidence: OPERATOR-DECISIONS.md
+
+current_state_findings:
+  - id: CS-001
+    summary: ListenAssist production placeholder
+    severity: P1
+    projects: [P02, P09, P12, P16]
+    production_status: placeholder
+  - id: CS-002
+    summary: run-findprivs production placeholder
+    severity: P1
+    projects: [P03, P09, P12, P17]
+    production_status: placeholder
+  - id: CS-003
+    summary: Production-integrity gap for stubs
+    severity: P0
+    projects: [P09]
+    production_status: broken_guard
+  - id: CS-004
+    summary: Repository .env secret risk
+    severity: P0
+    projects: [P05, P09, P12]
+    production_status: unsafe
+  - id: CS-005
+    summary: tmux command secret exposure
+    severity: P0
+    projects: [P05, P08, P10]
+    production_status: unsafe
+  - id: CS-006
+    summary: Free-form AI command execution
+    severity: P0
+    projects: [P04, P06, P09]
+    production_status: unsafe
+  - id: CS-007
+    summary: VPN process ownership without consent
+    severity: P1
+    projects: [P10]
+    production_status: partial
+  - id: CS-008
+    summary: Unrecorded moving dependencies
+    severity: P2
+    projects: [P11]
+    production_status: partial
+  - id: CS-009
+    summary: Documentation drift
+    severity: P1
+    projects: [P12, P09]
+    production_status: stale_docs
+  - id: CS-010
+    summary: Historical records absent from GitHub
+    severity: P0
+    projects: [P01]
+    production_status: resolved_locally
+
+production_entrypoints:
+  - path: neo.sh
+    phase: conductor
+    status: implemented
+    notes: Phase walk, checkpoints, pause menus, tmux wrap (Phases 51-59)
+    projects: [P16, P18]
+  - path: recon/babysteps.sh
+    phase: recon
+    status: implemented
+    notes: Speed/deep modes; rustscan + nmap union (Phase 46-47)
+    projects: [P15]
+  - path: recon/analyze-recon.sh
+    phase: recon
+    status: implemented
+    notes: API triage; append-only AI-TRIAGE
+    projects: [P08, P12]
+  - path: borg/borg.sh
+    phase: any
+    status: partial
+    notes: Works but eval-based wind-up unsafe (CS-006)
+    projects: [P04, P06]
+  - path: foothold/ListenAssist.sh
+    phase: foothold
+    status: placeholder
+    notes: 7-line meta_set only (CS-001)
+    projects: [P02]
+  - path: privesc/run-findprivs.sh
+    phase: privesc
+    status: placeholder
+    notes: Hard-coded smoke ingest (CS-002)
+    projects: [P03]
+  - path: privesc/FindPrivs.sh
+    phase: privesc
+    status: implemented
+    notes: On-target; needs transport wrapper (P03)
+    projects: [P03, P17]
+  - path: privesc/run-linpeas.sh
+    phase: privesc
+    status: implemented
+    notes: SSH wrapper
+    projects: [P03]
+  - path: privesc/run-linenum.sh
+    phase: privesc
+    status: implemented
+    notes: SSH wrapper
+    projects: [P03]
+  - path: connect/ovpn-connect.sh
+    phase: connect
+    status: partial
+    notes: VPN ritual scoped; consent gap (CS-007)
+    projects: [P10]
+  - path: lib/neo-payload.sh
+    phase: any
+    status: implemented
+    notes: Advisory tool-picker; no auto-execute (Phase 51)
+    projects: [P06, P15]
+  - path: lib/neo-tmux.sh
+    phase: any
+    status: partial
+    notes: Auto-wrap fixed Phases 56-59; key forwarding unsafe (CS-005)
+    projects: [P05, P09]
+  - path: lib/neo-ai.sh
+    phase: recon
+    status: partial
+    notes: .env sourcing (CS-004); Claude-specific
+    projects: [P05, P08]
+  - path: lib/neo-borg.sh
+    phase: any
+    status: partial
+    notes: eval wind-up (CS-006)
+    projects: [P04, P06]
+  - path: lib/neo-vpn.sh
+    phase: connect
+    status: partial
+    notes: pkill without OD-011 consent (CS-007)
+    projects: [P10]
+  - path: setup.sh
+    phase: meta
+    status: partial
+    notes: Latest downloads without manifest (CS-008)
+    projects: [P11]
+
+phase_history_highlights:
+  - phases: "1-2"
+    theme: notes-lib safety, pipeline v2 bootstrap
+    relevance: P14 evidence model inherits section markers
+  - phases: "28-32"
+    theme: AI mode A/B/C, boot sequence, VPN ritual
+    relevance: P08 provider abstraction, P10 VPN consent
+  - phases: "39-40"
+    theme: Payload suggest; execute loop later removed
+    relevance: P06 advisory-only actions confirmed by operator
+  - phases: "46-47"
+    theme: Speed scan reliability, AI capture hygiene
+    relevance: P12 doc truth for scan modes
+  - phases: "51"
+    theme: Operator feature batch — tmux, ask, Borg rename, payload redesign
+    relevance: P02 foothold guidance, P16 session state
+  - phases: "54-59"
+    theme: VPN hijack, tmux switch-client, integration test validity, v0.5
+    relevance: P09 test integrity, P10 VPN lifecycle
+  - phase: "60"
+    theme: Operator testing notes — ListenAssist/findprivs stubs confirmed
+    relevance: P02, P03, P09 acceptance criteria
+
+requirement_to_project:
+  P02: [OD-003, 2a, 2b, 2c, 2d, 2e, 2f]
+  P03: [OD-004, 3a, 3b, 3c, 3d, 3e, 3f]
+  P04: [OD-007, OD-008, 4a, 4b, 4c, 4d, 4e, 4f, 4g, 4h]
+  P05: [OD-006, 5a, 5b, 5c, 5d, 5e, 5f, 5g]
+  P06: [OD-008, 6a, 6b, 6c, 6d, 6e, 6f, 6g]
+  P07: [OD-007, 7a, 7b, 7c, 7d, 7e]
+  P08: [OD-006, 8a, 8b, 8c, 8d, 8e, 8f]
+  P09: [OD-005, 9a, 9b, 9c, 9d, 9e, 9f]
+  P10: [OD-011, 10a, 10b, 10c, 10d, 10e, 10f]
+  P11: [OD-010, 11a, 11b, 11c, 11d, 11e, 11f]
+  P12: [OD-012, 12a, 12b, 12c, 12d, 12e, 12f]
+  P13: [OD-009, OD-015, 13a, 13b, 13c, 13d, 13e, 13f, 13g, 13h]
+  P14: [14a, 14b, 14c, 14d, 14e, 14f, 14g]
+  P15: [15a, 15b, 15c, 15d, 15e, 15f]
+  P16: [16a, 16b, 16c, 16d, 16e, 16f]
+  P17: [17a, 17b, 17c, 17d, 17e, 17f, 17g]
+  P18: [OD-014, 18a, 18b, 18c, 18d, 18e, 18f]
+  P19: [OD-014, 19a, 19b, 19c, 19d, 19e, 19f]

@@ -1,0 +1,23 @@
+id: P06
+title: Typed AI actions and safe execution
+priority: P0
+status: review_ready
+objective: Replace parsing and execution of free-form model text with schema-validated argv actions and explicit policy decisions.
+requirements:
+  - {id: 6a, text: Represent a command as an argv array rather than a shell string.}
+  - {id: 6b, text: Validate every action against a versioned JSON schema before display or execution.}
+  - {id: 6c, text: Default all model-originated actions to advisory-only.}
+  - {id: 6d, text: Require allowlisted executable, project-local working directory, timeout, rationale, and risk.}
+  - {id: 6e, text: Require exact typed confirmation immediately before execution.}
+  - {id: 6f, text: Ban eval, bash -c, sh -c, and automatic package installation from AI output.}
+  - {id: 6g, text: Record proposal, decision, exit status, and redacted output.}
+artifacts:
+  engine: prototype/neo-next/lib/neo-actions.sh
+  schema: prototype/neo-next/schemas/action.schema.json
+  policy: prototype/neo-next/schemas/action-policy.json
+acceptance:
+  - shell metacharacters remain literal argv values
+  - denied tools cannot execute even after confirmation
+  - advisory actions cannot execute
+  - timeout and nonzero status are preserved in evidence
+

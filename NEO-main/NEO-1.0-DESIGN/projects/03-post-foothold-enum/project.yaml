@@ -1,0 +1,20 @@
+id: P03
+title: Post-foothold enumeration transport and FindPrivs
+priority: P1
+status: review_ready
+objective: Run or ingest host enumeration only after a shell exists, then preserve raw results for privilege-escalation analysis.
+requirements:
+  - {id: 3a, text: Make the already-open shell the default workflow and SSH an optional transport.}
+  - {id: 3b, text: Provide copy/paste commands for constrained shells where orchestration cannot attach.}
+  - {id: 3c, text: Accept an existing output file without rerunning commands.}
+  - {id: 3d, text: Preserve raw output, timestamps, target identity, transport, and hash.}
+  - {id: 3e, text: Distinguish observations from confirmed privilege-escalation findings.}
+  - {id: 3f, text: Refuse to present the smoke stub as production functionality.}
+artifacts:
+  prototype: prototype/neo-next/privesc/run-findprivs.sh
+acceptance:
+  - existing-shell instructions are useful without SSH
+  - SSH host values are syntactically validated
+  - ingestion never executes file contents
+  - production release gate rejects the current stub
+

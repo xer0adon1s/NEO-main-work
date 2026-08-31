@@ -1,0 +1,20 @@
+id: P14
+title: Evidence provenance and investigation notes
+priority: P1
+status: review_ready
+objective: Preserve a trustworthy, redacted chronology from raw tool evidence through operator notes and AI conclusions.
+requirements:
+  - {id: 14a, text: Use append-only JSONL events with stable event types and schema version.}
+  - {id: 14b, text: Store raw artifacts separately and address them by SHA-256.}
+  - {id: 14c, text: Record who or what produced each item and what inputs it used.}
+  - {id: 14d, text: Redact known secrets before persistence and again before AI submission.}
+  - {id: 14e, text: Use collision-resistant names and atomic writes in the project filesystem.}
+  - {id: 14f, text: Add file locking for concurrent tmux panes.}
+  - {id: 14g, text: Export a support bundle that is safe by default.}
+artifacts:
+  prototype: prototype/neo-next/lib/neo-evidence.sh
+acceptance:
+  - two writes in the same second cannot overwrite
+  - concurrent writers cannot corrupt the journal
+  - every derived dossier points to its input artifact hashes
+

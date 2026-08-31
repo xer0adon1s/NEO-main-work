@@ -1,0 +1,17 @@
+id: P11
+title: Latest-tool acquisition with provenance
+priority: P2
+status: review_ready
+objective: Allow current tool releases while making every downloaded or installed artifact identifiable, reproducible, and reviewable.
+requirements:
+  - {id: 11a, text: Resolve latest to an immutable release, commit, package version, or checksum before installation.}
+  - {id: 11b, text: Record source URL, resolved version, retrieval time, SHA-256, installer, and destination.}
+  - {id: 11c, text: Prefer signed releases and native package metadata where available.}
+  - {id: 11d, text: Never install a package name sourced only from AI output.}
+  - {id: 11e, text: Provide update, verify, inventory, and rollback guidance.}
+  - {id: 11f, text: Keep optional offensive tools out of the base install unless the operator chooses them.}
+acceptance:
+  - inventory answers exactly what code was installed
+  - a checksum mismatch blocks use
+  - current installations can be reproduced from the recorded manifest
+

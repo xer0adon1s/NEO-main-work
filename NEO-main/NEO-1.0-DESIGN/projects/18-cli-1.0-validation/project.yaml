@@ -1,0 +1,14 @@
+id: P18
+title: CLI 1.0 validation and release gates
+priority: P1
+status: review_ready
+objective: Define a release that reliably completes an operator-guided easy-box workflow in disposable authorized labs.
+requirements:
+  - {id: 18a, text: Publish a numbered capability checklist with pass, fail, skip, and evidence links.}
+  - {id: 18b, text: Validate fresh install, resume, interrupted VPN, no-AI fallback, provider failure, and missing-tool paths.}
+  - {id: 18c, text: Run end-to-end scenarios against at least three reproducible easy lab targets.}
+  - {id: 18d, text: Require zero P0 findings and documented disposition of every P1 finding.}
+  - {id: 18e, text: Verify no secret canary appears in repository, logs, process arguments, tmux commands, evidence, or bundles.}
+  - {id: 18f, text: Produce release manifest, checksums, known limitations, upgrade, and rollback instructions.}
+definition_of_done: A new operator can install NEO, create a project with educational or professional scope intake, connect VPN, enumerate, add recon, run optional Borg assimilation, plan and confirm a foothold, record an obtained shell, enumerate the host, and work through a ranked privilege-escalation plan without hidden automation or false success.
+

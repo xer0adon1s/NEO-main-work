@@ -1,0 +1,44 @@
+# Live engagement data — never commit box findings
+projects/*
+!projects/.gitkeep
+
+# VPN profiles may contain credentials
+vpn/*
+!vpn/.gitkeep
+
+# Session cheat sheets / scratch output
+results/*
+
+# Large wordlists — fetch separately (see README)
+wordlists/*.txt
+!wordlists/.gitkeep
+
+# Third-party tools — fetched by ./setup.sh
+vendor/*
+!vendor/.gitkeep
+
+# lib/ must only contain NEO scripts — ignore accidental system-lib pollution
+lib/*
+!lib/notes-lib.sh
+!lib/script-lib.sh
+!lib/neo-ai.sh
+!lib/neo-ai-analyze.sh
+!lib/neo-ai-cli.sh
+!lib/neo-splash.sh
+!lib/neo-hud.sh
+!lib/neo-borg.sh
+!lib/neo-payload.sh
+!lib/neo-tmux.sh
+!lib/neo-interact.sh
+!lib/neo-menu.sh
+!lib/neo-boot.sh
+!lib/neo-vpn.sh
+
+# Temp / editor
+*.swp
+*~
+.DS_Store
+
+
+# Borg collective — dossiers tracked; cloned PoCs under vectors/*/vendor/ stay local
+knowledge/vectors/*/vendor/

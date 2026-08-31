@@ -1,0 +1,19 @@
+id: P16
+title: Foothold and session state machine
+priority: P1
+status: review_ready
+objective: Replace inferred phase progress with explicit transitions and truthful session records.
+requirements:
+  - {id: 16a, text: Define initialized, vpn_ready, enumerating, recon_review, assimilating, foothold_planning, foothold_active, post_foothold_enum, privesc, and complete.}
+  - {id: 16b, text: Reject transitions that skip required operator decisions or evidence.}
+  - {id: 16c, text: Record session transport, identity, target, privilege, stability, and last verification time.}
+  - {id: 16d, text: Treat operator confirmation as required evidence for foothold_active.}
+  - {id: 16e, text: Support resume without silently reusing stale network or shell state.}
+  - {id: 16f, text: Serialize updates atomically and add locking before integration.}
+artifacts:
+  prototype: prototype/neo-next/lib/neo-mission-state.sh
+acceptance:
+  - invalid transitions fail without changing state
+  - a stale session is visibly marked for reverification
+  - phase navigation reads state rather than filesystem accidents
+

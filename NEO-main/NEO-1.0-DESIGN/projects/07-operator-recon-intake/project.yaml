@@ -1,0 +1,18 @@
+id: P07
+title: Operator-supplied recon intake before Borg
+priority: P1
+status: review_ready
+objective: Let the operator add arbitrary observations while preserving source, confidence, and the distinction between notes and tool evidence.
+requirements:
+  - {id: 7a, text: Support multiline interactive input and file ingestion.}
+  - {id: 7b, text: Store the original observation without executing or interpolating it.}
+  - {id: 7c, text: Label source as operator and record time, project, and optional target.}
+  - {id: 7d, text: Redact known secrets before persistence or provider submission.}
+  - {id: 7e, text: Make recon available to Borg only through an explicit evidence bundle.}
+artifacts:
+  prototype: prototype/neo-next/recon/operator-recon.sh
+acceptance:
+  - text containing shell syntax remains inert
+  - empty observations are rejected
+  - multiple notes do not overwrite one another
+
