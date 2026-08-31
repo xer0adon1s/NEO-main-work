@@ -1,5 +1,7 @@
 # NEO Daily Recap — 2026-08-31
 
+> **Handoff doc** — commit this file with tonight's push. Path: `NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md`
+
 **Repo:** `NEO-main-work` (flattened work tree — not live personal NEO)  
 **Starting version:** v0.5 (`VERSION`)  
 **End-of-day target:** v0.6 prototype → v1.0-rc after Linux lab sign-off  
@@ -627,4 +629,5 @@ Do NOT merge to live NEO yet. Output: prioritized bug list (P0/P1/P2), file:line
 
 ---
 
-*Generated: 2026-08-31 EOD · Cursor session · Operator: push this doc, then hand to Claude for pre-merge review.*
+*Generated: 2026-08-31 EOD · Cursor session · Operator: push this doc, then hand to Claude for pre-merge review.*  
+*File touched: 2026-08-31 17:46 local — ensure this appears in GitHub Desktop before push.*
