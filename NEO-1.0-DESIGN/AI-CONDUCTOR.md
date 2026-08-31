@@ -123,17 +123,21 @@ Conductor Y/n prompts name the matching pause letter so operator learns the mapp
 
 ---
 
-## Tier B+ (partial — v0.6)
+## Tier B+ (v0.6 — Waves 1–5)
 
-**Implemented (Wave 1–2 core):**
+**Implemented:**
 - Workbench automation loop (`lib/neo-conductor-loop.sh`) — guided vs assisted by `engagement_mode`
 - Variable attempt cap (default 5) + batch failure review (`analyze-failures-batch`)
 - AI privesc triage (`lib/neo-conductor-privesc.sh`) — jq ranker feeds bundle; operator sees **PRIVESC-PLAN** only
 - Handler pane C (`lib/neo-handler-pane.sh`) for visible listeners
-- Borg post-assimilate library research hook
-- `neo_conductor_on_event` dispatcher
+- Adaptive scan, operator-recon AI structurer, MSF AI post suggest (Wave 3)
+- Borg post-assimilate library hook + batch harvest (`neo-borg-library-batch.sh`)
+- Post-AI disclosure lint on all surfaces (`neo-ai-guard.sh`)
+- Provider web research bundle (`NEO_PROVIDER_WEB_RESEARCH=1`)
+- Borg v2 structured JSON (`borg/borg-v2.sh`, `schemas/borg-dossier.schema.json`)
+- `neo_conductor_on_event` dispatcher; `test/p18-lab-e2e.sh` lab harness
 
-**Still planned:** adaptive babysteps, AI enum planner rank, provider web research, Borg v2 JSON.
+**Deferred:** full P08 provider migration; aggressive conductor mode (v1.1).
 
 See `NEO-1.0-DESIGN/TIER-B-PLAN.md`.
 

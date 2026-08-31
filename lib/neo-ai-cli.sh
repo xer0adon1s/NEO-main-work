@@ -96,6 +96,12 @@ neo_ai_finish_triage_run() {
     neo_ai_print_triage_brief "${response}"
     neo_ai_process_tool_requests "${response}"
 
+    # shellcheck source=neo-ai-guard.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
+    if declare -F neo_ai_guard_output >/dev/null 2>&1; then
+        response="$(neo_ai_guard_output "${project}" "${response}" "ai-triage")" || return 1
+    fi
+
     ts="$(date '+%Y-%m-%d %H:%M:%S')"
     triage_doc="$(cat <<EOF
 ## AI triage run ${ts}

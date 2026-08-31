@@ -120,3 +120,54 @@ neo_provider_extract_json() {
     awk '/^```json[[:space:]]*$/{on=1;next} /^```[[:space:]]*$/{if(on){exit}} on{print}' "${input}" > "${output}"
     jq -e 'type=="object"' "${output}" >/dev/null 2>&1
 }
+
+# Wave 4 — live web research context (curated index URLs + optional fetch).
+neo_provider_research_index_path() {
+    printf '%s/knowledge/resources/borg_research_index.yaml' "${NEO_DIR:-${NEO_HOME}}"
+}
+
+neo_provider_research_index_pick_urls() {
+    local query="$1" limit="${2:-3}" index lines=() url count=0
+    index="$(neo_provider_research_index_path)"
+    [[ -f "${index}" ]] || return 1
+    while IFS= read -r url; do
+        [[ -n "${url}" ]] || continue
+        lines+=("${url}")
+        count=$((count + 1))
+        (( count >= limit )) && break
+    done < <(grep -iE 'https?://[^[:space:]#]+' "${index}" 2>/dev/null | \
+        grep -iF "${query}" 2>/dev/null | head -n "${limit}" || \
+        grep -iE 'https?://[^[:space:]#]+' "${index}" 2>/dev/null | head -n "${limit}")
+    ((${#lines[@]} > 0)) || return 1
+    printf '%s\n' "${lines[@]}"
+}
+
+neo_provider_web_research_bundle_block() {
+    local query="$1" limit="${2:-3}"
+    local url tmp body block="" fetched=0
+    neo_provider_capability web_research || return 1
+    # shellcheck source=neo-borg-harvest.sh
+    source "${NEO_DIR}/lib/neo-borg-harvest.sh" 2>/dev/null || true
+
+    block="## Live web research (curated index — verify independently)"
+    while IFS= read -r url; do
+        [[ -n "${url}" ]] || continue
+        block="${block}"$'\n'"- ${url}"
+        if declare -F neo_borg_harvest_fetch_url >/dev/null 2>&1 && neo_borg_harvest_network_enabled; then
+            tmp="$(mktemp)"
+            if neo_borg_harvest_fetch_url "${url}" "${tmp}" 2>/dev/null; then
+                body="$(head -c 4000 "${tmp}" 2>/dev/null || true)"
+                if declare -F neo_borg_harvest_html_to_text >/dev/null 2>&1; then
+                    body="$(neo_borg_harvest_html_to_text "${body}" 2>/dev/null | head -c 2500 || true)"
+                fi
+                block="${block}"$'\n```text\n'"${body}"$'\n```'
+                fetched=$((fetched + 1))
+            fi
+            rm -f -- "${tmp}"
+        fi
+        (( fetched >= limit )) && break
+    done < <(neo_provider_research_index_pick_urls "${query}" "${limit}" 2>/dev/null || true)
+
+    [[ "${fetched}" -gt 0 || "${block}" == *"http"* ]] || return 1
+    printf '%s' "${block}"
+}

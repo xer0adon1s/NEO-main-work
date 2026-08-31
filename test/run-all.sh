@@ -56,6 +56,11 @@ for test_file in \
     borg-library-ai-test.sh \
     conductor-test.sh \
     conductor-automation-test.sh \
+    disclosure-lint-all-test.sh \
+    neo-provider-web-test.sh \
+    borg-v2-test.sh \
+    borg-library-batch-test.sh \
+    p18-lab-e2e.sh \
     neo-feedback-test.sh \
     payload-test.sh \
     neo-report-test.sh \

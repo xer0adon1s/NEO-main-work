@@ -37,7 +37,7 @@ done
 
 # --- lib/ should only contain NEO scripts ---
 printf '\n--- lib/ hygiene ---\n'
-neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-borg-disclosure.sh neo-borg-library.sh neo-borg-library-ai.sh neo-borg-harvest.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-report.sh neo-conductor.sh neo-feedback.sh)
+neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-ai-guard.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-borg-disclosure.sh neo-borg-library.sh neo-borg-library-ai.sh neo-borg-harvest.sh neo-borg-v2.sh neo-borg-library-batch.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-handler-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-report.sh neo-conductor.sh neo-conductor-loop.sh neo-conductor-privesc.sh neo-enum-ai.sh neo-adaptive-scan.sh neo-operator-recon-ai.sh neo-feedback.sh)
 for f in "${neo_libs[@]}"; do
     [[ -f "lib/${f}" ]] && ok "neo lib: ${f}" || bad "missing neo lib: ${f}"
 done

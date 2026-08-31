@@ -609,6 +609,14 @@ neo_payload_call_ai() {
         if neo_ai_run_with_analyze_hud_to_file "${tmp_out}" \
             neo_payload_provider_run_visible "${tmp_sys}" "${tmp_user}" "${provider_out}"; then
             response="$(cat "${tmp_out}")"
+            # shellcheck source=neo-ai-guard.sh
+            source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
+            if declare -F neo_ai_guard_output >/dev/null 2>&1; then
+                response="$(neo_ai_guard_output "" "${response}" "payload-ai")" || {
+                    NEO_AI_PROVIDER="${saved_provider}"
+                    return 1
+                }
+            fi
             printf '%s' "${response}"
             NEO_AI_PROVIDER="${saved_provider}"
             return 0
@@ -621,6 +629,14 @@ neo_payload_call_ai() {
         if neo_ai_run_with_analyze_hud_to_file "${tmp_out}" \
             neo_payload_provider_run_visible "${tmp_sys}" "${tmp_user}" "${provider_out}"; then
             response="$(cat "${tmp_out}")"
+            # shellcheck source=neo-ai-guard.sh
+            source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
+            if declare -F neo_ai_guard_output >/dev/null 2>&1; then
+                response="$(neo_ai_guard_output "" "${response}" "payload-ai")" || {
+                    NEO_AI_PROVIDER="${saved_provider}"
+                    return 1
+                }
+            fi
             printf '%s' "${response}"
             NEO_AI_PROVIDER="${saved_provider}"
             return 0

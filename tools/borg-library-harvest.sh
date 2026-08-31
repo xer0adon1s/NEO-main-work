@@ -37,6 +37,8 @@ METHOD_SLUG=""
 LIBRARY_MODE="educational"
 DRY_RUN=0
 MECHANICAL_ONLY=0
+BATCH_PROJECT=""
+BATCH_QUEUE=""
 
 usage() {
     cat <<'EOF'
@@ -63,6 +65,9 @@ Legacy (no AI — not recommended):
   --mechanical-only              Use html strip / jq only (old prototype path)
 
   --dry-run
+  --batch                      Run batch queue (with --from-project or --queue-file)
+  --from-project NAME          Build queue from projects/NAME/assimilated/
+  --queue-file PATH            Batch topics file (one per line)
   -h, --help
 
 Environment:
@@ -97,10 +102,28 @@ while (($# > 0)); do
         --library-mode=*) LIBRARY_MODE="${1#*=}"; shift ;;
         --mechanical-only) MECHANICAL_ONLY=1; shift ;;
         --dry-run) DRY_RUN=1; shift ;;
+        --batch) shift ;;
+        --from-project) BATCH_PROJECT="${2:-}"; shift 2 ;;
+        --from-project=*) BATCH_PROJECT="${1#*=}"; shift ;;
+        --queue-file) BATCH_QUEUE="${2:-}"; shift 2 ;;
+        --queue-file=*) BATCH_QUEUE="${1#*=}"; shift ;;
         -h|--help) usage; exit 0 ;;
         *) echo "unknown: $1" >&2; usage; exit 1 ;;
     esac
 done
+
+if [[ -n "${BATCH_PROJECT}" || -n "${BATCH_QUEUE}" ]]; then
+    # shellcheck source=../lib/neo-borg-library-batch.sh
+    source "${NEO_DIR}/lib/neo-borg-library-batch.sh"
+    queue="${BATCH_QUEUE}"
+    [[ -n "${queue}" ]] || queue="$(neo_borg_library_batch_build_queue_from_project "${BATCH_PROJECT}" 2>/dev/null || true)"
+    [[ -n "${queue}" && -f "${queue}" ]] || {
+        echo "borg-library-harvest: no batch queue (assimilated vectors empty?)" >&2
+        exit 1
+    }
+    neo_borg_library_batch_run "${queue}" "${DRY_RUN}"
+    exit 0
+fi
 
 [[ -n "${RESEARCH}" || "${MECHANICAL_ONLY}" == "1" ]] || {
     echo "borg-library-harvest: --research TOPIC is required (AI-driven)." >&2

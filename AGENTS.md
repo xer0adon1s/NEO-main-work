@@ -426,4 +426,7 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
 - 2026-08-31 — **Tier B Wave 3:** `neo-adaptive-scan.sh` targeted deep enum; `neo-operator-recon-ai.sh`
   structure operator text; MSF AI post suggest; babysteps `--targets-file`; locked decisions
   #6–8 (enum no-remove, aggressive deferred, P08 wave 4).
+- 2026-08-31 — **Tier B Waves 4–5:** `neo-ai-guard.sh` disclosure lint on triage/Borg/payload/ELI5;
+  `neo_provider_web_research_bundle_block`; Borg v2 JSON (`neo-borg-v2.sh`, `borg/borg-v2.sh`);
+  batch library harvest (`neo-borg-library-batch.sh`, harvest `--batch`); `test/p18-lab-e2e.sh` harness.
 - 2026-08-31 — **Phase 63 batch:** Borg HUD spam fix; SCOPE/PROGRESS/CURRENT-STATE doc sync;

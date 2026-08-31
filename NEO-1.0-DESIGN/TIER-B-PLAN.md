@@ -1,6 +1,6 @@
 # Tier B — AI Conductor Automation & Phase Intelligence
 
-**Status:** Waves 1–3 **implemented** (v0.6); Waves 4–5 pending (disclosure lint all, P08 provider, Borg v2 JSON).  
+**Status:** Waves 1–5 **implemented** (v0.6 prototype); P18 live lab E2E (B12) is harness + checklist — run with `NEO_P18_LAB=1` on Linux HTB.  
 **Builds on:** `AI-CONDUCTOR.md` (Tier A), `OPERATOR-WORKBENCH.md`, `WORKFLOW-MAP.md`  
 **Version target:** v0.6 → v1.0-rc (Tier B is the bridge)
 
@@ -464,11 +464,11 @@ Wave 2 — Intelligence on evidence (B2, B3, B7)
     ↓
 Wave 3 — Targeted execution + MSF (B4, B5, B6, session adapter)
     ↓
-Wave 4 — Safety + provider (B8, B9, P08 adapter migration)
+Wave 4 — Safety + provider (B8, B9) ✅
     ↓
-Wave 5 — Structure at scale (B10, B11)
+Wave 5 — Structure at scale (B10, B11) ✅
     ║
-    ╚══ P18 lab E2E (B12) anytime after Wave 1 on Linux
+    ╚══ P18 lab E2E (B12) — harness offline; live with NEO_P18_LAB=1
 ```
 
 **Estimated touch:** ~15–25 sessions for Waves 1–4 to reach “feels like AI conducts the box”; Wave 5 is polish for 1.0.
@@ -483,6 +483,17 @@ Wave 5 — Structure at scale (B10, B11)
 6. Doc update in `AI-CONDUCTOR.md` → “Tier B implemented”
 
 **Operator-visible win:** foothold phase feels like pair-programming with AI.
+
+### Wave 4–5 deliverables (safety + structure)
+
+1. `neo_ai_guard_output` on triage, Borg, payload, ELI5 (`NEO_DISCLOSURE_LINT_ALL`)
+2. `neo_provider_web_research_bundle_block` in Borg bundle (`NEO_PROVIDER_WEB_RESEARCH=1`)
+3. `borg/borg-v2.sh` + `schemas/borg-dossier.schema.json` + pause offer
+4. `neo_borg_library_batch_*` + `borg-library-harvest.sh --batch`
+5. `test/disclosure-lint-all-test.sh`, `neo-provider-web-test.sh`, `borg-v2-test.sh`,
+   `borg-library-batch-test.sh`, `p18-lab-e2e.sh`
+
+**Operator-visible win:** educational missions won't save spoiler AI text; Borg can pull curated URLs; batch library research after assimilation.
 
 ---
 

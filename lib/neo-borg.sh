@@ -685,7 +685,7 @@ neo_borg_prompt_vectors() {
 
 neo_borg_build_bundle() {
     local project="$1" vector="$2" phase="$3" slug="$4"
-    local target collective library_block="" core="" bundle="" research_idx=""
+    local target collective library_block="" core="" bundle="" research_idx="" web_block=""
 
     # shellcheck source=neo-conductor.sh
     source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor.sh" 2>/dev/null || true
@@ -699,6 +699,11 @@ neo_borg_build_bundle() {
     source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg-library.sh" 2>/dev/null && \
         library_block="$(neo_borg_library_context_for_vector "${project}" "${vector}" 2>/dev/null || true)"
     research_idx="$(head -c 24000 "${NEO_DIR:-${NEO_HOME}}/knowledge/resources/borg_research_index.yaml" 2>/dev/null || true)"
+    # shellcheck source=neo-provider.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-provider.sh" 2>/dev/null || true
+    if declare -F neo_provider_web_research_bundle_block >/dev/null 2>&1; then
+        web_block="$(neo_provider_web_research_bundle_block "${vector}" 3 2>/dev/null || true)"
+    fi
 
     bundle="$(cat <<EOF
 # BORG assimilation bundle — authorized lab only
@@ -713,6 +718,9 @@ ${collective}
 
 ## Borg research source catalog
 ${research_idx:-_catalog unavailable_}
+
+## Live web research (when NEO_PROVIDER_WEB_RESEARCH=1)
+${web_block:-_disabled — set NEO_PROVIDER_WEB_RESEARCH=1 and NEO_BORG_HARVEST=1 for fetch_}
 
 ## Method library (ingested — disclosure-aware)
 ${library_block:-_none_}
@@ -817,6 +825,18 @@ actions drive the permission-gated run loop (nothing executes without operator y
 EOF
 }
 
+neo_borg_call_ai_guard() {
+    local response="$1" label="${2:-borg}" guarded=""
+    # shellcheck source=neo-ai-guard.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
+    if declare -F neo_ai_guard_output >/dev/null 2>&1; then
+        guarded="$(neo_ai_guard_output "" "${response}" "${label}")" || return 1
+        printf '%s' "${guarded}"
+        return 0
+    fi
+    printf '%s' "${response}"
+}
+
 neo_borg_call_ai() {
     local bundle="$1" vector="$2" phase="$3"
     local prompt sys response rc ai_mode tmp_out
@@ -843,6 +863,7 @@ neo_borg_call_ai() {
             response="$(cat "${tmp_out}")"
             rm -f "${tmp_out}"
             if [[ -n "${response}" ]]; then
+                response="$(neo_borg_call_ai_guard "${response}" "borg-assimilate")" || return 1
                 printf '%s' "${response}"
                 return 0
             fi
@@ -863,6 +884,7 @@ EOF
             response="$(cat "${tmp_out}")"
             rm -f "${tmp_out}"
             if [[ -n "${response}" ]]; then
+                response="$(neo_borg_call_ai_guard "${response}" "borg-assimilate")" || return 1
                 printf '%s' "${response}"
                 return 0
             fi
@@ -1466,6 +1488,10 @@ project_link: projects/${project}/assimilated/${slug}"
     if declare -F neo_conductor_on_event >/dev/null 2>&1; then
         neo_conductor_on_event borg.assimilate_complete "${project}" "${phase}" "${slug}" || true
     fi
+    # shellcheck source=neo-borg-library-batch.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg-library-batch.sh" 2>/dev/null || true
+    declare -F neo_borg_library_batch_offer >/dev/null 2>&1 && \
+        neo_borg_library_batch_offer "${project}" || true
     return 0
 }
 
@@ -1474,5 +1500,9 @@ neo_borg_at_pause() {
     # shellcheck source=script-lib.sh
     source "${NEO_DIR:-${NEO_HOME}}/lib/script-lib.sh"
     cybersec_init_colors
+    # shellcheck source=neo-borg-v2.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg-v2.sh" 2>/dev/null || true
+    declare -F neo_borg_v2_offer_at_pause >/dev/null 2>&1 && \
+        neo_borg_v2_offer_at_pause "${project}" || true
     neo_borg_run "${project}" "${phase}" ""
 }

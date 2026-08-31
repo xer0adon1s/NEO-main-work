@@ -2465,3 +2465,37 @@ After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5
 
 `./test/menu-routing-test.sh`, `./test/conductor-test.sh`, `./test/run-all.sh`
 
+---
+
+# Phase 72 — Tier B Waves 4–5 prototype (2026-08-31)
+
+## Operator prompt(s)
+
+> k i pushed the commit. lets prototype wave 4-5 entirely.
+
+## What changed
+
+**Wave 4 (B8, B9):**
+- **`lib/neo-ai-guard.sh`** — `neo_ai_guard_output` wraps all educational AI saves
+- **`lib/neo-borg-disclosure.sh`** — `neo_borg_disclosure_guard_ai_output` (`NEO_DISCLOSURE_LINT_ALL`, `NEO_DISCLOSURE_STRICT`)
+- Wired guard in **`neo-payload.sh`**, **`neo-borg.sh`**, **`neo-ai-cli.sh`** (triage), **`neo-eli5.sh`**
+- **`lib/neo-provider.sh`** — `neo_provider_web_research_bundle_block` + `neo_provider_research_index_pick_urls`
+- Borg bundle includes live web block when `NEO_PROVIDER_WEB_RESEARCH=1` + `NEO_BORG_HARVEST=1`
+
+**Wave 5 (B10, B11, B12):**
+- **`lib/neo-borg-v2.sh`**, **`borg/borg-v2.sh`**, **`schemas/borg-dossier.schema.json`**
+- **`lib/neo-borg-library-batch.sh`** — queue from assimilated slugs; offer after Borg; harvest `--batch`
+- **`test/p18-lab-e2e.sh`** — offline harness + live checklist (`NEO_P18_LAB=1`)
+
+**Tests:** `disclosure-lint-all-test.sh`, `neo-provider-web-test.sh`, `borg-v2-test.sh`,
+`borg-library-batch-test.sh`, `p18-lab-e2e.sh` — added to `test/run-all.sh`
+
+**Docs:** `TIER-B-PLAN.md`, `AI-CONDUCTOR.md`, `AGENTS.md` extension log; `neo.sh` + `neo-diagnostic.sh` lib lists.
+
+## Verification deferred to home Linux
+
+`./test/disclosure-lint-all-test.sh`, `./test/neo-provider-web-test.sh`, `./test/borg-v2-test.sh`,
+`./test/borg-library-batch-test.sh`, `./test/p18-lab-e2e.sh`, `./test/run-all.sh`, `./test/neo-diagnostic.sh`
+
+**EOD handoff:** `NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md` — full session recap + Linux test matrix + Claude review checklist.
+
