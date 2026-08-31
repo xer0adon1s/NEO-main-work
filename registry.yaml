@@ -45,6 +45,20 @@ borg:
     log: smart
 
 # Pause-menu library (not a standalone script — wired from neo.sh)
+neo-conductor:
+  file: lib/neo-conductor.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: Unified mission AI bundles; proactive Borg/payload sequencing; phase hooks (NEO_CONDUCTOR=1)
+
+neo-feedback:
+  file: lib/neo-feedback.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: Pause-menu ack + working indicators (NEO_FEEDBACK=1); AI timer uses progress bar
+
 neo-payload:
   file: lib/neo-payload.sh
   runs: local
@@ -54,7 +68,7 @@ neo-payload:
   # Claude Code (claude -p) or ANTHROPIC_API_KEY; [p] payload suggest (tool-picker,
   # copy-paste output) / [z] analyze failures (foothold only, after a first attempt —
   # reviews NEO's log plus a tmux terminal-log capture when available)
-  # Phase-gated: recon, foothold (until shell), privesc
+  # Phase-gated: recon, foothold (until shell), privesc, post
   owns:
     PAYLOAD: append
     TODO: append
@@ -91,7 +105,7 @@ neo-workbench:
   init_project: false
   requires: [jq, tmux]
   # [t] try (permission gate) → capture → AI analyze → repeat until foothold.
-  # [o] open operator shell. Phase-gated: recon, foothold, privesc.
+  # [o] open operator shell. Phase-gated: recon, foothold, privesc, post.
   owns:
     WORKBENCH: append
     PAYLOAD: append
@@ -120,7 +134,35 @@ neo-pipeline-hooks:
   runs: local
   phase: any
   init_project: false
-  notes: Opt-in plan-enum, operator-recon, privesc rank hooks at phase boundaries
+  notes: Opt-in plan-enum, operator-recon, privesc rank, MSF post menu hooks
+
+neo-eli5:
+  file: lib/neo-eli5.sh
+  runs: local
+  phase: any
+  init_project: false
+  notes: Pause [e] ELI5 explain — beginner-friendly command/evidence lessons
+  owns:
+    ELI5: append
+  finish:
+    phase: dynamic
+    log: smart
+
+normalize-findprivs:
+  file: privesc/normalize-findprivs.sh
+  runs: local
+  phase: privesc
+  init_project: false
+  requires: [jq]
+  notes: FindPrivs artifact → privesc-facts.json
+
+rank-privesc-plan:
+  file: privesc/rank-privesc-plan.sh
+  runs: local
+  phase: privesc
+  init_project: false
+  requires: [jq]
+  notes: Rank hypotheses from privesc-facts.json
 
 ListenAssist:
   file: foothold/ListenAssist.sh
@@ -241,7 +283,21 @@ neo-vendor:
   phase: meta
   init_project: false
   requires: [jq, sha256sum]
-  notes: P11 vendor manifest inventory/verify/init
+  notes: P11 vendor manifest inventory/verify/init/install/rollback
+
+scope-import:
+  file: tools/scope-import.sh
+  runs: local
+  phase: connect
+  init_project: false
+  notes: Import engagement scope from policy template
+
+neo-secret:
+  file: tools/neo-secret.sh
+  runs: local
+  phase: meta
+  init_project: false
+  notes: Secret broker CLI store/remove/audit
 
 ovpn-connect:
   file: connect/ovpn-connect.sh
@@ -255,4 +311,33 @@ status:
   runs: local
   phase: meta
   init_project: false
-  notes: false
+
+borg-library-ingest:
+  file: tools/borg-library-ingest.sh
+  runs: local
+  phase: meta
+  init_project: false
+  notes: Manual walkthrough/method ingest into knowledge/library/; disclosure lint required
+
+borg-library-harvest:
+  file: tools/borg-library-harvest.sh
+  runs: local
+  phase: meta
+  init_project: false
+  notes: AI-driven library research (--research); NEO_BORG_HARVEST=1 for optional NVD/URL context
+
+neo-report-export:
+  file: tools/neo-report-export.sh
+  runs: local
+  phase: post
+  init_project: false
+  notes: PDF export stub (pandoc) for final-report artifacts
+
+neo-report:
+  file: tools/neo-report.sh
+  runs: local
+  phase: post
+  init_project: false
+  owns:
+    REPORT: set
+  notes: Human-readable final report; educational vs professional via disclosure mode

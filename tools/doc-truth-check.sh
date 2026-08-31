@@ -71,11 +71,82 @@ check_tier3_tools() {
         || fail 'recon/review-plan.sh missing'
 }
 
+check_eli5_documented() {
+    grep -q '\[e\]' "${AGENTS}" 2>/dev/null \
+        && pass 'AGENTS.md documents [e] ELI5' \
+        || fail 'AGENTS.md missing [e] ELI5'
+    grep -q 'SECTION:ELI5' "${NEO_SOURCE_ROOT}/templates/investigation-notes.md" 2>/dev/null \
+        && pass 'template ELI5 section' \
+        || fail 'template missing ELI5 section'
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-eli5.sh" ]] && pass 'lib/neo-eli5.sh present' \
+        || fail 'lib/neo-eli5.sh missing'
+}
+
+check_pipeline_hooks() {
+    grep -q 'neo_pipeline_offer_plan_enum' "${NEO_SOURCE_ROOT}/neo.sh" 2>/dev/null \
+        && pass 'neo.sh plan-enum hook wired' \
+        || fail 'neo.sh missing plan-enum hook'
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-pipeline-hooks.sh" ]] \
+        && pass 'neo-pipeline-hooks present' \
+        || fail 'neo-pipeline-hooks missing'
+}
+
+check_final_report() {
+    grep -q 'SECTION:REPORT' "${NEO_SOURCE_ROOT}/templates/investigation-notes.md" 2>/dev/null \
+        && pass 'template REPORT section' \
+        || fail 'template missing REPORT section'
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-report.sh" ]] && pass 'lib/neo-report.sh present' \
+        || fail 'lib/neo-report.sh missing'
+    [[ -f "${NEO_SOURCE_ROOT}/tools/neo-report.sh" ]] && pass 'tools/neo-report.sh present' \
+        || fail 'tools/neo-report.sh missing'
+    grep -q 'final-report' "${NEO_SOURCE_ROOT}/lib/neo-menu.sh" 2>/dev/null \
+        && pass 'menu [f] final-report routed' \
+        || fail 'menu missing final-report'
+}
+
+check_borg_library() {
+    [[ -f "${NEO_SOURCE_ROOT}/tools/borg-library-ingest.sh" ]] \
+        && pass 'borg-library-ingest.sh present' \
+        || fail 'borg-library-ingest.sh missing'
+    [[ -f "${NEO_SOURCE_ROOT}/schemas/library-walkthrough.schema.json" ]] \
+        && pass 'library-walkthrough schema' \
+        || fail 'library-walkthrough schema missing'
+    [[ -f "${NEO_SOURCE_ROOT}/knowledge/library/INDEX.yaml" ]] \
+        && pass 'knowledge/library/INDEX.yaml' \
+        || fail 'library INDEX missing'
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-borg-library-ai.sh" ]] \
+        && pass 'neo-borg-library-ai.sh (AI harvest)' \
+        || fail 'neo-borg-library-ai.sh missing'
+    [[ -f "${NEO_SOURCE_ROOT}/tools/borg-library-harvest.sh" ]] \
+        && pass 'borg-library-harvest.sh present' \
+        || fail 'borg-library-harvest.sh missing'
+    grep -q 'neo_scope_sync_project_meta' "${NEO_SOURCE_ROOT}/lib/neo-scope.sh" 2>/dev/null \
+        && pass 'scope syncs engagement_mode to meta' \
+        || fail 'neo_scope_sync_project_meta missing'
+}
+
+check_conductor_documented() {
+    [[ -f "${NEO_SOURCE_ROOT}/NEO-1.0-DESIGN/AI-CONDUCTOR.md" ]] \
+        && pass 'AI-CONDUCTOR.md present' \
+        || fail 'AI-CONDUCTOR.md missing'
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-conductor.sh" ]] \
+        && pass 'neo-conductor.sh present' \
+        || fail 'neo-conductor.sh missing'
+    grep -q 'NEO_CONDUCTOR' "${AGENTS}" 2>/dev/null \
+        && pass 'AGENTS.md documents NEO_CONDUCTOR' \
+        || fail 'AGENTS.md missing NEO_CONDUCTOR'
+}
+
 check_version_file
 check_gitignore_env
 check_no_stubs
 check_workbench_documented
 check_workbench_libs
 check_tier3_tools
+check_eli5_documented
+check_pipeline_hooks
+check_final_report
+check_borg_library
+check_conductor_documented
 
 finish_tests

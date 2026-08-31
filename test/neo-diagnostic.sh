@@ -23,7 +23,8 @@ printf 'NEO v%s diagnostic — %s\n\n' "$(cat VERSION 2>/dev/null | tr -d '[:spa
 for f in neo.sh setup.sh phases.yaml registry.yaml VERSION AGENTS.md README.md \
     lib/notes-lib.sh lib/script-lib.sh lib/neo-ai.sh lib/neo-ai-analyze.sh lib/neo-ai-cli.sh lib/neo-hud.sh lib/neo-splash.sh lib/neo-vpn.sh lib/neo-boot.sh lib/neo-borg.sh lib/neo-payload.sh lib/neo-menu.sh lib/neo-tmux.sh lib/neo-interact.sh \
     lib/neo-core.sh lib/neo-1.0-bootstrap.sh lib/neo-secrets.sh lib/neo-evidence.sh lib/neo-actions.sh lib/neo-mission-state.sh lib/neo-scope.sh lib/neo-provider.sh lib/neo-windup-actions.sh lib/neo-vpn-consent.sh \
-    tools/neo-secret.sh tools/scope-intake.sh tools/scope-import.sh \
+    lib/neo-operator-pane.sh lib/neo-workbench.sh lib/neo-toolkit.sh lib/neo-exploit-framework.sh lib/neo-pipeline-hooks.sh lib/neo-eli5.sh \
+    tools/neo-secret.sh tools/scope-intake.sh tools/scope-import.sh tools/neo-vendor.sh \
     borg/borg-v2.sh recon/operator-recon.sh recon/plan-enum.sh \
     schemas/action-policy.json schemas/action.schema.json schemas/engagement-scope.schema.json \
     recon/babysteps.sh recon/analyze-recon.sh borg/borg.sh assets/borg-splash-wide.txt \
@@ -36,7 +37,7 @@ done
 
 # --- lib/ should only contain NEO scripts ---
 printf '\n--- lib/ hygiene ---\n'
-neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh)
+neo_libs=(notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-vpn-consent.sh neo-boot.sh neo-borg.sh neo-borg-disclosure.sh neo-borg-library.sh neo-borg-library-ai.sh neo-borg-harvest.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh neo-core.sh neo-1.0-bootstrap.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-windup-actions.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-report.sh neo-conductor.sh neo-feedback.sh)
 for f in "${neo_libs[@]}"; do
     [[ -f "lib/${f}" ]] && ok "neo lib: ${f}" || bad "missing neo lib: ${f}"
 done
@@ -122,6 +123,26 @@ run_test "interact-test" test/interact-test.sh
 run_test "neo-tmux-test" test/neo-tmux-test.sh
 run_test "neo-tmux-integration-test" test/neo-tmux-integration-test.sh
 run_test "neo-smoke-test" test/neo-smoke-test.sh
+run_test "workbench-test" test/workbench-test.sh
+run_test "toolkit-test" test/toolkit-test.sh
+run_test "exploit-framework-test" test/exploit-framework-test.sh
+run_test "plan-enum-hook-test" test/plan-enum-hook-test.sh
+run_test "privesc-rank-hook-test" test/privesc-rank-hook-test.sh
+run_test "vendor-test" test/vendor-test.sh
+run_test "session-adapter-test" test/session-adapter-test.sh
+run_test "eli5-test" test/eli5-test.sh
+
+# --- Borg HUD (Phase 60) ---
+printf '\n--- Borg HUD ---\n'
+hud_frame="$(awk '/^neo_borg_hud_frame\(\)/,/^neo_borg_hud_start\(\)/' lib/neo-borg.sh)"
+if grep -q 'resistance is futile' <<< "${hud_frame}"; then
+    bad 'Borg HUD tagline still inside animation tick'
+else
+    ok 'Borg HUD tagline not in animation tick'
+fi
+grep -q 'resistance is futile' lib/neo-borg.sh \
+    && ok 'Borg HUD tagline shown once at start' \
+    || note 'Borg HUD tagline removed entirely'
 
 # --- Config (no secrets) ---
 printf '\n--- operator config ---\n'

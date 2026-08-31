@@ -107,8 +107,9 @@ Track implementation from design → production. Update status as tiers complete
 | 4.3 | operator-recon before foothold | [x] |
 | 4.4 | Post phase workbench | [x] |
 | 4.5 | Session adapter | [~] — SSH/MSF handler → operator pane; msf session id |
-| 4.6 | neo-vendor install/rollback | [~] |
+| 4.6 | neo-vendor install/rollback | [~] — file backup rollback for vendor kind |
 | 4.7 | Borg live web research | [ ] |
+| 4.9 | AI conductor (Tier A bundle + sequencing + hooks) | [x] |
 | 4.8 | P21 full MSF conductor | [~] |
 
 ---
@@ -127,4 +128,4 @@ P19 GUI — docs only.
 4. ~~**Tier 2.5** — operator workbench (core loop)~~ **DONE** — see `TIER2.5-STATUS.md`
 5. ~~**Tier 3** — release polish (docs/tools)~~ **INCOMPLETE** — see `SCOPE-STATUS.md` / `TIER3-STATUS.md`
 6. **Tier 3.13 / P18** — lab E2E on home Linux (blocks 1.0.0-rc)
-7. **Tier 4+** — not started / deferred
+7. ~~**Tier 4+** — not started / deferred~~ **Tier 4 prototyped** — see `SCOPE-STATUS.md`

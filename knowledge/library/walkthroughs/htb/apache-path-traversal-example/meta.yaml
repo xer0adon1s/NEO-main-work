@@ -1,0 +1,9 @@
+schema_version: 1
+box_id: htb:apache-path-traversal-example
+platform: htb
+display_name: apache-path-traversal-example
+difficulty: easy
+paths_count: 1
+tags: [web, apache, path-traversal]
+cves: [CVE-2021-41773, CVE-2021-42013]
+techniques: [T1190]

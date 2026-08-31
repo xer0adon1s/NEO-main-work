@@ -19,7 +19,7 @@ neo_eli5_ai_available() {
 }
 
 neo_eli5_menu_fragment() {
-    neo_eli5_ai_available && printf ' / [e] ELI5 explain'
+    neo_eli5_ai_available && printf ' / [e]xplain (ELI5)'
 }
 
 neo_eli5_system_prompt() {
@@ -115,6 +115,9 @@ neo_eli5_build_bundle() {
 
     [[ -z "${focus}" ]] && focus="$(neo_eli5_extract_focus "${project}" 2>/dev/null || true)"
 
+    # shellcheck source=neo-borg-disclosure.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg-disclosure.sh" 2>/dev/null || true
+
     cat <<EOF
 ## ELI5 teaching request
 Phase: ${phase}
@@ -142,6 +145,7 @@ ${borg:-_none_}
 
 ## Workbench tries (trimmed)
 ${workbench:-_none_}
+$(neo_borg_disclosure_ai_rules "${project}" 2>/dev/null || true)
 EOF
 }
 
@@ -263,6 +267,18 @@ neo_eli5_offer_after() {
     read -r -p 'Explain this at ELI5 level now? [y/N]: ' ans
     [[ "${ans}" =~ ^[yY] ]] || return 0
     neo_eli5_run "${project}" "${phase}" "${focus}" "Follow-up after latest NEO suggestion."
+}
+
+neo_eli5_offer_after_borg() {
+    local project="$1" phase="$2" slug="$3" vector="$4"
+    neo_eli5_offer_after "${project}" "${phase}" "" \
+        "Explain the Borg dossier for \"${vector}\" (slug ${slug}) — technique, CVE leads, and suggested commands at ELI5 level."
+}
+
+neo_eli5_offer_after_triage() {
+    local project="$1" phase="${2:-recon}"
+    neo_eli5_offer_after "${project}" "${phase}" "" \
+        "Explain the latest AI triage — what was found, why these attack paths, and what to do next."
 }
 
 neo_eli5_handle_choice() {

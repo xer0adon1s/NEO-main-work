@@ -83,6 +83,25 @@ call_count="$(grep -cE '^\s*NEO_PAYLOAD_TERM_REL="\$\(neo_tmux_save_capture' "${
 ((call_count == 1)) && ok "neo_tmux_save_capture invoked exactly once in neo-payload.sh" \
     || bad "expected exactly 1 invocation of neo_tmux_save_capture, found ${call_count} — duplicate capture risk"
 
+# --- Borg-guided payload helpers ---
+mkdir -p "${NEO_HOME}/projects/t/assimilated/redis-unauth"
+neo_borg_write_file() { printf '%s' "$2" > "$1"; }
+neo_borg_write_file "${NEO_HOME}/projects/t/assimilated/redis-unauth/SUMMARY.md" \
+    $'## Proposed wind-up actions\n1. `[RUN:redis-cli -h TARGET PING]` probe\n'
+neo_payload_has_borg_dossiers t && ok "has_borg_dossiers detects assimilated slug" \
+    || bad "has_borg_dossiers"
+windup="$(neo_payload_collect_borg_windup_actions t)"
+[[ "${windup}" == *"[RUN:redis-cli"* ]] && ok "collect_borg_windup_actions extracts RUN tags" \
+    || bad "windup extract: ${windup}"
+prompt="$(neo_payload_suggest_system_prompt borg-guided)"
+[[ "${prompt}" == *"Borg-guided mode"* && "${prompt}" == *"Borg alignment"* ]] \
+    && ok "borg-guided system prompt" || bad "borg-guided system prompt"
+
+declare -f neo_payload_offer_after_borg >/dev/null \
+    && ok "neo_payload_offer_after_borg exists" || bad "offer_after_borg missing"
+declare -f neo_payload_pick_focus_slugs >/dev/null \
+    && ok "neo_payload_pick_focus_slugs exists" || bad "pick_focus_slugs missing"
+
 bash -n "${NEO_ROOT}/lib/neo-payload.sh" && ok "syntax" || bad "syntax"
 
 rm -rf "${tmp}"

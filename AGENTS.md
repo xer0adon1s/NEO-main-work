@@ -133,6 +133,7 @@ LOG only. Prevents clobber wars as the toolkit grows.
 | `PAYLOAD` | neo-payload (pause `[p]`/`[z]`) | append | Borg analysis, payload suggest, failure analysis |
 | `WORKBENCH` | neo-workbench (pause `[t]`/`[o]`) | append | try/analyze loop, command attempts, captures |
 | `ELI5` | neo-eli5 (pause `[e]`) | append | beginner-friendly command/evidence lessons |
+| `REPORT` | neo-report (`[f]` post / mission end) | set | human-readable final report; artifact copy |
 | `LOG` | every script | append | never dedupe |
 
 `notes_set_section` / `notes_append_section` warn on stderr and return
@@ -238,7 +239,36 @@ Resume / `NEO_SPLASH=0` / `--no-splash` skips intro and VPN ASCII banners (A/B/C
 Saved as `ai_triage=subscription|api|manual` in `project.meta`. **`[a]sk Claude`**
 at any pause runs `claude -p` when Claude Code is installed.
 
-**Pause menus** (every letter is case-insensitive — one meaning each): **`[c]`** continue · **`[r]`** repeat · **`[a]`** ask Claude · **`[b]`** Assimilate with Borg · **`[p]`**ayload suggest · **`[t]`**ry command · **`[o]`**perator shell · **`[e]`** ELI5 explain · **`[z]`** analyze failures · **`[s]`** skip to step · **`[q]`** quit · recon also **`[d]`** deep enum. **`[p]`** shows on **recon**, **foothold** (until shell), and **privesc**; **`[t]`/`[o]`** on those same phases (operator workbench — P20). **`[z]`** shows on **foothold only, after a first attempt** (`foothold_attempted` or any workbench try). Both post-phase and `pause_before` script-choice menus use **`neo_compute_pause_extras()`**; both dispatch via **`neo_menu_classify()`** in **`lib/neo-menu.sh`**.
+**Pause menus** (every letter is case-insensitive — one meaning each):
+
+| Group | Letter | Action |
+|-------|--------|--------|
+| Navigate | `[c]` | continue |
+| | `[r]` | repeat phase |
+| | `[s]` | skip to step |
+| | `[k]` | skip phase |
+| | `[q]` | quit |
+| | `[d]` | deep enum (recon only) |
+| Plan (AI) | `[b]` | Borg research (assimilate vector dossiers) |
+| | `[p]` | payload suggestion (AI exact next command) |
+| | `[a]` | ask AI (free-text) |
+| | `[e]` | explain (ELI5) |
+| Run | `[t]` | try it (operator pane) |
+| | `[o]` | operator pane (shell focus) |
+| | `[z]` | diagnose failure (foothold, after attempt) |
+| Deliver | `[f]` | write report (post only) |
+
+Menus are composed in workflow order: **plan → run → learn → deliver** (`neo_menu_compose_pause_extras` in `lib/neo-menu.sh`). **`[p]`** on recon, foothold (until shell), privesc, post; **`[t]`/`[o]`** on those phases; **`[z]`** foothold only after `foothold_attempted` or workbench try. Conductor nudges use the same letters (`NEO_CONDUCTOR=1`). Dispatch: **`neo_menu_classify()`**.
+
+**Operator feedback (`NEO_FEEDBACK=1`, default):** pause letters that start work print an immediate
+acknowledgement (`lib/neo-feedback.sh`); AI calls show a stderr progress bar + countdown
+(`neo-ai-analyze.sh`); Borg keeps its ASCII HUD during assimilation. Disable with `NEO_FEEDBACK=0`.
+
+**AI conductor (`NEO_CONDUCTOR=1`, default):** after recon triage, offers `[b]` Borg research
+(if pending vectors, default Y) then `[p]` payload suggestion (default **n** — use pause menu).
+Foothold/privesc entry offers `[p]` (default Y). Pause nudges list only visible letters in
+workflow order. Design: `NEO-1.0-DESIGN/AI-CONDUCTOR.md`. Disable with `NEO_CONDUCTOR=0` or
+`ai_triage=manual`.
 
 **Operator workbench (P20):** NEO's conductor pane owns stdin during pauses — run suggested commands in the **operator tmux pane** (`[o]` then `[t]`), not by pasting into the menu. Safe single-line attack-box commands may run via typed argv (`local_safe` transport). Loop: suggest → try (y/N) → capture → AI analyze → repeat until foothold → `[c]` continues pipeline. See **`NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md`**.
 
@@ -365,5 +395,29 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
 - 2026-08-31 — **Attack plan waves 1–4:** post workbench, pipeline hooks (`neo-pipeline-hooks.sh`),
   MSF handler in ListenAssist, mission handler_plan stub, neo-vendor install/rollback, new tests.
 - 2026-08-31 — **ELI5 tutor (`[e]`):** `lib/neo-eli5.sh` — educational mode at pauses; explains
-  evidence, suggestions, and command flags before the operator runs them; **ELI5** notes section;
-  optional prompt after payload suggest and workbench analyze.
+ evidence, suggestions, and command flags before the operator runs them; **ELI5** notes section;
+ optional prompt after payload suggest and workbench analyze.
+- 2026-08-31 — **Borg multi-vector + payload integration (Phase 64):** `[b]org` menu gated when
+ all enum/triage vectors assimilated; multi-pick (`a`, `1,3`) assimilation; `[p]` Borg-guided
+ mode (option 0) pipes dossiers + wind-up actions into AI suggest; ELI5 after suggest unchanged.
+- 2026-08-31 — **Borg library disclosure (Phase 65):** post-assimilate payload hook; multi-slug
+ focus picker; STATUS Borg blurb; red-herring skip; `neo-borg-disclosure.sh` + check tool;
+ `knowledge/library/` scaffold; design `BORG-RESEARCH-LIBRARY.md`.
+- 2026-08-31 — **Final report (Phase 67):** `lib/neo-report.sh` — educational book-report vs
+ professional pentest deliverable; `[f]` at post phase; mission-end prompt; `--report` flag;
+ `REPORT` section + `artifacts/final-report-*.md`.
+- 2026-08-31 — **Borg library ingest (Phase 66):** `tools/borg-library-ingest.sh`, walkthrough
+ schema, seed entries in `knowledge/library/`; scope intake → `engagement_mode` in meta;
+ professional reports pull library CVE cross-refs; educational report hard-fail on disclosure lint.
+- 2026-08-31 — **AI conductor (Tier A / Phase 69):** `lib/neo-conductor.sh` — unified mission bundle,
+ proactive Borg→payload sequencing after triage; foothold/privesc phase hooks; pause nudges;
+ design `NEO-1.0-DESIGN/AI-CONDUCTOR.md`.
+- 2026-08-31 — **Operator feedback (Phase 71):** `lib/neo-feedback.sh` — ack on pause letters;
+ AI timer progress bar; wired through `neo.sh` pause menus + conductor offers.
+- 2026-08-31 — **AI conductor tuning (Phase 70):** pause menu labels + workflow groups
+  (plan/run/learn/deliver); conductor letter-aligned Y/n prompts; dedupe payload offers per phase.
+- 2026-08-31 — **Borg library AI harvest (Phase 68):** `lib/neo-borg-library-ai.sh`;
+ `--research` drives Claude + `borg_research_index`; mechanical fetch is context-only;
+ `borg_research_index` wired into Borg assimilate bundle.
+- 2026-08-31 — **Phase 63 batch:** Borg HUD spam fix; SCOPE/PROGRESS/CURRENT-STATE doc sync;
+  neo-diagnostic + registry expansion; neo-vendor file rollback; ELI5 after Borg + AI triage.

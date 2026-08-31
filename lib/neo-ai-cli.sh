@@ -121,6 +121,16 @@ EOF
 
     printf '%s[+]%s AI triage written to projects/%s/Investigation-Notes.md → AI Triage\n' \
         "${C_GREEN:-}" "${C_RESET:-}" "${project}"
+    # shellcheck source=neo-eli5.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-eli5.sh" 2>/dev/null || true
+    if declare -F neo_eli5_offer_after_triage >/dev/null 2>&1; then
+        neo_eli5_offer_after_triage "${project}" "$(meta_get phase 2>/dev/null || echo recon)" || true
+    fi
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor.sh" 2>/dev/null || true
+    if declare -F neo_conductor_after_triage >/dev/null 2>&1; then
+        neo_conductor_after_triage "${project}" "$(meta_get phase 2>/dev/null || echo recon)" || true
+    fi
 }
 
 neo_ai_run_cli_triage() {

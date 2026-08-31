@@ -161,3 +161,4 @@ neo_evidence_record scope_defined operator \
 
 printf '\nScope saved: %s\n' "${scope_file}"
 neo_scope_summary "${PROJECT}" "${STATE_ROOT}"
+neo_scope_sync_project_meta "${PROJECT}" 2>/dev/null || true

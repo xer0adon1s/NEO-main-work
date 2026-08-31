@@ -1,0 +1,13 @@
+schema_version: 1
+kind: method
+slug: redis-unauth-rce
+ingested: "2026-08-31T00:00:00Z"
+cves: []
+techniques: [redis-unauth-write, T1190]
+disclosure:
+  educational_safe: true
+  professional_full: false
+  lint_passed: true
+source:
+  kind: manual
+  note: NEO seed entry — technique-first, no lab box title

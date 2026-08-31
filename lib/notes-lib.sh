@@ -265,6 +265,16 @@ notes_refresh_status() {
     target="$(meta_get target 2>/dev/null || echo "unknown")"
     updated="$(date '+%Y-%m-%d %H:%M:%S')"
     status_text="_Last updated by **${script}** at ${updated} — phase \`${phase}\`, target \`${target}\`. ${summary}_"
+    if [[ -n "${OUTDIR:-}" && -f "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg.sh" ]]; then
+        local _borg_blurb _proj
+        _proj="$(basename "${OUTDIR}")"
+        # shellcheck source=neo-borg.sh
+        source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg.sh" 2>/dev/null || true
+        if declare -F neo_borg_status_blurb >/dev/null 2>&1; then
+            _borg_blurb="$(neo_borg_status_blurb "${_proj}" 2>/dev/null || true)"
+            [[ -n "${_borg_blurb}" ]] && status_text="${status_text} ${_borg_blurb}"
+        fi
+    fi
     notes_set_section STATUS "${status_text}" || true
     meta_set last_script "${script}" || true
     meta_set last_updated "${updated}" || true

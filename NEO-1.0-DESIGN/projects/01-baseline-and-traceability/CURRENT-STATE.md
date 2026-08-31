@@ -1,103 +1,45 @@
-# Current State — Baseline Complete
+# Current State — Baseline (updated 2026-08-31)
 
-Status: review_ready (2026-08-31). Static review complete; CLAUDE-COLLAB.md and
-CURSOR-REVIEW-LOG.md ingested. Existing v0.5 source remains unchanged.
+Status: **review_ready** with production integration substantially complete for 1.0-rc
+candidate. Remaining gate: **lab E2E** (P18) on home Linux.
 
 ## Repository profile
 
-- Current version file: `0.5`
-- Production shell files: 29
-- Production shell lines: approximately 7,035
-- Test shell files: 11
-- Test shell lines: approximately 1,351
-- Registered entries: 14
-- Walked phases: recon, foothold, privesc, post
+- Current version file: `0.5` (target `1.0.0-rc` after operator sign-off)
+- Production shell libs: 20+ under `lib/` (workbench, pipeline-hooks, exploit-framework, eli5, …)
+- Test suites: 20+ in `test/run-all.sh`
+- Walked phases: recon, foothold, privesc, post (conductor-guided post)
 
-## Strong foundations
+## Resolved since initial baseline (CS-001 / CS-002)
 
-- Mission phase ordering and checkpoint/resume behavior are explicit.
-- Investigation notes use marked sections so scripts can update owned content safely.
-- Large output can be stored as artifacts while notes retain a preview and pointer.
-- Operator approval is already a visible product principle.
-- AI triage, Borg, payload guidance, tmux capture, and pre-foothold interaction are modular.
-- The test history shows serious attempts to reproduce real tmux and state bugs.
+### CS-001 — ListenAssist — **RESOLVED**
 
-## Confirmed blockers and discrepancies
+`foothold/ListenAssist.sh` is a full interactive listener script (~170+ lines): ncat/nc/socat,
+optional MSF `exploit/multi/handler`, tmux guidance, notes logging. Integrated in pipeline.
 
-### CS-001 — ListenAssist production placeholder
+### CS-002 — run-findprivs — **RESOLVED**
 
-`foothold/ListenAssist.sh` is seven lines and only sets phase metadata. It does not start a
-listener, ask questions, guide a second window, capture results, or update foothold evidence.
-This is intentional placeholder status per OD-003, but documentation presents it as working.
+`privesc/run-findprivs.sh` is a substantive wrapper (~140+ lines): SSH transport, ingest,
+existing-shell path. Production integrity gate checks line count.
 
-Routed to: P02, P09, P12, P16.
+## Still open (non-blocking for code; lab or post-1.0)
 
-### CS-002 — run-findprivs production placeholder
+| ID | Item | Status |
+|----|------|--------|
+| CS-003 | Diagnostic semantic guards | Partial — babysteps + ListenAssist + run-findprivs line checks |
+| CS-004 | `.env` secret risk | Mitigated — `.gitignore` excludes `.env`; secret broker preferred |
+| CS-005 | tmux API key forward | **Resolved** — keys not forwarded in `neo-tmux.sh` |
+| CS-006 | Borg eval | **Resolved** — wind-up uses typed argv |
+| CS-007 | VPN pkill consent | **Resolved** — `neo-vpn-consent.sh` |
+| CS-008 | Moving dependencies | Documented in KNOWN-LIMITATIONS |
 
-`privesc/run-findprivs.sh` is seven lines and ingests a hard-coded smoke verdict instead of
-running `FindPrivs.sh` through an existing shell or SSH transport.
+## Integration waves complete (code)
 
-Routed to: P03, P09, P12, P17.
+- Tier 0–2: CORE, safety, workflows
+- Tier 2.5: Operator workbench `[t]`/`[o]` including **post** phase
+- Tier 3–4 (prototyped): pipeline hooks, MSF foundation, neo-vendor, ELI5, session adapter
+- **Blocks 1.0.0-rc:** P18 E2E only (operator lab)
 
-### CS-003 — Production-integrity gap
+## Recommended verification
 
-`test/neo-diagnostic.sh` contains an anti-stub integrity check for `babysteps.sh`, but no
-equivalent semantic guards for ListenAssist or run-findprivs. Existence and syntax are not
-enough to establish production capability.
-
-Routed to: P09.
-
-### CS-004 — Repository `.env` secret risk
-
-`lib/neo-ai.sh` can source `${NEO_HOME}/.env`, and README documents it as a credential source.
-`.gitignore` does not exclude `.env`. Sourcing also treats it as shell code instead of strict
-key-value data.
-
-Routed to: P05, P09, P12.
-
-### CS-005 — tmux command secret exposure
-
-`lib/neo-tmux.sh` forwards `ANTHROPIC_API_KEY` by building a tmux shell command containing its
-value. Shell quoting protects parsing but not confidentiality.
-
-Routed to: P05, P08, P10.
-
-### CS-006 — Free-form AI command execution
-
-`lib/neo-borg.sh` parses commands from AI prose and executes them with `eval` or `bash -c`
-after a y/N prompt. Prompt-injection warnings cannot make arbitrary shell text a safe API.
-
-Routed to: P04, P06, P09.
-
-### CS-007 — VPN process ownership
-
-`lib/neo-vpn.sh` can use `sudo pkill -x openvpn`, affecting every matching process. OD-011
-requires explicit informed consent before that action.
-
-Routed to: P10.
-
-### CS-008 — Unrecorded moving dependencies
-
-`setup.sh` fetches latest/master artifacts without recording resolved version, commit,
-download time, or checksum. OD-010 accepts latest behavior but requires provenance.
-
-Routed to: P11.
-
-### CS-009 — Documentation drift
-
-README identifies NEO as both v0.5 and v0.4, publishes stale test totals, and the AI recon
-bundle says the nmap full-range cross-check is deep-only even though speed mode runs it.
-
-Routed to: P12, P09.
-
-### CS-010 — Historical records absent from GitHub
-
-**Resolved locally (2026-08-31):** both files now in workspace root. Ingested in
-`HISTORY-INGESTION.md`. Phases 1–60 traceability in `REQUIREMENTS-TRACEABILITY.yaml`.
-
-Routed to: P01 (closed).
-
-## Validation limitation
-
-The Windows review host has no WSL distribution, Bash, or ShellCheck. No Linux scripts or
-tests have been executed. Runtime claims remain unverified until P18.
+See `NEO-1.0-DESIGN/E2E-CHECKLIST.md` and `SCOPE-STATUS.md`.

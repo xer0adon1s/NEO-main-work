@@ -35,12 +35,23 @@ neo_ai_timer_start() {
 
     neo_ai_timer_stop
     neo_ai_analyze_init_colors
+    # shellcheck source=neo-hud.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-hud.sh" 2>/dev/null || true
     NEO_AI_TIMER_FILE="$(mktemp)"
     (
-        local sec="${seconds}"
+        local sec="${seconds}" total="${seconds}" elapsed=0 pct=0 bar=""
         while (( sec > 0 )) && [[ -f "${NEO_AI_TIMER_FILE}" ]]; do
-            printf '\r  %s[*]%s claude working… %2ds remaining (may finish sooner)   ' \
-                "${C_BLUE}" "${C_RESET}" "${sec}" >&2
+            elapsed=$((total - sec))
+            pct=$((elapsed * 100 / total))
+            (( pct > 99 && sec > 0 )) && pct=99
+            if declare -F neo_hud_progress_bar >/dev/null 2>&1; then
+                bar="$(neo_hud_progress_bar "${pct}")"
+                printf '\r  %s%s%s AI working… %2ds %s   ' \
+                    "${C_BLUE}" "${C_RESET}" "${bar}" "${sec}" "${C_DIM}" >&2
+            else
+                printf '\r  %s[*]%s AI working… %2ds remaining (may finish sooner)   ' \
+                    "${C_BLUE}" "${C_RESET}" "${sec}" >&2
+            fi
             sleep 1
             sec=$((sec - 1))
         done

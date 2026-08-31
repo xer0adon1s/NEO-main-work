@@ -61,7 +61,7 @@ fi
 [[ -f "${NEO_SOURCE_ROOT}/lib/neo-vpn-consent.sh" ]] && pass 'neo-vpn-consent.sh present' \
     || fail 'neo-vpn-consent.sh missing'
 
-for lib in neo-core.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-1.0-bootstrap.sh neo-windup-actions.sh neo-vpn-consent.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh; do
+for lib in neo-core.sh neo-secrets.sh neo-evidence.sh neo-actions.sh neo-mission-state.sh neo-scope.sh neo-provider.sh neo-1.0-bootstrap.sh neo-windup-actions.sh neo-vpn-consent.sh neo-operator-pane.sh neo-workbench.sh neo-toolkit.sh neo-exploit-framework.sh neo-pipeline-hooks.sh neo-eli5.sh neo-conductor.sh; do
     [[ -f "${NEO_SOURCE_ROOT}/lib/${lib}" ]] && pass "core lib present: ${lib}" || fail "core lib missing: ${lib}"
 done
 

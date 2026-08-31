@@ -9,6 +9,9 @@ Each vector lives once under `vectors/<slug>/` and is linked from per-project
 **Research index:** `resources/borg_research_index.{yaml,md}` — Borg "start here" library
 (merged external CVE/exploit/technique sources). See `resources/README.md`.
 
+**Method library (ingested walkthroughs/methods):** `library/` — see `library/README.md` and
+`NEO-1.0-DESIGN/projects/04-borg-assimilation/BORG-RESEARCH-LIBRARY.md`.
+
 This index is auto-maintained by `borg/borg.sh`.
 
 ## Assimilated vectors

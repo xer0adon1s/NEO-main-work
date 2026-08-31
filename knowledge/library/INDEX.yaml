@@ -1,0 +1,13 @@
+# Borg method library index — auto-maintained; see BORG-RESEARCH-LIBRARY.md
+version: 1
+methods:
+  redis-unauth-rce:
+    path: knowledge/library/methods/redis-unauth-rce
+    techniques: [redis-unauth-write, T1190]
+walkthroughs:
+  htb:apache-path-traversal-example:
+    platform: htb
+    paths:
+      - cve-2021-41773-chain
+    cves: [CVE-2021-41773, CVE-2021-42013]
+cert_tracks: {}

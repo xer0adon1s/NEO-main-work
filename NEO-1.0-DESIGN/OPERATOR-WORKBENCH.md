@@ -38,7 +38,7 @@ is missing.
 ## Typical foothold session
 
 1. Recon completes → AI triage + optional Borg
-2. **`[p]ayload suggest`** → pick tool → get `## Exact next command`
+2. **`[p]ayload suggestion`** → pick tool → get `## Exact next command`
 3. **`[t]ry`** → confirm → command runs in pane B (or attack box if safe)
 4. Press Enter when done → capture → **Analyze? Y**
 5. Read brief → **`[t]ry`** again with new command
@@ -64,7 +64,7 @@ is missing.
 
 ## LOCK & LOAD (`lib/neo-toolkit.sh`)
 
-After **[p]ayload suggest**, AI triage, or workbench analyze, NEO asks:
+After **[p]ayload suggestion**, AI triage, or workbench analyze, NEO asks:
 
 > Verify tools & wordlists for this suggestion? **[Y/n]**
 

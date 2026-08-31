@@ -63,5 +63,39 @@ ctx="$(neo_borg_collective_context "redis-unauth")"
 [[ "${ctx}" == *"Existing collective entry"* ]] && ok "collective context for slug" || bad "collective context"
 rm -rf "${tmp_root}"
 
+hud_frame="$(awk '/^neo_borg_hud_frame\(\)/,/^neo_borg_hud_start\(\)/' "${NEO_DIR}/lib/neo-borg.sh")"
+! grep -q 'resistance is futile' <<< "${hud_frame}" && ok 'HUD tagline not in tick loop' || bad 'HUD tagline in tick loop'
+
+tmp_proj="$(mktemp -d)"
+export NEO_HOME="${tmp_proj}/Neo"
+export NEO_DIR="${NEO_HOME}"
+mkdir -p "${NEO_HOME}/projects/multibox/assimilated/redis-unauth"
+neo_borg_write_file "${NEO_HOME}/projects/multibox/Investigation-Notes.md" "$(cat <<'EOF'
+<!-- SECTION:AI-TRIAGE -->
+## Attack paths
+- Redis unauth on 6379
+- Apache path traversal
+<!-- /SECTION:AI-TRIAGE -->
+EOF
+)"
+neo_borg_write_file "${NEO_HOME}/projects/multibox/assimilated/redis-unauth/SUMMARY.md" "## Proposed wind-up actions\n1. \`[RUN:redis-cli PING]\`"
+# shellcheck source=../lib/script-lib.sh
+source "${NEO_DIR}/lib/script-lib.sh"
+OUTDIR="${NEO_HOME}/projects/multibox"
+NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
+pending="$(neo_borg_pending_count multibox)"
+(( pending == 1 )) && ok "pending_vectors: 1 after one assimilated" || bad "pending_vectors expected 1 got ${pending}"
+neo_borg_menu_should_show multibox && ok "menu shows while pending vectors remain" || bad "menu should show"
+neo_borg_menu_should_show multibox >/dev/null
+frag="$(neo_borg_menu_fragment multibox)"
+[[ "${frag}" == *"1 lead"* ]] && ok "menu fragment shows pending count" || bad "menu fragment: ${frag}"
+
+neo_borg_mark_skipped multibox "Apache path traversal"
+pending_after="$(neo_borg_pending_count multibox)"
+(( pending_after == 0 )) && ok "red herring skip removes pending vector" || bad "skip pending got ${pending_after}"
+blurb="$(neo_borg_status_blurb multibox)"
+[[ "${blurb}" == *"skipped"* ]] && ok "status blurb mentions skipped" || bad "blurb: ${blurb}"
+rm -rf "${tmp_proj}"
+
 printf '\n%d passed, %d failed\n' "${pass}" "${fail}"
 (( fail == 0 ))

@@ -72,7 +72,7 @@ neo_workbench_save_attempt_json "${project}" "wb-1-1" foothold workbench "echo h
 neo_workbench_has_attempts "${project}" && ok "attempt JSON recorded" || bad "attempt JSON"
 
 frag="$(neo_workbench_menu_fragment foothold "${project}")"
-[[ "${frag}" == *"[t]ry command"* ]] && ok "menu fragment includes try" || bad "menu fragment"
+[[ "${frag}" == *"[t]ry it"* ]] && ok "menu fragment includes try" || bad "menu fragment"
 
 bash -n "${NEO_DIR}/lib/neo-operator-pane.sh" && ok "syntax neo-operator-pane.sh" || bad "syntax pane"
 bash -n "${NEO_DIR}/lib/neo-workbench.sh" && ok "syntax neo-workbench.sh" || bad "syntax workbench"

@@ -45,9 +45,9 @@ neo_workbench_has_attempts() {
 }
 
 neo_workbench_menu_fragment() {
-    local phase="$1" project="$2" frag=""
+    local phase="$1" project="${2:-}" frag=""
     neo_workbench_visible_phase "${phase}" || return 0
-    frag="${frag} / [t]ry command / [o]perator shell"
+    frag="${frag} / [t]ry it / [o]perator pane"
     printf '%s' "${frag}"
 }
 
@@ -224,8 +224,16 @@ neo_workbench_call_ai() {
 
 neo_workbench_build_analyze_bundle() {
     local project="$1" phase="$2" cmd="$3" output="$4" transport="$5"
+    local mission_excerpt=""
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR}/lib/neo-conductor.sh" 2>/dev/null || true
     # shellcheck source=neo-payload.sh
     source "${NEO_DIR}/lib/neo-payload.sh"
+    if declare -F neo_conductor_build_bundle >/dev/null 2>&1; then
+        mission_excerpt="$(neo_conductor_build_bundle "${project}" "${phase}" workbench 2>/dev/null | head -c 12000)"
+    else
+        mission_excerpt="$(neo_payload_build_bundle "${project}" "${phase}" "workbench" 2>/dev/null | head -c 12000)"
+    fi
     cat <<EOF
 # Workbench output analysis — phase ${phase}
 
@@ -243,7 +251,7 @@ ${output}
 \`\`\`
 
 ## Mission context (excerpt)
-$(neo_payload_build_bundle "${project}" "${phase}" "workbench" 2>/dev/null | head -c 12000)
+${mission_excerpt}
 EOF
 }
 

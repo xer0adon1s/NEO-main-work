@@ -2286,7 +2286,7 @@ from inside `machines_us-4` after VPN reconnect. No commit/tag pushed — operat
   cleanly
 - **Fix direction (when authorized):** redraw in place (cursor-up / `tput cuu` / overwrite
   same lines) or drop the line from per-tick frames and show it once at HUD start
-- **Status:** Noted — not fixed
+- **Status:** **Fixed** Phase 63 — tagline once at HUD start; not in animation tick
 
 <!-- More operator testing notes go below as they're reported -->
 
@@ -2365,4 +2365,103 @@ Full bash suite deferred to home Linux per operator.
 
 At any pause with AI: press **`[e]`** → NEO explains latest suggested command (or paste your own).
 After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5 level now? [y/N]**.
+
+---
+
+# Phase 63 — Borg HUD fix + doc truth + vendor rollback + ELI5 hooks (2026-08-31)
+
+## Operator prompt(s)
+
+> yes do anything 1-5 we can do without shell exec
+
+## What changed
+
+1. **Borg HUD spam (Phase 60)** — `lib/neo-borg.sh`: tagline prints once at HUD start; animation
+   redraws 5 lines (not 7); tagline removed from per-tick frame.
+2. **Doc truth sweep** — `SCOPE-STATUS.md`, `HARD-CODE-BACKLOG.md`, `PROGRESS.md`,
+   `CURRENT-STATE.md`, `TIER2.5-STATUS.md`, P21 DESIGN checklist.
+3. **Diagnostic + registry** — `neo-diagnostic.sh` (new libs, 9 test suites, HUD check),
+   `registry.yaml` (neo-eli5, privesc scripts, phase comments), `neo.sh` lib list,
+   `doc-truth-check.sh` (ELI5 + pipeline hooks).
+4. **neo-vendor rollback** — `tools/neo-vendor.sh`: snapshot backup + restore for vendor files;
+   distro rollback = advisory message.
+5. **ELI5 after Borg/triage** — `neo_eli5_offer_after_borg`, `neo_eli5_offer_after_triage` in
+   `neo-eli5.sh`; wired from Borg assimilate + `neo_ai_finish_triage_run`.
+
+## Verification deferred to home Linux
+
+`./test/run-all.sh`, `./test/neo-diagnostic.sh`, `./tools/doc-truth-check.sh`
+
+---
+
+# Phase 68 — Borg library AI-first harvest (2026-08-31)
+
+## Operator prompt(s)
+
+> just as a reminder, all of these tools are AI driven especially the 'go out on the web and research this and build libraries' and shit lol
+
+## What changed
+
+- **`lib/neo-borg-library-ai.sh`** — Claude synthesizes library entries from topic + `borg_research_index`
+  + optional fetched context; parse → educational/professional artifacts; disclosure lint on educational.
+- **`tools/borg-library-harvest.sh`** — primary path is `--research TOPIC` (AI); NVD/URL/`--from-file`
+  only feed context when `NEO_BORG_HARVEST=1`; `--mechanical-only` legacy escape hatch.
+- **`lib/neo-borg.sh`** — research index excerpt wired into Borg assimilate bundle.
+- **`test/borg-library-ai-test.sh`** — offline parse fixture; added to `run-all.sh`.
+- Design/docs: `BORG-RESEARCH-LIBRARY.md`, `knowledge/library/README.md`, `registry.yaml`, `AGENTS.md`.
+
+## Mental model (locked)
+
+| Layer | Role |
+|-------|------|
+| Research index | *Where* to look (77 source pointers) |
+| AI harvest | *Librarian* — researches + writes library entries |
+| Mechanical fetch | Optional untrusted context for Claude — not the product |
+
+## Verification deferred to home Linux
+
+`./test/borg-library-ai-test.sh`, `./test/run-all.sh`, `./test/neo-diagnostic.sh`
+
+---
+
+# Phase 69 — AI conductor Tier A (2026-08-31)
+
+## Operator prompt(s)
+
+> lets do ai-conductor and then tier a 1-3 after. lmk if u need me
+
+## What changed
+
+- **`NEO-1.0-DESIGN/AI-CONDUCTOR.md`** — design doc (bundle, sequencing, hooks, Tier B backlog).
+- **`lib/neo-conductor.sh`** — `neo_conductor_build_bundle`, `neo_conductor_after_triage`,
+  `neo_conductor_on_phase_entry`, pause nudges, mission-state hook.
+- **Wiring:** `neo-ai.sh`, `neo-payload.sh`, `neo-borg.sh`, `neo-workbench.sh`, `neo-ai-cli.sh`,
+  `neo.sh` (lib list, phase entry, pause nudge).
+- **`test/conductor-test.sh`** — offline bundle tests.
+
+## Verification deferred to home Linux
+
+`./test/conductor-test.sh`, `./test/run-all.sh`, `./test/neo-diagnostic.sh`
+
+---
+
+# Phase 70 — Pause menu + conductor tuning (2026-08-31)
+
+## Operator prompt(s)
+
+> yes lets tune. do a full pass — one specific thing to examine is what letters are being offered for various actions at the pause points. i want the letters to make sense based on what command its running.
+
+## What changed
+
+- **`lib/neo-menu.sh`** — `neo_menu_compose_pause_extras` (plan/run/learn/deliver groups),
+  `neo_menu_primary_prompt`, `neo_menu_conductor_nudge`, `neo_menu_letter_legend`.
+- **Menu labels:** `[b]org research`, `[p]suggest next`, `[t]ry it`, `[o]perator pane`,
+  `[z]diagnose failure`, `[e]xplain (ELI5)`, `[f]write report`, `[a]sk AI`.
+- **`lib/neo-conductor.sh`** — letter-aligned Y/n prompts; triage payload default **n**;
+  foothold/privesc payload **Y**; `conductor_payload_phase` dedupes repeat offers.
+- **`neo.sh`** — grouped pause line via `neo_menu_primary_prompt`.
+
+## Verification deferred to home Linux
+
+`./test/menu-routing-test.sh`, `./test/conductor-test.sh`, `./test/run-all.sh`
 

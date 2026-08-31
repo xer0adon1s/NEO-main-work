@@ -51,7 +51,13 @@ for test_file in \
     notes-lib-test.sh \
     recon-bundle-test.sh \
     borg-test.sh \
+    borg-disclosure-test.sh \
+    borg-library-ingest-test.sh \
+    borg-library-ai-test.sh \
+    conductor-test.sh \
+    neo-feedback-test.sh \
     payload-test.sh \
+    neo-report-test.sh \
     neo-boot-test.sh \
     menu-routing-test.sh \
     interact-test.sh \

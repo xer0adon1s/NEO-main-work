@@ -59,6 +59,8 @@ assert_classify o open-operator
 assert_classify O open-operator
 assert_classify e eli5
 assert_classify E eli5
+assert_classify f final-report
+assert_classify F final-report
 
 # --- unmatched input (numeric script choices, garbage, empty) falls through cleanly ---
 assert_classify 1 unmatched
@@ -97,6 +99,17 @@ raw_arms="$(grep -nE '^\s*(a\|A|s\|S)\)' "${neo_sh}" || true)"
 ${raw_arms}"
 
 bash -n "${NEO_DIR}/lib/neo-menu.sh" && ok "syntax: lib/neo-menu.sh" || bad "syntax: lib/neo-menu.sh"
+
+primary="$(neo_menu_primary_prompt recon)"
+[[ "${primary}" == *"[d]eep enum"* ]] && ok "recon primary prompt includes deep enum" || bad "recon prompt: ${primary}"
+[[ "$(neo_menu_primary_prompt foothold)" == *"[c]ontinue"* ]] && ok "foothold primary prompt" || bad "foothold prompt"
+
+legend="$(neo_menu_letter_legend)"
+[[ "${legend}" == *"[p]ayload suggestion"* ]] && ok "letter legend: payload suggestion" || bad "legend missing [p]"
+[[ "${legend}" == *"[b]org research"* ]] && ok "letter legend: borg research" || bad "legend missing [b]"
+[[ "${legend}" == *"[z]diagnose"* ]] && ok "letter legend: diagnose" || bad "legend missing [z]"
+
+bash -n "${NEO_DIR}/lib/neo-conductor.sh" && ok "syntax: neo-conductor.sh" || bad "syntax: neo-conductor.sh"
 
 printf '\n%d passed, %d failed\n' "${pass}" "${fail}"
 test "${fail}" -eq 0

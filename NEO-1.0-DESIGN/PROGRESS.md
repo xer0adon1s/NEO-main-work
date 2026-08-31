@@ -1,63 +1,52 @@
 # NEO 1.0 Design Progress
 
-Last updated: 2026-08-31
+Last updated: 2026-08-31 (post attack-plan waves + ELI5 + doc sync)
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
-| Projects total | 20 |
+| Projects total | 21 (P01–P21) |
 | review_ready | 19 |
-| in_progress | 1 (P20 workbench — integrated in production tree) |
-| deferred | 0 |
-| Prototype modules | 15 shell libs/scripts |
-| Prototype tests | 6 suites |
-| JSON schemas | 6 |
+| in_progress | 2 (P20 workbench, P21 MSF foundation) |
+| Prototype / production libs | 20+ under `lib/` |
+| Unit test suites | 20+ in `test/run-all.sh` |
+| Shipped version | `0.5` → target `1.0.0-rc` after lab E2E |
 
 ## Project status
 
-| ID | Title | Status | Design | Prototype |
-|----|-------|--------|--------|-----------|
-| P01 | Baseline | review_ready | ✓ | n/a |
-| P02 | ListenAssist | review_ready | ✓ | ✓ |
-| P03 | FindPrivs transport | review_ready | ✓ | ✓ |
-| P04 | Borg v2 | review_ready | ✓ | ✓ |
-| P05 | Secrets | review_ready | ✓ | ✓ |
-| P06 | Safe actions | review_ready | ✓ | ✓ |
-| P07 | Operator recon | review_ready | ✓ | ✓ |
-| P08 | AI provider | review_ready | ✓ | ✓ |
-| P09 | Test integrity | review_ready | ✓ | ✓ |
-| P10 | VPN consent | review_ready | ✓ | ✓ |
-| P11 | Tool provenance | review_ready | ✓ | partial |
-| P12 | Doc truth | review_ready | ✓ | stub |
-| P13 | Scope policy | review_ready | ✓ | ✓ |
-| P14 | Evidence | review_ready | ✓ | ✓ |
-| P15 | Service enum | review_ready | ✓ | ✓ |
-| P16 | Mission state | review_ready | ✓ | ✓ |
-| P17 | Privesc workflow | review_ready | ✓ | partial |
-| P18 | CLI validation | review_ready | ✓ | n/a |
-| P19 | GUI boundary | review_ready | ✓ | n/a |
-| P20 | Operator workbench | in_progress | ✓ | ✓ (Tier 2.5) |
+| ID | Title | Status | Production |
+|----|-------|--------|------------|
+| P01 | Baseline | review_ready | Traceability YAML, WORKFLOW-MAP |
+| P02 | ListenAssist | review_ready | Full script + MSF handler (P21) |
+| P03 | FindPrivs transport | review_ready | Wrapper + ingest |
+| P04 | Borg assimilation | review_ready | v1 pause + v2 `--v2` |
+| P05–P19 | (see MASTER-MANIFEST) | review_ready | Integrated per tier |
+| P20 | Operator workbench | **in_progress** | Core loop + post phase; lab E2E pending |
+| P21 | Exploit framework (MSF) | **in_progress** | Foundation + session adapter prototyped |
+
+## Landed since initial PROGRESS (2026-08-31)
+
+- Attack Plan Waves 1–4: post workbench, pipeline hooks, MSF handler, neo-vendor
+- Phase 61: session adapter, MSF post menu
+- Phase 62: ELI5 `[e]` educational tutor
+- Phase 63: Borg HUD spam fix, doc truth sweep, vendor rollback, diagnostic expansion
 
 ## Blockers
 
 | Blocker | Owner | Resolution |
 |---------|-------|------------|
-| No Bash on work Windows PC | environment | Run tests on home Linux |
-| Production integration | operator | NEO-at-work git, waves C1–C5 |
-| E2E lab boxes | operator | P18 on HTB VPN |
+| Bash tests on work PC | environment | Home Linux tonight |
+| P18 E2E (3 HTB boxes) | operator | `E2E-CHECKLIST.md` |
+| VERSION 1.0.0-rc | operator | After `run-all.sh` + diagnostic green |
 
-## Next actions for operator
+## Next actions for operator (home Linux)
 
-1. Push `NEO-1.0-DESIGN/` to **neo-at-work** git (separate from live NEO)
-2. On Linux: `cd NEO-1.0-DESIGN/prototype/neo-next && bash test/run-all.sh`
-3. Review INTEGRATION-PLAN wave 1 when ready to integrate
-4. Say the word when home lab is available for integration session
-
-## Files added this session
-
-- P01: REQUIREMENTS-TRACEABILITY.yaml, DISCREPANCIES.yaml, WORKFLOW-MAP.md, HISTORY-INGESTION.md
-- P02–P19: DESIGN.md each
-- Root: INTEGRATION-PLAN.md, IMPLEMENTATION-ROADMAP.md, PROGRESS.md (this file)
-- Root: SECRETS-RUNBOOK.md, UPGRADE-FROM-0.5.md
-- Prototype: privesc normalizer/ranker, neo-vendor, doc-truth-check, schemas
+```bash
+./test/run-all.sh
+./test/neo-diagnostic.sh
+./tools/doc-truth-check.sh
+./neo.sh <box> <ip>   # full loop recon → post with [t]/[e]
+# E2E-CHECKLIST.md — 3 boxes when VPN up
+# Then: bump VERSION to 1.0.0-rc if green
+```

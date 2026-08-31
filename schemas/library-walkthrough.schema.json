@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo.local/schemas/library-walkthrough.schema.json",
+  "title": "Borg library walkthrough path",
+  "type": "object",
+  "required": ["schema_version", "path_id", "box_id", "platform", "ingested", "disclosure", "source"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "path_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+    "box_id": { "type": "string", "pattern": "^[a-z0-9]+:[a-z0-9][a-z0-9._-]{0,48}$" },
+    "platform": { "enum": ["htb", "tryhackme", "vulnhub", "course", "oscp", "oswe", "osee", "gxpn", "other"] },
+    "display_name": { "type": "string", "maxLength": 120 },
+    "path_name": { "type": "string", "maxLength": 200 },
+    "ingested": { "type": "string", "format": "date-time" },
+    "cves": { "type": "array", "items": { "type": "string", "pattern": "^CVE-[0-9]{4}-[0-9]+$" } },
+    "techniques": { "type": "array", "items": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "source": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["manual", "operator", "url", "transcript"] },
+        "url": { "type": "string" },
+        "author": { "type": "string" },
+        "license": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "disclosure": {
+      "type": "object",
+      "required": ["educational_safe", "professional_full"],
+      "properties": {
+        "educational_safe": { "type": "boolean" },
+        "professional_full": { "type": "boolean" },
+        "lint_passed": { "type": "boolean" }
+      }
+    },
+    "files": {
+      "type": "object",
+      "properties": {
+        "educational": { "type": "string" },
+        "steps": { "type": "string" }
+      }
+    }
+  }
+}

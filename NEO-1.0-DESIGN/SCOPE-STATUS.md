@@ -26,10 +26,10 @@ This is the long-form status board. For item checkboxes see [`HARD-CODE-BACKLOG.
 |------|------|---------|
 | 0 | Core dependencies | **Complete** |
 | 1 | P0 safety | **Complete** |
-| 2 | P1 workflows | **Complete** (helpers exist but some not pipeline-wired) |
-| 2.5 | Operator workbench | **Prototyped** |
-| 3 | Release polish | **Incomplete** |
-| 4 | P2 hardening | **Not started** |
+| 2 | P1 workflows | **Complete** |
+| 2.5 | Operator workbench | **Prototyped** (code complete; lab E2E pending) |
+| 3 | Release polish | **Incomplete** (blocked on lab validation + VERSION bump) |
+| 4 | P2 hardening | **Prototyped** (4.1–4.8 code landed; 4.7 deferred) |
 | 5 | Post-1.0 / GUI | **Deferred** |
 
 **What blocks `1.0.0-rc`:** P18 lab E2E on 3 HTB boxes (Tier 3.13), operator sign-off, VERSION bump (3.12). Linux lab required — Windows work PC cannot run bash suites.
@@ -80,7 +80,7 @@ Foundation libraries, schemas, bootstrap, and release gates. Everything else dep
 |----|-----------|------|--------|-------|
 | C7 | State machine | `lib/neo-mission-state.sh` | **Complete** | `preflight → recon → … → complete` |
 | — | State persistence | `~/.local/state/neo/projects/<p>/mission.json` | **Complete** | Parallel to legacy `project.meta phase` |
-| — | MSF session adapter | mission.json session fields | **Not started** | P21 / Tier 4 — meterpreter/shell tracking |
+| — | MSF session adapter | mission.json session fields | **Prototyped** | `neo_mission_record_msf_session`, session connect |
 
 ## 0.F — Engagement scope policy
 
@@ -159,7 +159,7 @@ Scope intake, stub replacement, Borg v2, VPN consent, recon/privesc helper scrip
 |----|------|------|--------|-------|
 | 2.4 | ListenAssist full script | `foothold/ListenAssist.sh` | **Complete** | ncat/nc/socat; ~170 lines; in pipeline |
 | — | Integrity gate stub check | gate | **Complete** | Passes substantive marker |
-| — | MSF handler pairing | ListenAssist + msfconsole | **Not started** | P21 — `exploit/multi/handler` workflow |
+| — | MSF handler pairing | ListenAssist + msfconsole | **Prototyped** | `--handler msf` / auto-detect |
 
 ## 2.C — Post-foothold enum / FindPrivs (P03)
 
@@ -236,7 +236,7 @@ The main NEO 1.0 product differentiator: suggest → verify → try → capture 
 | 2.5.3 | Workbench loop | `lib/neo-workbench.sh` | **Complete** | Extract command, classify transport, capture |
 | — | Transport modes | workbench | **Complete** | `local_safe`, `operator_pane`, `manual_only` |
 | — | Mission hooks | workbench + mission-state | **Complete** | `foothold_attempt`, `session_established` |
-| — | Post phase `[t]`/`[o]` | `neo_workbench_visible_phase` | **Incomplete** | Currently recon/foothold/privesc only — post pause exists but workbench menu hidden |
+| — | Post phase `[t]`/`[o]` | `neo_workbench_visible_phase` | **Complete** | recon, foothold, privesc, **post** |
 
 ## 2.5.D — Pause menu integration
 
@@ -291,15 +291,15 @@ Docs, vendor tooling, toolkit preflight, MSF foundation, version bump, E2E gate.
 |----|------|------|--------|-------|
 | 3.2 | Vendor manifest CLI | `tools/neo-vendor.sh` | **Prototyped** | inventory / verify / init / install-vendor |
 | 3.2 | Manifest file | `vendor/manifest.json` | **Prototyped** | Schema present; may be empty until populated |
-| — | Per-tool install | `neo-vendor install <name>` | **Not started** | Design in P11; only `./setup.sh` wrapper today |
-| — | Rollback | `neo-vendor rollback` | **Not started** | Design only |
+| — | Per-tool install | `neo-vendor install <name>` | **Prototyped** | Distro + vendor kind |
+| — | Rollback | `neo-vendor rollback` | **Prototyped** | File backup restore; distro = manual |
 
 ## 3.C — Enumeration plan review (P15)
 
 | ID | Item | Path | Status | Notes |
 |----|------|------|--------|-------|
 | 3.3 | Plan reviewer | `recon/review-plan.sh` | **Prototyped** | Review [r] / execute [e] / skip [s] |
-| — | Pipeline auto-hook | neo.sh after babysteps | **Not started** | plan-enum output not consumed automatically |
+| — | Pipeline auto-hook | neo.sh after babysteps | **Complete** | `neo_pipeline_offer_plan_enum` at recon pause |
 
 ## 3.D — Release artifacts
 
@@ -330,11 +330,11 @@ Docs, vendor tooling, toolkit preflight, MSF foundation, version bump, E2E gate.
 | — | MSF in tool picker | `neo-payload.sh` | **Complete** | Alongside nmap, gobuster, etc. |
 | — | MSF install in toolkit | `neo-toolkit.sh` | **Complete** | metasploit package mapping |
 | — | Unit tests | `test/exploit-framework-test.sh` | **Complete** | Offline detection + classify |
-| — | Handler + ListenAssist | P21 | **Not started** | Guided handler workflow |
-| — | Post-phase MSF menu | P21 | **Not started** | Post modules via workbench |
+| — | Handler + ListenAssist | P21 | **Prototyped** | MSF handler in ListenAssist |
+| — | Post-phase MSF menu | P21 | **Prototyped** | `neo_pipeline_offer_msf_post` + module catalog |
 | — | Meterpreter session adapter | P21 | **Prototyped** | `neo_mission_record_msf_session` + post menu |
-| — | MSF resource script runner | P21 | **Not started** | |
-| — | Module search automation | P21 | **Not started** | Beyond AI-suggested `search cve:` |
+| — | MSF resource script runner | P21 | **Prototyped** | `neo_msf_write_resource_script` |
+| — | Module search automation | P21 | **Prototyped** | `neo_msf_search_command` (advisory) |
 
 ## 3.G — Version & E2E release gate
 
@@ -346,20 +346,20 @@ Docs, vendor tooling, toolkit preflight, MSF foundation, version bump, E2E gate.
 
 ---
 
-# TIER 4 — P2 hardening (not started)
+# TIER 4 — P2 hardening (prototyped)
 
-Lower priority; extends 1.0 after release gate. Items inferred from design docs and deferred lists — not yet numbered in backlog.
+Pipeline wiring, session adapter, vendor rollback, MSF conductor depth. Code landed; lab validation pending.
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 4.1 | Wire `plan-enum` → `review-plan` after babysteps | **Not started** | P15 pipeline integration |
-| 4.2 | Surface privesc ranker at privesc pause | **Not started** | P17 UX |
-| 4.3 | Wire `operator-recon.sh` before Borg handoff | **Not started** | P07 |
-| 4.4 | Workbench `[t]`/`[o]` on **post** phase | **Not started** | `neo_workbench_visible_phase` gap |
-| 4.5 | Session adapter (shell → operator pane target) | **Prototyped** | P16 + P21 |
-| 4.6 | `neo-vendor install <tool>` + rollback | **Not started** | P11 full design |
-| 4.7 | Borg live web research adapter | **Not started** | Capability flag; post-1.0 candidate |
-| 4.8 | P21 full MSF conductor (handler, post, sessions) | **Not started** | Beyond 3.15 foundation |
+| 4.1 | Wire `plan-enum` after recon pause | **Complete** | `neo_pipeline_offer_plan_enum` |
+| 4.2 | Surface privesc ranker at privesc pause | **Complete** | `neo_pipeline_offer_privesc_rank` |
+| 4.3 | Wire `operator-recon.sh` before foothold | **Complete** | `neo_pipeline_offer_operator_recon` |
+| 4.4 | Workbench `[t]`/`[o]` on **post** phase | **Complete** | Wave 1 |
+| 4.5 | Session adapter (shell → operator pane target) | **Prototyped** | Phase 61 |
+| 4.6 | `neo-vendor install <tool>` + rollback | **Prototyped** | File backup rollback |
+| 4.7 | Borg live web research adapter | **Deferred** | Post-1.0 |
+| 4.8 | P21 full MSF conductor (handler, post, sessions) | **Prototyped** | No auto-exploit |
 
 ---
 
@@ -510,7 +510,7 @@ Maps end-to-end engagement flow. "Target" = 1.0 design intent; "Today" = current
 | Step | Today | Status |
 |------|-------|--------|
 | Post phase in phases.yaml | conductor-guided | **Complete** | No automated scripts |
-| [p][t] workbench on post | — | **Incomplete** | Post pause exists; [t]/[o] hidden |
+| [p][t] workbench on post | — | **Complete** | Post pause shows `[p]`/`[t]`/`[o]`/`[e]` |
 | Flags / creds sections | manual notes | **Complete** |
 | Mission → complete | mission state | **Prototyped** | Operator-driven |
 
@@ -526,31 +526,30 @@ Maps end-to-end engagement flow. "Target" = 1.0 design intent; "Today" = current
 | **P04** | Borg assimilation | P1 | **Prototyped** | v1 pause + v2 JSON `--v2` | Live research; v2 as default? |
 | **P05** | Secrets | P0 | **Complete** | Broker, gitignore, neo-secret CLI, canary tests | — |
 | **P06** | Safe actions | P0 | **Complete** | neo-actions, windup bridge, schemas | Scope enforcement on every action (partial) |
-| **P07** | Operator recon intake | P1 | **Prototyped** | `operator-recon.sh` | Wire into recon handoff |
+| **P07** | Operator recon intake | P1 | **Complete** | Wired via `neo_pipeline_offer_operator_recon` |
 | **P08** | AI provider | P1 | **Complete** | neo-provider; all AI libs routed | — |
 | **P09** | Test integrity | P0 | **Complete** | integrity gate, run-all, diagnostic hook | — |
 | **P10** | VPN consent | P1 | **Complete** | neo-vpn-consent + patch | — |
-| **P11** | Tool acquisition | P2 | **Prototyped** | neo-vendor inventory/verify/init | Per-tool install, rollback |
+| **P11** | Tool acquisition | P2 | **Prototyped** | install + file rollback |
 | **P12** | Doc / release truth | P1 | **Prototyped** | doc-truth-check.sh | CI/lab pass recorded |
 | **P13** | Engagement scope | P1 | **Complete** | intake, import, neo.sh gate, schema | — |
 | **P14** | Evidence & notes | P1 | **Complete** | evidence JSONL + notes-lib | Optional EVIDENCE-INDEX section |
-| **P15** | Service enumeration | P1 | **Prototyped** | plan-enum, review-plan | Pipeline auto-hook |
-| **P16** | Mission / session state | P1 | **Prototyped** | mission.json state machine | MSF session adapter |
-| **P17** | Privesc workflow | P1 | **Prototyped** | normalizer, ranker | Surface at pause; workbench integration |
+| **P15** | Service enumeration | P1 | **Prototyped** | plan-enum + pipeline hook |
+| **P16** | Mission / session state | P1 | **Prototyped** | mission.json + session adapter |
+| **P17** | Privesc workflow | P1 | **Prototyped** | ranker at privesc pause |
 | **P18** | CLI 1.0 validation | P1 | **Not started** | E2E-CHECKLIST written | 3 lab boxes + sign-off |
 | **P19** | GUI 2.0 boundary | P3 | **Deferred** | DESIGN.md only | All GUI work post-1.0 |
-| **P20** | Operator workbench | P1 | **Prototyped** | Full core loop integrated | Lab E2E; post phase [t]/[o] |
-| **P21** | Exploit framework (MSF when relevant) | P1 | **Prototyped** | neo-exploit-framework foundation | Handler, post, sessions |
+| **P20** | Operator workbench | P1 | **Prototyped** | Full core loop + post + ELI5 | Lab E2E (2.5.7) |
+| **P21** | Exploit framework (MSF when relevant) | P1 | **Prototyped** | Handler, post menu, session fields | Auto-exploit deferred |
 
 ---
 
 # Recommended next coding (priority order)
 
-1. **Post phase workbench** — show `[t]`/`[o]` on post pause (Tier 4.4; quick win)
-2. **P21 handler + ListenAssist** — MSF when that step needs it (Tier 4.8)
-3. **Pipeline wire plan-enum** after babysteps (Tier 4.1)
-4. **Privesc ranker at pause** (Tier 4.2)
-5. **P18 E2E** on home Linux when available (Tier 3.13)
+1. **P18 E2E** on home Linux — `E2E-CHECKLIST.md` (blocks 1.0.0-rc)
+2. **VERSION bump** to `1.0.0-rc` after operator sign-off
+3. **Borg live web research** (4.7) — post-1.0 unless prioritized
+4. **Auto-SSH operator pane** — deferred; session adapter covers manual path today
 
 ---
 

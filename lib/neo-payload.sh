@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # neo-payload.sh — [p]ayload suggest + [z] analyze failures; pairs with neo-workbench [t] try.
+
+NEO_PAYLOAD_FOCUS_SLUGS=()
 # (foothold, after a first attempt — reviews both NEO-tracked activity and, when available,
 # a tmux terminal-log capture of what was tried manually outside NEO).
 
@@ -68,9 +70,17 @@ neo_payload_mark_foothold_attempted() {
 neo_payload_menu_fragment() {
     local phase="$1" project="${2:-${PROJECT_NAME:-}}" frag=""
     neo_payload_ai_available || return 0
-    neo_payload_suggest_visible "${phase}" && frag="${frag} / [p]ayload suggest"
-    neo_payload_analyze_failures_visible "${phase}" "${project}" && frag="${frag} / [z] analyze failures"
+    neo_payload_suggest_visible "${phase}" && frag="${frag}$(neo_payload_suggest_menu_fragment)"
+    neo_payload_analyze_failures_visible "${phase}" "${project}" && frag="${frag}$(neo_payload_diagnose_menu_fragment)"
     printf '%s' "${frag}"
+}
+
+neo_payload_suggest_menu_fragment() {
+    printf ' / [p]ayload suggestion'
+}
+
+neo_payload_diagnose_menu_fragment() {
+    printf ' / [z]diagnose failure'
 }
 
 # Every letter means one thing regardless of case (p/P, z/Z) — see neo.sh's
@@ -105,14 +115,22 @@ neo_payload_read_dossier() {
 
 neo_payload_collect_borg_dossiers() {
     local project="$1"
-    local assim_dir slug path summary exploit
+    local assim_dir slug path summary exploit focus=false
     assim_dir="${NEO_HOME}/projects/${project}/assimilated"
     [[ -d "${assim_dir}" ]] || { printf '_No assimilated vectors for this mission._\n'; return 0; }
+    ((${#NEO_PAYLOAD_FOCUS_SLUGS[@]} > 0)) && focus=true
 
     local any=false
     for path in "${assim_dir}"/*; do
         [[ -e "${path}" ]] || continue
         slug="$(basename "${path}")"
+        if [[ "${focus}" == true ]]; then
+            local match=false s
+            for s in "${NEO_PAYLOAD_FOCUS_SLUGS[@]}"; do
+                [[ "${s}" == "${slug}" ]] && match=true
+            done
+            [[ "${match}" == true ]] || continue
+        fi
         [[ -f "${path}/SUMMARY.md" || -L "${path}" ]] || continue
         any=true
         printf '### Vector: %s\n' "${slug}"
@@ -125,6 +143,113 @@ neo_payload_collect_borg_dossiers() {
         [[ -n "${exploit}" ]] && printf '#### Technique / wind-up\n%s\n\n' "${exploit}"
     done
     [[ "${any}" == true ]] || printf '_No Borg dossiers linked — run [b]org assimilate first._\n'
+}
+
+neo_payload_has_borg_dossiers() {
+    local project="$1" assim_dir path
+    assim_dir="${NEO_HOME}/projects/${project}/assimilated"
+    [[ -d "${assim_dir}" ]] || return 1
+    for path in "${assim_dir}"/*; do
+        [[ -e "${path}" ]] || continue
+        [[ -f "${path}/SUMMARY.md" || -L "${path}" ]] && return 0
+    done
+    return 1
+}
+
+neo_payload_list_borg_slugs() {
+    local project="$1" assim_dir path slug
+    assim_dir="${NEO_HOME}/projects/${project}/assimilated"
+    [[ -d "${assim_dir}" ]] || return 0
+    for path in "${assim_dir}"/*; do
+        [[ -e "${path}" ]] || continue
+        slug="$(basename "${path}")"
+        [[ -f "${path}/SUMMARY.md" || -L "${path}" ]] && printf '%s\n' "${slug}"
+    done
+}
+
+# Borg wind-up [RUN:…] / [PAYLOAD:…] lines already proposed during assimilation.
+neo_payload_collect_borg_windup_actions() {
+    local project="$1" assim_dir path slug found=false focus=false
+    assim_dir="${NEO_HOME}/projects/${project}/assimilated"
+    [[ -d "${assim_dir}" ]] || { printf '_none_\n'; return 0; }
+    ((${#NEO_PAYLOAD_FOCUS_SLUGS[@]} > 0)) && focus=true
+    for path in "${assim_dir}"/*; do
+        [[ -e "${path}" ]] || continue
+        slug="$(basename "${path}")"
+        if [[ "${focus}" == true ]]; then
+            local match=false s
+            for s in "${NEO_PAYLOAD_FOCUS_SLUGS[@]}"; do
+                [[ "${s}" == "${slug}" ]] && match=true
+            done
+            [[ "${match}" == true ]] || continue
+        fi
+        if [[ -L "${path}" ]]; then
+            path="$(readlink -f "${path}" 2>/dev/null || readlink "${path}")"
+        fi
+        for slug_file in "${path}/SUMMARY.md" "${path}/EXPLOIT.md"; do
+            [[ -f "${slug_file}" ]] || continue
+            while IFS= read -r line; do
+                [[ -n "${line}" ]] || continue
+                found=true
+                printf '%s: %s\n' "${slug}" "${line}"
+            done < <(grep -E '\[(RUN|PAYLOAD|NEO):' "${slug_file}" 2>/dev/null || true)
+        done
+    done
+    [[ "${found}" == true ]] || printf '_No Borg wind-up actions in dossiers yet._\n'
+}
+
+# Set global NEO_PAYLOAD_FOCUS_SLUGS[] — all slugs when only one; interactive when many.
+neo_payload_pick_focus_slugs() {
+    local project="$1"
+    local -a slugs=() choice pick i s match
+    NEO_PAYLOAD_FOCUS_SLUGS=()
+    mapfile -t slugs < <(neo_payload_list_borg_slugs "${project}")
+    ((${#slugs[@]} == 0)) && return 0
+    if ((${#slugs[@]} == 1)); then
+        NEO_PAYLOAD_FOCUS_SLUGS=("${slugs[0]}")
+        return 0
+    fi
+
+    neo_payload_init_colors
+    printf '\n%s  ▸ BORG FOCUS — which assimilated vector(s) for this suggest?%s\n\n' \
+        "${C_CYAN}" "${C_RESET}" >&2
+    for i in "${!slugs[@]}"; do
+        printf '  %2d) %s\n' "$((i + 1))" "${slugs[$i]}" >&2
+    done
+    printf '   a) All assimilated vectors\n   q) Cancel\n\n' >&2
+    read -r -p 'Focus slug(s)? [a] (comma-separated numbers): ' choice
+    choice="${choice:-a}"
+    case "${choice}" in
+        q|Q) return 1 ;;
+        a|A|all|ALL)
+            NEO_PAYLOAD_FOCUS_SLUGS=("${slugs[@]}")
+            return 0
+            ;;
+        *)
+            IFS=',' read -r -a picks <<< "${choice// /,}"
+            for pick in "${picks[@]}"; do
+                pick="$(tr -d '[:space:]' <<< "${pick}")"
+                [[ "${pick}" =~ ^[0-9]+$ ]] || continue
+                (( pick >= 1 && pick <= ${#slugs[@]} )) || continue
+                NEO_PAYLOAD_FOCUS_SLUGS+=("${slugs[$((pick - 1))]}")
+            done
+            ((${#NEO_PAYLOAD_FOCUS_SLUGS[@]} > 0)) || NEO_PAYLOAD_FOCUS_SLUGS=("${slugs[@]}")
+            return 0
+            ;;
+    esac
+}
+
+neo_payload_offer_after_borg() {
+    local project="$1" phase="$2" ans
+    [[ -t 0 ]] || return 0
+    # shellcheck source=neo-payload.sh
+    declare -F neo_payload_suggest_at_pause >/dev/null 2>&1 || return 0
+    neo_payload_init_colors
+    printf '\n%s[*]%s Assimilation complete — suggest a next command from the new dossier?\n' \
+        "${C_CYAN}" "${C_RESET}"
+    read -r -p '[p] Borg-guided payload suggestion? [Y/n] ' ans
+    [[ "${ans}" =~ ^[Nn]$ ]] && return 0
+    neo_payload_suggest_at_pause "${project}" "${phase}" "borg-guided"
 }
 
 # Distro-package tool names present in this mission's assimilated Borg manifests (name:
@@ -174,13 +299,20 @@ neo_payload_list_candidate_tools() {
 }
 
 # Interactive tool picker. Prints the chosen tool name on stdout; returns 1 on cancel.
+# When Borg dossiers exist, option 0 = borg-guided (AI picks tool + command from dossiers).
 neo_payload_pick_tool() {
     local project="$1"
     local -a names=() avail=()
-    local line name flag pick i
+    local line name flag pick i borg_mode=false
+
+    neo_payload_has_borg_dossiers "${project}" && borg_mode=true
 
     neo_payload_init_colors
     printf '\n%s  ▸ TOOL CHECK — which tool do you want to use?%s\n\n' "${C_CYAN}" "${C_RESET}" >&2
+    if [[ "${borg_mode}" == true ]]; then
+        printf '  %s0) Borg-guided (recommended — AI picks from assimilated dossiers)%s\n\n' \
+            "${C_BRIGHT}" "${C_RESET}" >&2
+    fi
 
     while IFS='|' read -r name flag; do
         [[ -n "${name}" ]] || continue
@@ -188,7 +320,7 @@ neo_payload_pick_tool() {
         avail+=("${flag}")
     done < <(neo_payload_list_candidate_tools "${project}")
 
-    if ((${#names[@]} == 0)); then
+    if ((${#names[@]} == 0)) && [[ "${borg_mode}" != true ]]; then
         printf '  (no candidate tools found)\n' >&2
         return 1
     fi
@@ -202,10 +334,26 @@ neo_payload_pick_tool() {
     done
     printf '   m) type a different tool name\n   q) cancel\n\n' >&2
 
-    read -r -p 'Use which tool? [1]: ' pick
-    pick="${pick:-1}"
+    if [[ "${borg_mode}" == true ]]; then
+        read -r -p 'Use which tool? [0]: ' pick
+        pick="${pick:-0}"
+    else
+        read -r -p 'Use which tool? [1]: ' pick
+        pick="${pick:-1}"
+    fi
     case "${pick}" in
         q|Q) return 1 ;;
+        0)
+            if [[ "${borg_mode}" == true ]]; then
+                printf 'borg-guided'
+                return 0
+            fi
+            if ((${#names[@]} > 0)); then
+                printf '%s' "${names[0]}"
+                return 0
+            fi
+            return 1
+            ;;
         m|M)
             read -r -p 'Tool name: ' pick
             [[ -n "${pick}" ]] || return 1
@@ -217,13 +365,31 @@ neo_payload_pick_tool() {
                 printf '%s' "${names[$((pick - 1))]}"
                 return 0
             fi
-            printf '%s' "${names[0]}"
-            return 0
+            if ((${#names[@]} > 0)); then
+                printf '%s' "${names[0]}"
+                return 0
+            fi
+            [[ "${borg_mode}" == true ]] && printf 'borg-guided' && return 0
+            return 1
             ;;
     esac
 }
 
 neo_payload_build_bundle() {
+    local project="$1" phase="$2" tool="${3:-}"
+    local bundle extra
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor.sh" 2>/dev/null || true
+    if declare -F neo_conductor_build_bundle >/dev/null 2>&1; then
+        bundle="$(neo_conductor_build_bundle "${project}" "${phase}" payload "${tool}")" && {
+            printf '%s' "${bundle}"
+            return 0
+        }
+    fi
+    neo_payload_build_bundle_legacy "${project}" "${phase}" "${tool}"
+}
+
+neo_payload_build_bundle_legacy() {
     local project="$1" phase="$2" tool="${3:-}"
     local target whoami borg_notes prior_payload msf_block="" mission_block="" post_msf=""
 
@@ -273,6 +439,12 @@ ${borg_notes:-_none_}
 ## Borg dossiers (collective)
 $(neo_payload_collect_borg_dossiers "${project}")
 
+## Borg wind-up actions (from dossiers — confirm before running)
+$(neo_payload_collect_borg_windup_actions "${project}")
+
+## Assimilated slugs (this mission)
+$(neo_payload_list_borg_slugs "${project}" | awk 'BEGIN{n=0} {if(n++) printf ", "; printf "%s", $0} END{if(NR==0) print "_none_"}')
+
 ## Prior payload / analysis runs
 ${prior_payload:-_none_}
 
@@ -290,46 +462,89 @@ ${whoami:-_none_}
 
 ## Sudo / privesc hints
 $(notes_get_section SUDO 2>/dev/null | neo_ai_strip_ansi 2>/dev/null | head -c 2000 || echo _none_)
+$(neo_payload_disclosure_bundle_block "${project}")
 EOF
+}
+
+neo_payload_disclosure_bundle_block() {
+    local project="$1"
+    # shellcheck source=neo-borg-disclosure.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg-disclosure.sh" 2>/dev/null || return 0
+    neo_borg_disclosure_ai_rules "${project}"
 }
 
 # No more wind-up tags, no auto-execute — the operator picks the tool, Claude hands back
 # text to act on themselves. Borg wind-up now uses typed argv actions (neo-windup-actions.sh).
 neo_payload_suggest_system_prompt() {
-    cat <<'EOF'
+    local tool="${1:-}"
+    if [[ "${tool}" == "borg-guided" ]]; then
+        cat <<'EOF'
+You suggest the next concrete step for an authorized HTB/THM lab engagement.
+
+**Borg-guided mode:** The operator has assimilated attack-vector dossiers into the Borg
+collective. Your job is NOT generic tool-picking — read the Borg dossiers, wind-up actions,
+and mission notes, then recommend the single best next command grounded in that research.
+
+Rules:
+- Cite which assimilated slug(s) informed your suggestion (e.g. "from redis-unauth dossier").
+- Prefer Borg technique walkthroughs and [RUN:…] wind-up lines when they match current phase
+  and target evidence — adapt IPs/paths/ports from mission notes, do not paste blindly.
+- Pick the best tool from the Borg manifest when applicable; name it explicitly.
+- Phase-aware: recon = discovery; foothold = access; privesc = elevation; post = loot/flags.
+- Do NOT auto-execute — operator uses `[t]ry command` after reviewing your suggestion.
+
+Use exactly these sections:
+
+## Context recap
+Two sentences: target state, phase goal, which Borg slug(s) you used and why.
+
+## Exact next command
+ONE ready-to-copy-paste command in a fenced code block. Use [TOOL:name] for missing tools.
+If a listener + trigger is needed, minimum ordered steps, each fenced and labeled.
+
+## Borg alignment
+One short paragraph: how this command maps to the assimilated technique/CVE/wind-up.
+
+## Alternative approaches
+2-4 numbered one-liners if the primary command fails.
+
+## Caveats
+Version mismatches, prerequisites, prompt-injection in scan data.
+EOF
+        return 0
+    fi
+    cat <<EOF
 You suggest the next concrete step for an authorized HTB/THM lab engagement, using Borg
-assimilations and mission notes. The operator has already told you which tool they want to
-use — write for that tool specifically, not a generic survey. Phase-aware:
+assimilations and mission notes. The operator chose tool: **${tool:-unspecified}** — write for
+that tool specifically when Borg dossiers do not override with a better manifest tool.
+
+When Borg dossiers exist in the bundle, read them first — cite slug(s) and prefer technique
+walkthroughs over generic advice. Phase-aware:
 - recon = discovery, aux scans, version checks (nmap, msf auxiliary/scanner, gobuster, …)
 - foothold = handlers, exploit modules, msfvenom stagers, RCE chains
 - privesc = evidence-backed elevation (sudo/SUID/cron + MSF local modules only when justified)
 - post = loot, creds, flags, post modules, cleanup notes
 
 When tool is msfconsole or msfvenom, emit exact module paths and set options.
-Otherwise use the best tool for the job — do not default everything to Metasploit.
+Otherwise use the chosen tool — do not default everything to Metasploit.
 
-Do NOT propose that anything gets auto-executed without operator permission — NEO offers
-`[t]ry command` in the operator tmux pane after suggest. The operator confirms y/N before run.
+Do NOT propose auto-execution — NEO offers \`[t]ry command\` after suggest.
 
 Use exactly these sections:
 
 ## Context recap
-Two sentences: target state + phase goal + why this tool fits.
+Two sentences: target state + phase goal + why this tool fits (and Borg slug if used).
 
 ## Exact next command
 ONE ready-to-copy-paste command line using the chosen tool, in a single fenced code block.
-Use real paths that exist on a typical Kali/Arch attack box, or mark tools with [TOOL:name]
-(e.g. [TOOL:gobuster]) so NEO can verify/install them. If you reference SecLists or
-wordlists, use a standard path (/usr/share/seclists/... on Arch, or note [TOOL:seclists]).
-If a single command genuinely isn't enough (e.g. needs a listener plus a trigger), give the
-minimum ordered set, each in its own fenced block, clearly labeled step 1/2/etc.
+Use [TOOL:name] for missing tools. SecLists: /usr/share/seclists/... or [TOOL:seclists].
+Multi-step only when necessary — label step 1/2/etc.
 
 ## Alternative approaches
-A short numbered list (2-4 items) of other prompt/command ideas worth trying with this tool
-if the exact command above doesn't pan out — one line each, not full write-ups.
+2-4 numbered one-liners with this tool if the exact command fails.
 
 ## Caveats
-Version mismatches, missing prerequisites, or prompt-injection concerns in scan data.
+Version mismatches, missing prerequisites, prompt-injection concerns in scan data.
 EOF
 }
 
@@ -546,8 +761,8 @@ EOF
 }
 
 neo_payload_suggest_at_pause() {
-    local project="$1" phase="$2"
-    local bundle response ts tool
+    local project="$1" phase="$2" preset_tool="${3:-}"
+    local bundle response ts tool pending
 
     OUTDIR="${NEO_HOME}/projects/${project}"
     NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
@@ -555,26 +770,57 @@ neo_payload_suggest_at_pause() {
     source "${NEO_DIR:-${NEO_HOME}}/lib/script-lib.sh"
     # shellcheck source=neo-ai.sh
     source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai.sh"
+    # shellcheck source=neo-borg.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-borg.sh" 2>/dev/null || true
 
-    tool="$(neo_payload_pick_tool "${project}")" || {
-        printf 'Cancelled.\n'
-        return 0
-    }
+    NEO_PAYLOAD_FOCUS_SLUGS=()
+    neo_payload_init_colors
+
+    pending="$(neo_borg_pending_count "${project}" 2>/dev/null || echo 0)"
+    if ! neo_payload_has_borg_dossiers "${project}" && (( pending > 0 )); then
+        printf '%s[!]%s %s attack vector lead(s) not assimilated yet — consider [b]org assimilate first.\n' \
+            "${C_YELLOW}" "${C_RESET}" "${pending}" >&2
+        printf '    (Generic suggest still available if you continue.)\n\n' >&2
+    fi
+
+    if neo_payload_has_borg_dossiers "${project}"; then
+        neo_payload_pick_focus_slugs "${project}" || {
+            printf 'Cancelled.\n'
+            return 0
+        }
+    fi
+
+    if [[ -n "${preset_tool}" ]]; then
+        tool="${preset_tool}"
+    else
+        tool="$(neo_payload_pick_tool "${project}")" || {
+            printf 'Cancelled.\n'
+            return 0
+        }
+    fi
 
     # shellcheck source=neo-exploit-framework.sh
     source "${NEO_DIR:-${NEO_HOME}}/lib/neo-exploit-framework.sh" 2>/dev/null || true
     declare -F neo_msf_offer_install_hint >/dev/null 2>&1 && neo_msf_offer_install_hint
 
     neo_payload_init_colors
-    printf '\n%s[*]%s Suggest payload — %s, using Borg + mission context…\n\n' "${C_CYAN}" "${C_RESET}" "${tool}"
+    if [[ "${tool}" == "borg-guided" ]]; then
+        printf '\n%s[*]%s Borg-guided suggest — AI reading assimilated dossiers + mission notes…\n\n' \
+            "${C_CYAN}" "${C_RESET}"
+    else
+        printf '\n%s[*]%s Payload suggest — %s phase, tool %s (Borg dossiers in bundle)…\n\n' \
+            "${C_CYAN}" "${C_RESET}" "${phase}" "${tool}"
+    fi
 
     bundle="$(neo_payload_build_bundle "${project}" "${phase}" "${tool}")"
-    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt)")"; then
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")")"; then
         return 1
     fi
 
     ts="$(date '+%Y-%m-%d %H:%M:%S')"
-    neo_payload_save_section "Payload suggest (${tool})" "${response}"
+    local kind="Payload suggest (${tool})"
+    [[ "${tool}" == "borg-guided" ]] && kind="Payload suggest (Borg-guided)"
+    neo_payload_save_section "${kind}" "${response}"
     neo_payload_print_brief "${response}" "PAYLOAD SUGGEST — ${tool} — TERMINAL BRIEF"
 
     # shellcheck source=neo-toolkit.sh
@@ -592,6 +838,12 @@ neo_payload_suggest_at_pause() {
     if declare -F neo_eli5_offer_after >/dev/null 2>&1; then
         cmd="$(awk '/^## Exact next command/{f=1;next} f&&/^```/{if(!o){o=1;next} exit} f&&o{print}' <<< "${response}" | head -20 || true)"
         neo_eli5_offer_after "${project}" "${phase}" "${cmd}" || true
+    fi
+
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor.sh" 2>/dev/null || true
+    if declare -F neo_conductor_mark_payload_done >/dev/null 2>&1; then
+        neo_conductor_mark_payload_done "${phase}"
     fi
 }
 

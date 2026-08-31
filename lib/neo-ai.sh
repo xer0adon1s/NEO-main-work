@@ -269,6 +269,24 @@ neo_ai_save_triage() {
 
 neo_ai_build_recon_bundle() {
     local project="$1"
+    local phase bundle
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
+    phase="$(meta_get phase 2>/dev/null || echo recon)"
+    # shellcheck source=neo-conductor.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor.sh" 2>/dev/null || true
+    if declare -F neo_conductor_build_bundle >/dev/null 2>&1; then
+        bundle="$(neo_conductor_build_bundle "${project}" "${phase}" triage)" && {
+            printf '%s' "${bundle}"
+            return 0
+        }
+    fi
+    # Fallback if conductor unavailable (tests/minimal env)
+    neo_ai_build_recon_bundle_legacy "${project}"
+}
+
+neo_ai_build_recon_bundle_legacy() {
+    local project="$1"
     local outdir="${NEO_HOME}/projects/${project}"
     local target phase status ports nmap services todo prior_triage attackpath foothold whoami bundle
 

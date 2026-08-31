@@ -24,8 +24,10 @@
 ## Remaining
 
 - Lab E2E → **Tier 3.13 / P18** (`NEO-1.0-DESIGN/E2E-CHECKLIST.md`)
-- Auto-SSH operator pane when session known (future)
-- Session adapter after reverse shell (future)
+- Auto-SSH operator pane when session known (**deferred** — operator runs SSH manually)
+- Session adapter → **Prototyped** (`neo_operator_pane_offer_session_connect`, Phase 61)
+- Post phase `[t]`/`[o]` → **Complete** (Wave 1)
+- ELI5 `[e]` tutor → **Complete** (Phase 62)
 
 ## Verify locally (Linux lab)
 

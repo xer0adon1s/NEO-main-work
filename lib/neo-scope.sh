@@ -112,3 +112,33 @@ neo_scope_summary() {
     neo_scope_load "${1}" "${2:-}" || return 1
     jq -r '"\(.mode) | \(.purpose) | hosts: \(.in_scope.hosts | join(", "))"' "${NEO_SCOPE_FILE}"
 }
+
+# Mirror scope into NEO_HOME project tree + project.meta (engagement_mode, client summary).
+neo_scope_sync_project_meta() {
+    local project="$1" scope_file mode client purpose platform proj_dir
+    scope_file="$(neo_scope_path "${project}")"
+    [[ -f "${scope_file}" ]] || return 0
+    command -v jq >/dev/null 2>&1 || return 0
+
+    mode="$(jq -r '.mode // empty' "${scope_file}")"
+    purpose="$(jq -r '.purpose // empty' "${scope_file}")"
+    platform="$(jq -r '.platform // empty' "${scope_file}")"
+    client="$(jq -r '.authorization.client_name // empty' "${scope_file}")"
+
+    proj_dir="${NEO_HOME:-${NEO_DIR}}/projects/${project}"
+    [[ -d "${proj_dir}" ]] || mkdir -p "${proj_dir}"
+
+    cp -f -- "${scope_file}" "${proj_dir}/engagement-scope.json" 2>/dev/null || true
+
+    if [[ -f "${NEO_HOME:-${NEO_DIR}}/lib/script-lib.sh" ]]; then
+        # shellcheck source=script-lib.sh
+        source "${NEO_HOME:-${NEO_DIR}}/lib/script-lib.sh"
+        OUTDIR="${proj_dir}"
+        NOTES_FILE="${proj_dir}/Investigation-Notes.md"
+        [[ -n "${mode}" ]] && meta_set engagement_mode "${mode}" 2>/dev/null || true
+        [[ -n "${purpose}" ]] && meta_set engagement_purpose "${purpose}" 2>/dev/null || true
+        [[ -n "${platform}" ]] && meta_set engagement_platform "${platform}" 2>/dev/null || true
+        [[ -n "${client}" ]] && meta_set engagement_client "${client}" 2>/dev/null || true
+    fi
+    return 0
+}
