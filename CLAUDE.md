@@ -13,4 +13,10 @@ When you add features, log the operator's exact prompt in `CURSOR-REVIEW-LOG.md`
 
 **Release:** NEO **v0.5** (`VERSION`; `neo.sh --version`).
 
-**Pre-review:** `./test/neo-diagnostic.sh` (61 checks) + unit suites under `test/` (162 tests total).
+**Pre-review (Linux attack box):**
+```bash
+bash tools/linux-phase1-verify.sh   # recommended gate (run-all + diagnostic + Phase 73–74)
+# or: ./test/run-all.sh && ./test/neo-diagnostic.sh
+```
+Read each runner's summary line for current counts (suites/assertions grow with new tests).
+**Last offline green (2026-09-01):** `linux-phase1-verify.sh` 6/6 · `neo-smoke-test.sh` 24/24.

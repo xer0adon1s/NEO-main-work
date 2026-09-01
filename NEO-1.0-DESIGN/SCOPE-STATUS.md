@@ -104,7 +104,7 @@ Foundation libraries, schemas, bootstrap, and release gates. Everything else dep
 |----|-----------|------|--------|-------|
 | C10 | Production integrity gate | `test/production-integrity-gate.sh` | **Complete** | Stub checks, eval ban, lib presence |
 | C11 | Test aggregate | `test/run-all.sh` | **Complete** | CORE + v0.5 + 1.0 suites |
-| C12 | Diagnostic hook | `test/neo-diagnostic.sh` | **Complete** | 61 checks (v0.5 baseline) |
+| C12 | Diagnostic hook | `test/neo-diagnostic.sh` | **Complete** | Structural + 23 suites — read banner (counts vary) |
 | — | CORE unit tests | `test/core-secrets-test.sh`, `mission-state-test.sh` | **Complete** | |
 
 ---
@@ -429,8 +429,9 @@ These existed before the 1.0 integration waves and remain operational.
 | neo boot | `test/neo-boot-test.sh` | 8 | **Complete** |
 | neo smoke | `test/neo-smoke-test.sh` | 26 | **Complete** |
 | tmux | `test/neo-tmux-test.sh` + integration | — | **Complete** |
-| neo diagnostic | `test/neo-diagnostic.sh` | 61 checks | **Complete** |
-| **Total unit + diagnostic** | | **~162+** | Verify on Linux |
+| neo diagnostic | `test/neo-diagnostic.sh` | read banner | **Complete** |
+| **run-all aggregate** | `test/run-all.sh` | 39 suites + bash -n | **Complete** |
+| **linux-phase1-verify** | `tools/linux-phase1-verify.sh` | 6-step gate | **6/6** (2026-09-01) |
 
 ---
 

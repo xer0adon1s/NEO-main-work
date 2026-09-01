@@ -96,7 +96,7 @@ check_final_report() {
         && pass 'template REPORT section' \
         || fail 'template missing REPORT section'
     [[ -f "${NEO_SOURCE_ROOT}/lib/neo-report.sh" ]] \
-        && pass 'lib/neo-report.sh present (prototyped, v0.6 — not implemented)' \
+        && pass 'lib/neo-report.sh present (prototyped v0.6 — generate wired Phase 74)' \
         || fail 'lib/neo-report.sh missing'
     [[ -f "${NEO_SOURCE_ROOT}/tools/neo-report.sh" ]] && pass 'tools/neo-report.sh present' \
         || fail 'tools/neo-report.sh missing'
@@ -145,6 +145,9 @@ check_feature_status_board() {
     grep -q 'prototyped, v0.6' "${board}" 2>/dev/null \
         && pass 'FEATURE-STATUS labels prototyped v0.6' \
         || fail 'FEATURE-STATUS missing prototyped v0.6 labels'
+    [[ -f "${NEO_SOURCE_ROOT}/NEO-1.0-DESIGN/projects/22-live-simulation-block-h/DESIGN.md" ]] \
+        && pass 'SIM-H Block H runbook present' \
+        || fail 'SIM-H runbook missing (P22)'
     local lib
     for lib in neo-conductor.sh neo-feedback.sh neo-report.sh neo-handler-pane.sh \
                neo-conductor-loop.sh neo-borg-library-ai.sh; do

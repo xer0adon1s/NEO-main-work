@@ -12,7 +12,7 @@ This file is the **single source of truth** for whether a feature is live in mis
 | Label | Meaning | When to use |
 |-------|---------|-------------|
 | **implemented** | Operator has used it in a real lab session and signed off; wired into `neo.sh` mission flow; behavior matches design intent. | Tier 0 CORE, workbench `[t]`/`[o]`, Borg `[b]` (core), payload `[p]`, ELI5 `[e]`, pipeline hooks, scope, secrets, tmux wrap, etc. |
-| **prototyped, v0.6** | `lib/` file (and/or tests) exist; offline unit tests may pass; **not** fully integrated or **not** human-approved for live missions. | All 16 Tier A/B libs added 2026-08-31 evening; guarded no-ops or printf-only at runtime until integration Blocks C–E. |
+| **prototyped, v0.6** | `lib/` file (and/or tests) exist; offline unit tests may pass; **not** fully integrated or **not** human-approved for live missions. | Tier A/B libs; Phase 74 closed many integration gaps — see Blocks C–E notes below; live sign-off = **P22 SIM-H**. |
 | **design only** | Spec / project doc / checklist only — no production lib or not started. | P19 GUI, aggressive conductor v1.1, full P08 provider migration. |
 | **review_ready** | **Design** doc ready for review — **not** production shipped. | `NEO-1.0-DESIGN/projects/*/project.yaml` status field. |
 
@@ -62,7 +62,7 @@ This file is the **single source of truth** for whether a feature is live in mis
 
 | Component | Path | Status | Notes |
 |-----------|------|--------|-------|
-| Unified bundle + phase hooks | `lib/neo-conductor.sh` | prototyped, v0.6 | Stubs; guarded wiring in `neo.sh` |
+| Unified bundle + phase hooks | `lib/neo-conductor.sh` | prototyped, v0.6 | Phase 74: real `after_triage`, `on_phase_entry` (foothold/privesc/post); `on_pause_entry` / `mission_state_hook` still no-ops |
 | Conductor design spec | `NEO-1.0-DESIGN/AI-CONDUCTOR.md` | design only | Intent doc — not status claim |
 
 ---
@@ -72,10 +72,10 @@ This file is the **single source of truth** for whether a feature is live in mis
 | Wave | Component | Path | Status |
 |------|-----------|------|--------|
 | B1 | Conductor automation loop | `lib/neo-conductor-loop.sh` | prototyped, v0.6 |
-| B2 | AI privesc triage hook | `lib/neo-conductor-privesc.sh` | prototyped, v0.6 |
-| B3 | AI enum planner | `lib/neo-enum-ai.sh` | prototyped, v0.6 |
-| B4 | Adaptive scan hints | `lib/neo-adaptive-scan.sh` | prototyped, v0.6 |
-| B5 | Operator-recon AI structurer | `lib/neo-operator-recon-ai.sh` | prototyped, v0.6 |
+| B2 | AI privesc triage hook | `lib/neo-conductor-privesc.sh` | prototyped, v0.6 — Phase 74: AI → PRIVESC-PLAN when offered |
+| B3 | AI enum planner | `lib/neo-enum-ai.sh` | prototyped, v0.6 — **stub** (bundle only, no AI call) |
+| B4 | Adaptive scan hints | `lib/neo-adaptive-scan.sh` | prototyped, v0.6 — Phase 74: deep-targets file + TODO queue |
+| B5 | Operator-recon AI structurer | `lib/neo-operator-recon-ai.sh` | prototyped, v0.6 — Phase 74: AI → INTERACT when offered |
 | B6 | MSF AI post suggest | `neo-exploit-framework.sh` (partial) | implemented (strings); AI post chain **prototyped, v0.6** |
 | B7 | Borg library hook | `lib/neo-borg-library.sh` | prototyped, v0.6 |
 | B8 | Disclosure lint all surfaces | `lib/neo-ai-guard.sh`, `neo-borg-disclosure.sh` | prototyped, v0.6 |
@@ -90,10 +90,10 @@ This file is the **single source of truth** for whether a feature is live in mis
 
 | Component | Path | Status |
 |-----------|------|--------|
-| Operator feedback (ack / progress) | `lib/neo-feedback.sh` | prototyped, v0.6 |
-| Final report `[f]` / `--report` | `lib/neo-report.sh` | prototyped, v0.6 (degrades gracefully; no full generate) |
-| Handler pane C | `lib/neo-handler-pane.sh` | prototyped, v0.6 |
-| Borg library AI parse | `lib/neo-borg-library-ai.sh` | prototyped, v0.6 |
+| Operator feedback (ack / progress) | `lib/neo-feedback.sh` | prototyped, v0.6 — Phase 73: default stderr ack when `NEO_FEEDBACK=1` |
+| Final report `[f]` / `--report` | `lib/neo-report.sh` | prototyped, v0.6 — Phase 74: `neo_report_generate` calls AI + REPORT artifact; needs live sign-off |
+| Handler pane C | `lib/neo-handler-pane.sh` | prototyped, v0.6 — tmux helpers exist; **unwired** from `neo.sh` |
+| Borg library AI parse | `lib/neo-borg-library-ai.sh` | prototyped, v0.6 — Phase 74: `research` + `write_artifacts` for harvest CLI |
 
 ---
 
@@ -153,7 +153,7 @@ verify is green and operator has VPN + target ready).
 
 | Item | Command | Prerequisite | Phase gate |
 |------|---------|--------------|------------|
-| **Live Tier B scratch mission** | `./neo.sh scratch-tierb-test <HTB_IP>` | HTB/THM VPN up (`tun0`); real reachable target; tmux session (not piped stdin) | **Block H / post–Phase 74** — not Phase 74 sign-off |
+| **Live Tier B scratch mission** | `./neo.sh scratch-tierb-test <HTB_IP>` | HTB/THM VPN up (`tun0`); real reachable target; tmux session (not piped stdin) | **Block H** — runbook: `NEO-1.0-DESIGN/projects/22-live-simulation-block-h/DESIGN.md` |
 | **P18 lab E2E checklist** | `NEO_P18_LAB=1 ./test/p18-lab-e2e.sh` | Same VPN + one full box run; manual checklist in script | **B12 live sign-off** |
 
 **Offline status (2026-09-01):** `linux-phase1-verify.sh` 6/6 pass; `neo-smoke-test.sh` 24/24;
@@ -168,9 +168,11 @@ fails as expected without a live shell — **not** a substitute for VPN smoke.
 
 | Doc | Role |
 |-----|------|
-| **`DAILY-WORK-2026-09-01.md`** | **Start here tomorrow** — ordered workload |
+| **`projects/22-live-simulation-block-h/DESIGN.md`** | **SIM-H** — live lab Block H runbook (post-offline verify) |
+| **`DAILY-WORK-2026-09-01.md`** | Ordered workload + integration block status |
 | `DRY-RUN-TRACE-2026-08-31.md` | Partial live dry-run evidence |
-| `NEO-CODE-REVIEW-2026-08-31.md` | Bug fixes + integration blocks |
+| `NEO-CODE-REVIEW-2026-08-31.md` | Bug fixes + integration blocks (updated 2026-09-01) |
 | `NEO-AT-WORK-README.md` | Honest v0.5 baseline note |
 | `registry.yaml` | Per-script `integration_status` must match this file |
 | `AGENTS.md` | Pipeline spec + extension log (prototype entries qualified) |
+| `tools/LINUX-PHASE1-INSTRUCTIONS.txt` | Offline verify instructions for home Linux |

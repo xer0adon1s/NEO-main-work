@@ -7,7 +7,9 @@ Tier A/B **prototyped, v0.6**. Remaining gate: **lab E2E** (P18) + human sign-of
 
 - Current version file: `0.5` (target `1.0.0-rc` after operator sign-off)
 - Production shell libs: 20+ under `lib/` (workbench, pipeline-hooks, exploit-framework, eli5, …)
-- Test suites: 20+ in `test/run-all.sh`
+- Test suites: **39** in `test/run-all.sh` (+ repo-wide `bash -n`)
+- Offline gate: `linux-phase1-verify.sh` **6/6** (2026-09-01)
+- Live gate: **P22 SIM-H** (`projects/22-live-simulation-block-h/DESIGN.md`)
 - Walked phases: recon, foothold, privesc, post (conductor-guided post)
 
 ## Resolved since initial baseline (CS-001 / CS-002)

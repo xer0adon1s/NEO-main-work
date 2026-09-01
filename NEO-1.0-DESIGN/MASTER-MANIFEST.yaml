@@ -35,7 +35,9 @@ projects:
   - {id: P17, slug: privesc-workflow, title: Privilege-escalation workflow, priority: P1, status: review_ready, depends_on: [P03, P06, P14, P16]}
   - {id: P18, slug: cli-1.0-validation, title: CLI 1.0 validation and release gates, priority: P1, status: review_ready, depends_on: [P02, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15, P16, P17]}
   - {id: P19, slug: gui-2.0-boundary, title: GUI 2.0 boundary and API readiness, priority: P3, status: review_ready, depends_on: [P08, P14, P16, P18]}
+  - {id: P20, slug: operator-workbench, title: Operator workbench and tmux pane B, priority: P0, status: in_progress, depends_on: [P01, P14, P16]}
   - {id: P21, slug: exploit-framework-conductor, title: Exploit framework conductor (Metasploit mastery), priority: P1, status: in_progress, depends_on: [P06, P08, P20]}
+  - {id: P22, slug: live-simulation-block-h, title: Live Simulation Block H operator sign-off, priority: P1, status: review_ready, depends_on: [P18, P20]}
 execution_order:
   - [P01]
   - [P05, P09]
@@ -47,6 +49,7 @@ execution_order:
   - [P21]
   - [P17]
   - [P18]
+  - [P22]
   - [P19]
 missing_inputs: []
 history_ingested:

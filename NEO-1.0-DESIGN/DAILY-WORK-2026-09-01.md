@@ -13,12 +13,12 @@
 
 | Signal | Verdict |
 |--------|---------|
-| **Offline tests** | `./test/run-all.sh` green (39 suites after setup-baseline) |
+| **Offline tests** | `./test/run-all.sh` green · `linux-phase1-verify.sh` **6/6** (2026-09-01 home Linux) |
 | **Live AI (`claude -p`)** | **Verified** — analyze-recon triage completed, saved to notes (`dryrun-sim-01`) |
 | **Live recon orchestration** | **Verified** — babysteps against `192.0.2.1`, expected empty ports, no crash |
 | **LOCK & LOAD toolkit** | **Verified live** — awk fix at `neo-toolkit.sh:104` |
 | **Full mission loop** | **Not verified** — dry-run stopped mid-ELI5; foothold/privesc/post/`[b]`/`[t]`/`[o]`/`[f]` still open |
-| **Live VPN smoke (`scratch-tierb-test`)** | **Shelved → later phase** — offline verify green 2026-09-01; run with VPN + real HTB target when Block H opens (see `FEATURE-STATUS.md` § Deferred verification) |
+| **Live VPN smoke (SIM-H / Block H)** | **Next** — run `projects/22-live-simulation-block-h/DESIGN.md` when VPN + target ready |
 | **Piped-input automation** | **Do not use** for E2E — wrong tool; see § Dry-run methods |
 | **Tmux send-keys dry-run** | **Works** — already ran once; resume/extend, don't reinvent |
 
@@ -138,24 +138,35 @@ unless workaround documented or flag added.
 
 ### Block C — Conductor integration (3–4 hr)
 
-From review doc — unchanged priority after dry-run proves mechanical wiring:
+**Status 2026-09-01:** Phase 74 closed most items offline; live sign-off pending SIM-H.
 
-- [ ] **C1.** Flesh out `neo_conductor_on_phase_entry` per `AI-CONDUCTOR.md`
-- [ ] **C2.** Wire `neo_conductor_after_triage` from `neo-ai-cli.sh`
-- [ ] **C3.** Implement `neo_conductor_on_event` cases (triage, borg, privesc ingest)
-- [ ] **C4.** Assisted loop opt-in only
-- [ ] **C5.** Expand `neo_conductor_build_bundle`
-- [ ] **C6.** `test/conductor-test.sh`, `conductor-automation-test.sh`
+- [x] **C1.** `neo_conductor_on_phase_entry` — foothold/privesc/post Y/n (Phase 74)
+- [x] **C2.** `neo_conductor_after_triage` wired from `neo-ai-cli.sh`
+- [x] **C3.** `neo_conductor_on_event` — triage/borg/privesc cases (assisted loop **not** called from `neo.sh`)
+- [x] **C4.** Assisted loop opt-in prompt in `neo_conductor_run_assisted_loop` (default **n**)
+- [x] **C5.** Expanded `neo_conductor_mission_core_bundle` (Phase 74)
+- [x] **C6.** `conductor-test.sh`, `conductor-automation-test.sh` in `run-all`
+- [ ] **C7.** Wire assisted loop from mission flow (optional product decision)
+- [ ] **C8.** Implement `on_pause_entry` / `mission_state_hook` (still no-ops)
 
 ### Block D — Borg library + disclosure (3–4 hr)
 
-- [ ] **D1–D5** Per `NEO-CODE-REVIEW-2026-08-31.md` Block D
-- [ ] **Priority:** `[b]` live verification depends on this + dry-run resume
+**Status 2026-09-01:** Phase 73–74 offline; lint still env-gated.
+
+- [x] **D1.** Disclosure patterns + `engagement_mode` from meta (Phase 73)
+- [ ] **D2.** `neo_ai_guard_output` on **every** save path with default-on lint (today: `NEO_DISCLOSURE_LINT_ALL=1`)
+- [x] **D3.** `neo_borg_library_ai_research` + `write_artifacts` (Phase 74)
+- [x] **D4.** `borg-library-harvest.sh` → lib functions (dry-run in `linux-phase1-verify`)
+- [x] **D5.** Disclosure + library tests in `run-all`
 
 ### Block E — Report + feedback (2 hr)
 
-- [ ] **E1.** Implement `neo_report_generate` (currently stub `neo-report.sh:58-61`)
-- [ ] **E2.** `[f]` on post + mission-complete offer end-to-end
+**Status 2026-09-01:** Generate implemented; feedback JSONL not started.
+
+- [x] **E1.** `neo_report_generate` — Claude call + REPORT section + artifact (Phase 74)
+- [x] **E2.** `[f]` on post + `--report` wired (needs live SIM-H sign-off)
+- [ ] **E3.** Optional: persist `neo_feedback_*` to JSONL
+- [x] **E4.** `neo-report-test.sh` in `run-all`
 
 ### Block F — Workbench + MSF polish (2 hr)
 
@@ -168,8 +179,10 @@ From review doc — unchanged priority after dry-run proves mechanical wiring:
 
 ### Block H — Real lab E2E (when VPN available)
 
-Use `NEO-1.0-DESIGN/E2E-CHECKLIST.md` — 3 HTB boxes. Synthetic dry-run is **not**
-a substitute; it's the cheap preflight before burning lab time.
+**Runbook:** `NEO-1.0-DESIGN/projects/22-live-simulation-block-h/DESIGN.md` (**SIM-H**)
+
+Use `NEO-1.0-DESIGN/E2E-CHECKLIST.md` for multi-box P18 after SIM-H passes.
+Synthetic dry-run is **not** a substitute; it's the cheap preflight before burning lab time.
 
 ### Block I — Changelog / session log naming (1–2 hr, doc hygiene)
 

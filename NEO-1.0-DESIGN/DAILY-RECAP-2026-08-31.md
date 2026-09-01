@@ -396,7 +396,7 @@ See `FEATURE-STATUS.md`. Optional: `./test/neo-diagnostic.sh` may fail `setup.sh
 ./test/neo-diagnostic.sh
 ```
 
-Historically **61 checks** + unit count **162+** (count grows with new suites — verify banner at end).
+Historically **~65+ diagnostic ok lines** + **39 aggregate suites** in `run-all.sh` (counts grow — read each runner's summary; do not trust stale totals in old docs).
 
 ### Doc truth
 

@@ -4,10 +4,11 @@ Use on home Linux lab with HTB/THM disposable boxes. Record pass/fail per row.
 
 ## Prerequisites
 
-- [ ] `./test/run-all.sh` passes
+- [ ] `./test/run-all.sh` passes (or `bash tools/linux-phase1-verify.sh` 6/6)
 - [ ] `./test/production-integrity-gate.sh` passes
 - [ ] `./tools/doc-truth-check.sh` passes
 - [ ] Secret canary audit clean
+- [ ] **SIM-H complete** — `NEO-1.0-DESIGN/projects/22-live-simulation-block-h/DESIGN.md` (one box, all core letters)
 
 ## Box 1 — Linux web foothold
 

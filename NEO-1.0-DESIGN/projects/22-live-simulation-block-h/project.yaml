@@ -1,0 +1,19 @@
+id: P22
+title: Live Simulation — Block H operator sign-off
+priority: P1
+status: review_ready
+objective: >
+  Run one authorized HTB/THM box as a live-fire simulation: exercise every pause-letter
+  and pipeline phase NEO v0.5 claims to support, record evidence, and promote FEATURE-STATUS
+  rows from prototype to implemented where behavior matches design.
+requirements:
+  - {id: 22a, text: Offline gate green before entering the sim (linux-phase1-verify 6/6 or run-all).}
+  - {id: 22b, text: Real VPN (tun0), real target IP, tmux session — no piped stdin automation.}
+  - {id: 22c, text: Complete simulation modules 0–7 in order; log pass/fail per checkpoint.}
+  - {id: 22d, text: Exercise at minimum [b] [p] [t] [o] [e] [a] [c] [f] on applicable phases.}
+  - {id: 22e, text: File debrief artifact (Investigation-Notes.md + optional sim log).}
+  - {id: 22f, text: Document known sim limitations (Tier B prototypes not in scope for pass/fail).}
+definition_of_done: >
+  Operator completes one full recon→foothold→privesc→post mission in tmux without hidden
+  automation, with WORKBENCH/PAYLOAD/BORG sections populated from real attempts, and signs
+  the debrief table in DESIGN.md.

@@ -2569,5 +2569,19 @@ After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5
 ## Status
 
 - **Offline:** `linux-phase1-verify.sh` 6/6; `neo-smoke-test.sh` 24/24; merge fixes in `86c277d`
-- **Live VPN smoke:** **deferred** — `./neo.sh scratch-tierb-test <HTB_IP>` and `NEO_P18_LAB=1 ./test/p18-lab-e2e.sh` tracked in `FEATURE-STATUS.md` § Deferred verification; not a Phase 74 gate
+- **Live VPN smoke:** **deferred** — run **`projects/22-live-simulation-block-h/DESIGN.md`** (SIM-H); tracked in `FEATURE-STATUS.md` § Deferred verification; not a Phase 74 gate
+
+---
+
+# Phase 75 — Doc hygiene pass (2026-09-01)
+
+## Operator prompt(s)
+
+> also can you do a full review of doc hygiene and fix anything out of date
+
+## What changed
+
+Aligned docs with **Phase 74** reality + **offline verify 6/6**: `CLAUDE.md`, `README.md`, `AGENTS.md` Testing, `FEATURE-STATUS.md`, `DAILY-WORK-2026-09-01.md`, `NEO-CODE-REVIEW-2026-08-31.md` (Blocks C–E/H), `MASTER-MANIFEST.yaml` (P20/P22), `SCOPE-STATUS.md`, `DAILY-RECAP` test counts, `E2E-CHECKLIST.md`, `CURRENT-STATE.md`, `tools/doc-truth-check.sh` (SIM-H + report wording).
+
+**Still dynamic (do not hardcode):** per-suite assertion totals — use runner summary lines.
 

@@ -13,7 +13,18 @@
 
 The Daily Recap claimed **Tier A (AI Conductor)** and **Tier B Waves 1–5** landed in production. **16 `lib/` files were missing** from git — design docs and tests existed; implementations did not. `neo.sh` still launched because every reference was guarded or unreachable at cold start.
 
-**After this Cursor session:** all 16 files exist as **rough-draft prototypes** (pass offline tests; not production-complete). `./test/run-all.sh` is **green in a clean environment** (38-suite aggregate + `bash -n`).
+**After this Cursor session:** all 16 files exist as **rough-draft prototypes** (pass offline tests; not production-complete). `./test/run-all.sh` is **green in a clean environment** (39-suite aggregate + `bash -n`).
+
+### Integration status update (2026-09-01 — Phases 73–74)
+
+| Block | Offline code | Live sign-off |
+|-------|----------------|---------------|
+| **C** Conductor | `after_triage`, `on_phase_entry`, expanded bundle — **done**; `on_pause_entry` / `mission_state_hook` — **stub** | SIM-H |
+| **D** Library + disclosure | research + harvest + disclosure meta — **done**; default-on lint — **open** | SIM-H |
+| **E** Report + feedback | `neo_report_generate` — **done**; feedback JSONL — **open** | SIM-H |
+| **F** Handler pane C | tmux helpers — **unwired** | SIM-H / post-1.0 |
+| **G** P2 hardening | Mostly **open** | — |
+| **H** Live E2E | Offline verify **6/6** | **`projects/22-live-simulation-block-h/DESIGN.md`** |
 
 ### Urgent — API key side effect (still operator action)
 
@@ -114,27 +125,28 @@ Work in this order. Each item should end with a test or manual repro note.
 
 ### Block C — Conductor integration (3–4 hr)
 
-- [ ] **C1.** Flesh out `neo_conductor_on_phase_entry` — foothold/privesc/post Y/n chains per `AI-CONDUCTOR.md`
-- [ ] **C2.** Wire `neo_conductor_after_triage` from `neo-ai-cli.sh` finish path
-- [ ] **C3.** Implement `neo_conductor_on_event` cases: `recon.triage_complete`, `borg.assimilate_complete`, `privesc.ingest_complete`
-- [ ] **C4.** Connect `neo_conductor_run_assisted_loop` only after explicit operator opt-in (never default-on)
-- [ ] **C5.** Expand `neo_conductor_build_bundle` — MSF block, disclosure block, mission.json excerpt (delegate to existing helpers)
-- [ ] **C6.** Run `test/conductor-test.sh`, `test/conductor-automation-test.sh`, `test/p18-lab-e2e.sh`
+- [x] **C1.** `neo_conductor_on_phase_entry` — Phase 74 (foothold/privesc/post)
+- [x] **C2.** `neo_conductor_after_triage` from `neo-ai-cli.sh`
+- [x] **C3.** `neo_conductor_on_event` cases (assisted loop not invoked from `neo.sh`)
+- [x] **C4.** Assisted loop opt-in only (`neo_conductor_run_assisted_loop`)
+- [x] **C5.** Expanded `neo_conductor_build_bundle` / mission core
+- [x] **C6.** Conductor tests in `run-all`
+- [ ] **C7.** `on_pause_entry` / `mission_state_hook` still no-ops
 
 ### Block D — Borg library + disclosure (3–4 hr)
 
-- [ ] **D1.** Harden `neo_borg_disclosure_check` — expand spoiler patterns; align with seed library content
-- [ ] **D2.** Wire `neo_ai_guard_output` into **every** AI save path (triage, Borg, payload, ELI5, report) when `NEO_DISCLOSURE_LINT_ALL=1`
-- [ ] **D3.** Implement `neo_borg_library_ai_research` (Claude call + parse + write artifacts)
-- [ ] **D4.** Connect `tools/borg-library-harvest.sh` to real lib functions (dry-run first)
-- [ ] **D5.** Run `test/borg-disclosure-test.sh`, `test/disclosure-lint-all-test.sh`, `test/borg-library-*`
+- [x] **D1.** Disclosure patterns + meta `engagement_mode` (Phase 73)
+- [ ] **D2.** `neo_ai_guard_output` on every AI save path (default-off today)
+- [x] **D3.** `neo_borg_library_ai_research` (Phase 74)
+- [x] **D4.** `borg-library-harvest.sh` wired (dry-run in linux-phase1-verify)
+- [x] **D5.** Library/disclosure tests in `run-all`
 
 ### Block E — Report + feedback (2 hr)
 
-- [ ] **E1.** Implement `neo_report_generate` — Claude call, append REPORT section, PDF export hook
-- [ ] **E2.** Enable `[f]` on post phase end-to-end (menu + mission-complete offer)
-- [ ] **E3.** Optional: persist `neo_feedback_*` to JSONL for operator analytics
-- [ ] **E4.** Run `test/neo-report-test.sh`
+- [x] **E1.** `neo_report_generate` — Claude + REPORT artifact (Phase 74)
+- [x] **E2.** `[f]` / `--report` wired (live sign-off pending)
+- [ ] **E3.** Feedback JSONL persistence
+- [x] **E4.** `neo-report-test.sh`
 
 ### Block F — Workbench + MSF polish (2 hr)
 
@@ -150,16 +162,19 @@ Work in this order. Each item should end with a test or manual repro note.
 - [ ] **G3.** IPv6 literal host parsing in `neo_scope_target_allowed`
 - [ ] **G4.** `GEMINI_API_KEY` in evidence redaction list
 - [ ] **G5.** Fix tautological tests (`neo-provider-web-test.sh`, `p18-lab-e2e.sh` assertions)
-- [ ] **G6.** Update `CLAUDE.md` test counts; `CORE-STATUS.md` schema file count
+- [ ] **G6.** ~~Update `CLAUDE.md` test counts~~ — **done 2026-09-01** (doc hygiene pass); keep counts dynamic via runner banners
 
 ### Block H — Integration smoke (1 hr)
 
+**Runbook:** `NEO-1.0-DESIGN/projects/22-live-simulation-block-h/DESIGN.md` (**SIM-H**)
+
 - [x] **H0.** Partial live dry-run — `DRY-RUN-TRACE-2026-08-31.md` (Claude, tmux send-keys):
   boot, scope, recon, `claude -p` triage, LOCK & LOAD verified; stopped mid-ELI5
-- [ ] **H1.** Finish dry-run — `[b]`/`[t]`/`[o]`/`[f]`, foothold→post, mission-complete
+- [x] **H-offline.** `linux-phase1-verify.sh` **6/6** (2026-09-01 home Linux)
+- [ ] **H1.** Finish SIM-H — `[b]`/`[t]`/`[o]`/`[f]`, foothold→post
 - [ ] **H2.** Assimilate one vector — confirm no syntax dump
-- [ ] **H3.** Complete mission to post — confirm no crash on mission-complete report offer
-- [ ] **H4.** Commit with message referencing review + prototype milestone
+- [ ] **H3.** Complete mission to post — report + mission-complete offer
+- [ ] **H4.** Promote FEATURE-STATUS rows + tag `1.0.0-rc` discussion
 
 ---
 

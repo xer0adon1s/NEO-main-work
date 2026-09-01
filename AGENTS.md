@@ -207,7 +207,20 @@ see Phase 19 convention in that file and **§ Operator prompt log** in `CLAUDE-C
 
 ## Testing
 
-**Framework regression:**
+**Recommended Linux gate (one command):**
+```bash
+bash tools/linux-phase1-verify.sh
+```
+See `tools/LINUX-PHASE1-INSTRUCTIONS.txt`.
+
+**Full aggregate:**
+```bash
+./test/run-all.sh              # 39 named suites + repo-wide bash -n
+./test/neo-diagnostic.sh       # structural checks + 23 suite re-runs (read banner for ok/fail counts)
+./tools/doc-truth-check.sh     # doc vs shipped files
+```
+
+**Focused suites (examples):**
 ```bash
 ./test/notes-lib-test.sh      # notes-lib + meta + ingest (21)
 ./test/recon-bundle-test.sh   # neo-ai bundle + triage parsing (18)
@@ -215,9 +228,14 @@ see Phase 19 convention in that file and **§ Operator prompt log** in `CLAUDE-C
 ./test/payload-test.sh        # neo-payload suggest/analyze + Borg hook (18)
 ./test/interact-test.sh       # pre-foothold web detector (7)
 ./test/menu-routing-test.sh   # pause-menu letter routing via neo_menu_classify (27)
-./test/neo-boot-test.sh       # VPN ritual stdout capture (3)
-./test/neo-smoke-test.sh      # neo.sh integration (26)
-./test/neo-diagnostic.sh      # full pre-review (59 checks)
+./test/neo-boot-test.sh       # VPN ritual stdout capture (8)
+./test/neo-smoke-test.sh      # neo.sh integration (24)
+./test/conductor-test.sh      # conductor bundle + gates
+./test/conductor-automation-test.sh
+./test/neo-feedback-test.sh
+./test/neo-report-test.sh
+./test/borg-disclosure-test.sh
+./test/borg-library-ai-test.sh
 ```
 
 **Legacy STATUS section:** `./tools/migrate-status.sh [project]`
@@ -421,8 +439,8 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
  mode (option 0) pipes dossiers + wind-up actions into AI suggest; ELI5 after suggest unchanged.
 - 2026-08-31 — **Borg library disclosure (Phase 65):** **prototyped, v0.6** — `neo-borg-disclosure.sh`
  + check tool; `knowledge/library/` scaffold; design `BORG-RESEARCH-LIBRARY.md`.
-- 2026-08-31 — **Final report (Phase 67):** **prototyped, v0.6** — `lib/neo-report.sh` stub;
- `[f]` / `--report` degrade gracefully; full generate not integrated. `tools/neo-report.sh` = implemented CLI.
+- 2026-08-31 — **Final report (Phase 67):** **prototyped, v0.6** — `lib/neo-report.sh`;
+ `[f]` / `--report` wired; **Phase 74** added `neo_report_generate` (AI + artifact) — live sign-off pending SIM-H.
 - 2026-08-31 — **Borg library ingest (Phase 66):** `tools/borg-library-ingest.sh`, walkthrough
  schema, seed entries in `knowledge/library/`; scope intake → `engagement_mode` in meta;
  professional reports pull library CVE cross-refs; educational report hard-fail on disclosure lint.
@@ -441,3 +459,7 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
   `neo-borg-library-batch.sh`, `neo-borg-harvest.sh`; standalone `borg/borg-v2.sh` = **implemented**.
 - 2026-08-31 — **Feature status board:** `NEO-1.0-DESIGN/FEATURE-STATUS.md` — canonical implemented vs prototyped labels.
 - 2026-08-31 — **Phase 63 batch:** Borg HUD spam fix; SCOPE/PROGRESS/CURRENT-STATE doc sync;
+- 2026-09-01 — **Phase 73 P0 batch:** feedback ack, disclosure meta, conductor prompt fixes, privesc bundle leak fix.
+- 2026-09-01 — **Phase 74 P1 integration:** conductor phase entry, privesc AI triage, report generate, library AI research, adaptive scan, handler pane helpers, operator-recon AI.
+- 2026-09-01 — **P22 SIM-H:** `projects/22-live-simulation-block-h/DESIGN.md` — live Block H runbook.
+- 2026-09-01 — **Doc hygiene pass:** CLAUDE.md, README, AGENTS Testing, FEATURE-STATUS, DAILY-WORK, NEO-CODE-REVIEW blocks, MASTER-MANIFEST P20/P22, SCOPE-STATUS, E2E-CHECKLIST, doc-truth-check.
