@@ -12,8 +12,8 @@
 set -euo pipefail
 
 NEO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export NEO_HOME="${NEO_ROOT}"
-export NEO_DIR="${NEO_ROOT}"
+export NEO_HOME="${NEO_HOME:-${NEO_ROOT}}"
+export NEO_DIR="${NEO_DIR:-${NEO_ROOT}}"
 
 # shellcheck source=../lib/neo-borg-library.sh
 source "${NEO_DIR}/lib/neo-borg-library.sh"

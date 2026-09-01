@@ -39,6 +39,8 @@ neo_adaptive_scan_build_targets_file() {
 neo_adaptive_scan_recommend() {
     local project="$1" _target="$2"
     local mode
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
     source "${NEO_DIR}/lib/script-lib.sh" 2>/dev/null || true
     mode="$(meta_get scan_mode 2>/dev/null || echo speed)"
@@ -50,6 +52,8 @@ neo_adaptive_scan_recommend() {
 neo_adaptive_scan_offer_after_triage() {
     local project="$1" file mode
     neo_conductor_skip_interactive && return 0
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
     source "${NEO_DIR}/lib/script-lib.sh" 2>/dev/null || true
     mode="$(meta_get scan_mode 2>/dev/null || echo speed)"

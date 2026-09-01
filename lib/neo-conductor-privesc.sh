@@ -6,6 +6,28 @@ NEO_DIR="${NEO_DIR:-$(cd "${NEO_LIB_DIR}/.." && pwd)}"
 # shellcheck source=neo-conductor.sh
 source "${NEO_LIB_DIR}/neo-conductor.sh"
 
+neo_conductor_privesc_plan_root() {
+    local project="$1"
+    printf '%s/projects/%s/privesc' \
+        "${NEO_STATE_ROOT:-${XDG_STATE_HOME:-${HOME}/.local/state}/neo}" \
+        "${project}"
+}
+
+neo_conductor_privesc_system_prompt() {
+    cat <<'EOF'
+You triage Linux privilege escalation findings for an authorized lab engagement.
+
+Output markdown with:
+
+## Top hypotheses (ranked)
+## Evidence cited
+## Recommended next checks (non-destructive)
+## Risks / false positives
+
+Ground every hypothesis in privesc-facts.json and privesc-plan.json from the bundle. Do not invent findings.
+EOF
+}
+
 neo_conductor_privesc_after_ingest() {
     local project="$1" bundle response ts facts plan facts_text plan_text plan_root
     neo_conductor_skip_interactive && return 0
@@ -57,8 +79,6 @@ ${response}" 2>/dev/null || true
 ${response}" 2>/dev/null || true
     meta_set conductor_privesc_triage_done 1 2>/dev/null || true
     printf '[*] Privesc plan saved → PRIVESC-PLAN section.\n'
-    return 0
-}
     return 0
 }
 

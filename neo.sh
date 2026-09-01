@@ -575,6 +575,10 @@ next_phase_name() {
     echo "${PHASE_ORDER[$n]}"
 }
 
+neo_valid_ssh_target() {
+    [[ "${1:-}" =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._:-]+$ ]]
+}
+
 resolve_ssh_target() {
     local project="$1"
     OUTDIR="${NEO_HOME}/projects/${project}"
@@ -583,12 +587,28 @@ resolve_ssh_target() {
     local cached
     cached="$(meta_get ssh_target 2>/dev/null || true)"
     if [[ -n "${cached}" ]]; then
-        echo "${cached}"
+        if neo_valid_ssh_target "${cached}"; then
+            echo "${cached}"
+            return 0
+        fi
+        printf 'neo: ignoring invalid cached ssh_target=%q — re-prompting.\n' "${cached}" >&2
+        meta_set ssh_target "" 2>/dev/null || true
+    fi
+    if [[ -n "${NEO_SSH_TARGET:-}" ]] && neo_valid_ssh_target "${NEO_SSH_TARGET}"; then
+        echo "${NEO_SSH_TARGET}"
         return 0
     fi
-    local t
+    if [[ "${NEO_TEST_NONINTERACTIVE:-0}" == "1" ]]; then
+        printf 'neo: no valid ssh_target in project.meta (need user@host).\n' >&2
+        return 1
+    fi
+    local t ans
     read -r -p "SSH target (user@host): " t
     [[ -n "${t}" ]] || return 1
+    neo_valid_ssh_target "${t}" || {
+        printf 'neo: SSH target must look like user@host.\n' >&2
+        return 1
+    }
     read -r -p "Save to project.meta as ssh_target? [Y/n] " ans
     if [[ ! "${ans}" =~ ^[Nn] ]]; then
         meta_set ssh_target "${t}" || true

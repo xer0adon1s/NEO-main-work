@@ -248,7 +248,7 @@ TARGET="10.99.99.98"
 printf 'c\nq\n' | bash "${WORKDIR}/neo.sh" "${PROJECT}" "${TARGET}"
 assert "paused at foothold" grep -q '^phase=foothold' "${WORKDIR}/projects/${PROJECT}/project.meta"
 
-printf 'k\nc\n1\nresume@10.99.99.98\nY\nc\nc\n' \
+printf 'k\n1\nresume@10.99.99.98\nY\nc\nc\n' \
     | bash "${WORKDIR}/neo.sh" "${PROJECT}"
 assert "resume completed" grep -q '^phase=post' "${WORKDIR}/projects/${PROJECT}/project.meta"
 

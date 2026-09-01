@@ -36,11 +36,12 @@ neo_conductor_prompt_yn() {
             esac
             ;;
     esac
-    esac
 }
 
 neo_conductor_resolve_mode() {
     local project="$1" mode engagement
+    OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
     source "${NEO_LIB_DIR}/script-lib.sh" 2>/dev/null || true
     mode="$(meta_get conductor_mode 2>/dev/null || true)"
@@ -166,6 +167,7 @@ neo_conductor_on_phase_entry() {
     [[ "${NEO_CONDUCTOR:-1}" == "0" ]] && return 0
 
     OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
     source "${NEO_LIB_DIR}/script-lib.sh" 2>/dev/null || true
     key="conductor_phase_entry_${phase}"
@@ -230,6 +232,7 @@ neo_conductor_after_triage() {
     [[ "${NEO_CONDUCTOR:-1}" == "0" ]] && return 0
 
     OUTDIR="${NEO_HOME}/projects/${project}"
+    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
     source "${NEO_LIB_DIR}/script-lib.sh" 2>/dev/null || true
     if [[ "$(meta_get conductor_after_triage_done 2>/dev/null || true)" == "1" ]]; then
@@ -274,6 +277,5 @@ neo_conductor_after_triage() {
         neo_conductor_on_event recon.triage_complete "${project}" "${phase}" || true
     fi
 
-    return 0
     return 0
 }

@@ -12,6 +12,7 @@ neo_borg_disclosure_mode() {
             source "${NEO_LIB_DIR}/notes-lib.sh" 2>/dev/null || true
         if declare -F meta_get >/dev/null 2>&1; then
             OUTDIR="${NEO_HOME}/projects/${project}"
+            NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
             meta_mode="$(meta_get engagement_mode 2>/dev/null || true)"
             [[ -n "${meta_mode}" ]] && mode="${meta_mode}"
         fi

@@ -21,8 +21,6 @@ neo_conductor_on_event() {
         recon.triage_complete|foothold.entry|privesc.entry|post.entry)
             neo_conductor_on_phase_entry "${project}" "${phase}" || true
             ;;
-
-            ;;
         *)
             ;;
     esac

@@ -50,7 +50,7 @@ neo_operator_recon_ai_offer() {
         if [[ -n "${content}" ]]; then
             excerpt="${content}"
             if ((${#excerpt} > 8000)); then
-                excerpt="${excerpt:0:8000}"$'\n\n'[operator recon truncated at 8000 chars]'
+                excerpt="${excerpt:0:8000}"$'\n\n'"[operator recon truncated at 8000 chars]"
             fi
             bundle="${bundle}"$'\n\n'"## Operator recon (${category})
 ${excerpt}"
@@ -64,8 +64,6 @@ ${excerpt}"
             return 1
         fi
         neo_operator_recon_ai_save "${project}" "${category}" "${response}"
-    fi
-
     fi
     return 0
 }
