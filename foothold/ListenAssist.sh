@@ -164,8 +164,14 @@ printf '  Project: %s\n  Target: %s\n  Mode: %s\n' "${PROJECT}" "${TARGET}" "${M
 [[ "${MODE}" == reverse ]] && printf '  Callback: %s:%s\n' "${CALLBACK_IP}" "${PORT}"
 if [[ "${HANDLER}" == msf || "${TOOL}" == msf ]]; then
     printf '  Handler: Metasploit (%s)\n' "${PAYLOAD}"
-    printf '\nRun in operator pane (one-shot):\n\n  %s\n' "${MSF_HANDLER_CMD}"
-    printf '\nOr interactively in operator pane:\n\n%s\n' "${MSF_HANDLER_BLOCK}"
+    printf '\nMSF handler runs in tmux pane C (neo-handler) when NEO tmux wrap is active.\n'
+    printf 'One-shot command:\n\n  %s\n' "${MSF_HANDLER_CMD}"
+    printf '\nOr interactively in handler pane:\n\n%s\n' "${MSF_HANDLER_BLOCK}"
+    # shellcheck source=../lib/neo-handler-pane.sh
+    source "${NEO_DIR}/lib/neo-handler-pane.sh" 2>/dev/null || true
+    if declare -F neo_handler_pane_offer_msf >/dev/null 2>&1; then
+        neo_handler_pane_offer_msf "${PROJECT}" "${CALLBACK_IP}" "${PORT}" "${PAYLOAD}" || true
+    fi
     finish_cmd="${MSF_HANDLER_CMD}"
 else
     printf '\nRun this in your separate listener window or pane:\n\n  '
@@ -198,22 +204,50 @@ printf '\nPlan recorded: %s\n' "${artifact}"
 
 if (( START_LISTENER == 1 )); then
     command -v tmux >/dev/null 2>&1 || { neo_core_die 'tmux is required for --start'; exit 1; }
-    session="neo-listener-$(tr '[:upper:]' '[:lower:]' <<< "${PROJECT}" | tr -cs 'a-z0-9' '-')"
+    # shellcheck source=../lib/neo-handler-pane.sh
+    source "${NEO_DIR}/lib/neo-handler-pane.sh" 2>/dev/null || true
     if [[ "${HANDLER}" == msf || "${TOOL}" == msf ]]; then
-        quoted="${MSF_HANDLER_CMD}"
+        if declare -F neo_handler_pane_start_msf_listener >/dev/null 2>&1 && \
+            neo_handler_pane_available 2>/dev/null; then
+            neo_handler_pane_start_msf_listener "${CALLBACK_IP}" "${PORT}" "${PAYLOAD}" || true
+            neo_evidence_record listener_started ListenAssist \
+                "Started MSF handler in neo-handler pane." "${artifact}" observed
+        else
+            session="neo-listener-$(tr '[:upper:]' '[:lower:]' <<< "${PROJECT}" | tr -cs 'a-z0-9' '-')"
+            quoted="${MSF_HANDLER_CMD}"
+            if neo_core_confirm "Type start-listener to create detached tmux session ${session}: " start-listener; then
+                tmux has-session -t "${session}" 2>/dev/null && {
+                    neo_core_die "tmux listener session already exists: ${session}"
+                    exit 1
+                }
+                tmux new-session -d -s "${session}" "${quoted}"
+                printf 'Listener started. Open it with: tmux attach -t %s\n' "${session}"
+                neo_evidence_record listener_started ListenAssist "Started tmux listener ${session}." "${artifact}" observed
+            else
+                printf 'Listener was not started. Use the printed command in handler pane C.\n'
+            fi
+        fi
     else
+        session="neo-listener-$(tr '[:upper:]' '[:lower:]' <<< "${PROJECT}" | tr -cs 'a-z0-9' '-')"
         quoted="$(neo_core_quote_argv "${argv[@]}")"
-    fi
-    if neo_core_confirm "Type start-listener to create detached tmux session ${session}: " start-listener; then
-        tmux has-session -t "${session}" 2>/dev/null && {
-            neo_core_die "tmux listener session already exists: ${session}"
-            exit 1
-        }
-        tmux new-session -d -s "${session}" "${quoted}"
-        printf 'Listener started. Open it with: tmux attach -t %s\n' "${session}"
-        neo_evidence_record listener_started ListenAssist "Started tmux listener ${session}." "${artifact}" observed
-    else
-        printf 'Listener was not started. Use the printed command in your own window.\n'
+        if neo_core_confirm "Type start-listener to create detached tmux session ${session}: " start-listener; then
+            tmux has-session -t "${session}" 2>/dev/null && {
+                neo_core_die "tmux listener session already exists: ${session}"
+                exit 1
+            }
+            if declare -F neo_handler_pane_start_argv_listener >/dev/null 2>&1 && \
+                neo_handler_pane_available 2>/dev/null; then
+                neo_handler_pane_start_argv_listener "${quoted}" || true
+                neo_evidence_record listener_started ListenAssist \
+                    "Started listener in neo-handler pane." "${artifact}" observed
+            else
+                tmux new-session -d -s "${session}" "${quoted}"
+                printf 'Listener started. Open it with: tmux attach -t %s\n' "${session}"
+                neo_evidence_record listener_started ListenAssist "Started tmux listener ${session}." "${artifact}" observed
+            fi
+        else
+            printf 'Listener was not started. Use the printed command in your own window.\n'
+        fi
     fi
 fi
 

@@ -15,6 +15,7 @@ source "${NEO_LIB_DIR}/neo-operator-pane.sh"
 source "${NEO_LIB_DIR}/neo-windup-actions.sh"
 
 NEO_WORKBENCH_LAST_ATTEMPT_ID=""
+NEO_WORKBENCH_LAST_OUTCOME=""
 
 neo_workbench_state_dir() {
     local project="$1"
@@ -177,6 +178,8 @@ neo_workbench_try_loop_step() {
     local project="$1" phase="$2" assisted="${3:-false}"
     local cmd transport id artifact_dir artifact_path output rc outcome tk_ans auto_analyze=false
 
+    NEO_WORKBENCH_LAST_OUTCOME=""
+
     OUTDIR="${NEO_HOME}/projects/${project}"
     NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
@@ -204,13 +207,18 @@ neo_workbench_try_loop_step() {
     else
         # shellcheck source=neo-feedback.sh
         source "${NEO_LIB_DIR}/neo-feedback.sh" 2>/dev/null || true
+        # shellcheck source=neo-conductor-tuning.sh
+        source "${NEO_LIB_DIR}/neo-conductor-tuning.sh" 2>/dev/null || true
         declare -F neo_feedback_ack_action >/dev/null 2>&1 && neo_feedback_ack_action try-command
         neo_toolkit_preflight_command "${cmd}" "${project}" 0 || true
-        auto_analyze=true
+        if declare -F neo_conductor_auto_analyze_enabled >/dev/null 2>&1 && \
+            neo_conductor_auto_analyze_enabled "${project}"; then
+            auto_analyze=true
+        fi
     fi
 
     printf '\nCommand:\n  %s\nTransport: %s\n' "${cmd}" "${transport}"
-    if [[ "${transport}" == operator_pane ]]; then
+    if [[ "${transport}" == operator_pane && "${assisted}" != true ]]; then
         neo_workbench_confirm_yes 'Confirm send to operator pane (live target session)?' || return 1
     fi
     if [[ "${assisted}" != true && "${transport}" == local_safe ]]; then
@@ -232,6 +240,13 @@ neo_workbench_try_loop_step() {
                 rc=$?; outcome=failure
             fi
             printf '%s' "${output}" > "${artifact_path}"
+            if [[ "${assisted}" == true && "${outcome}" != success ]]; then
+                # shellcheck source=neo-conductor-tuning.sh
+                source "${NEO_LIB_DIR}/neo-conductor-tuning.sh" 2>/dev/null || true
+                local wait_local
+                wait_local="$(neo_conductor_workbench_wait_sec local_safe true 2>/dev/null || printf '8')"
+                sleep "${wait_local}"
+            fi
             ;;
         operator_pane)
             if ! neo_operator_pane_send_command "${cmd}"; then
@@ -239,7 +254,17 @@ neo_workbench_try_loop_step() {
                 return 1
             fi
             printf '%s[*]%s Command sent to operator pane — watch the right-hand pane.\n' "${C_CYAN:-}" "${C_RESET:-}"
-            read -r -p 'Press Enter when the command has finished (output will be captured)…' _
+            if [[ "${assisted}" == true ]]; then
+                # shellcheck source=neo-conductor-tuning.sh
+                source "${NEO_LIB_DIR}/neo-conductor-tuning.sh" 2>/dev/null || true
+                local wait_sec
+                wait_sec="$(neo_conductor_workbench_wait_sec operator_pane true 2>/dev/null || printf '60')"
+                printf '%s[*]%s Assisted loop: waiting %ss for operator pane output…\n' \
+                    "${C_CYAN:-}" "${C_RESET:-}" "${wait_sec}"
+                sleep "${wait_sec}"
+            else
+                read -r -p 'Press Enter when the command has finished (output will be captured)…' _
+            fi
             output="$(neo_operator_pane_capture "${NEO_WORKBENCH_CAPTURE_LINES:-300}" 2>/dev/null || true)"
             if [[ -z "${output}" ]]; then
                 output="_operator pane capture empty_"
@@ -268,6 +293,7 @@ EOF
 )"
     neo_workbench_mark_foothold_attempted
     neo_workbench_mission_on_try "${project}" "${phase}"
+    NEO_WORKBENCH_LAST_OUTCOME="${outcome}"
 
     cybersec_finish "workbench-try" "${phase}" \
         "Workbench try recorded (${id})" \

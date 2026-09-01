@@ -54,10 +54,12 @@ for test_file in \
     recon-bundle-test.sh \
     borg-test.sh \
     borg-disclosure-test.sh \
+    enum-ai-test.sh \
     borg-library-ingest-test.sh \
     borg-library-ai-test.sh \
     conductor-test.sh \
     conductor-automation-test.sh \
+    conductor-tuning-test.sh \
     disclosure-lint-all-test.sh \
     neo-provider-web-test.sh \
     borg-v2-test.sh \

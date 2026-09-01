@@ -298,6 +298,27 @@ neo_payload_list_candidate_tools() {
         done
 }
 
+# Non-interactive tool pick for conductor assisted loop (borg-guided when dossiers exist,
+# else first installed candidate, else first listed).
+neo_payload_auto_tool() {
+    local project="$1" line name flag
+    if neo_payload_has_borg_dossiers "${project}"; then
+        printf 'borg-guided'
+        return 0
+    fi
+    while IFS='|' read -r name flag; do
+        [[ -n "${name}" && "${flag}" == "1" ]] || continue
+        printf '%s' "${name}"
+        return 0
+    done < <(neo_payload_list_candidate_tools "${project}")
+    while IFS='|' read -r name flag; do
+        [[ -n "${name}" ]] || continue
+        printf '%s' "${name}"
+        return 0
+    done < <(neo_payload_list_candidate_tools "${project}")
+    return 1
+}
+
 # Interactive tool picker. Prints the chosen tool name on stdout; returns 1 on cancel.
 # When Borg dossiers exist, option 0 = borg-guided (AI picks tool + command from dossiers).
 neo_payload_pick_tool() {
@@ -701,9 +722,21 @@ neo_payload_capture_failure_context() {
 
     # shellcheck source=neo-tmux.sh
     source "${NEO_DIR:-${NEO_HOME}}/lib/neo-tmux.sh"
+    # shellcheck source=neo-handler-pane.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-handler-pane.sh" 2>/dev/null || true
+    # shellcheck source=neo-conductor-tuning.sh
+    source "${NEO_DIR:-${NEO_HOME}}/lib/neo-conductor-tuning.sh" 2>/dev/null || true
+    local handler_lines="${NEO_ANALYZE_HANDLER_LINES:-400}"
+    if declare -F neo_conductor_handler_capture_lines >/dev/null 2>&1; then
+        handler_lines="$(neo_conductor_handler_capture_lines)"
+    fi
 
     NEO_PAYLOAD_TERM_REL="$(neo_tmux_save_capture "${project}" "${NEO_ANALYZE_TERM_LINES:-300}" 2>/dev/null || true)"
     NEO_PAYLOAD_LOG_EXCERPT="$(notes_get_section LOG 2>/dev/null | neo_ai_strip_ansi 2>/dev/null | tail -c 8000 || true)"
+    NEO_PAYLOAD_HANDLER_EXCERPT=""
+    if declare -F neo_handler_pane_capture >/dev/null 2>&1; then
+        NEO_PAYLOAD_HANDLER_EXCERPT="$(neo_handler_pane_capture "${handler_lines}" 2>/dev/null || true)"
+    fi
 }
 
 # Renders the shared "recent activity" block from NEO_PAYLOAD_TERM_REL / NEO_PAYLOAD_LOG_EXCERPT
@@ -722,6 +755,9 @@ ${NEO_PAYLOAD_LOG_EXCERPT:-_none_}
 
 ## Terminal log capture (manual activity outside NEO, if any)
 ${term_capture:-_No tmux session was active — nothing captured. Only NEO-tracked activity above is available._}
+
+## Handler pane capture (MSF listener / nc — pane C)
+${NEO_PAYLOAD_HANDLER_EXCERPT:-_No handler pane capture — start listener in neo-handler pane when using MSF._}
 EOF
 }
 
@@ -761,7 +797,7 @@ EOF
 )"
     bundle="${bundle}"$'\n\n'"$(neo_payload_failure_context_block "${project}")"
 
-    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_analyze_failures_system_prompt)")"; then
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_analyze_failures_system_prompt)" "${project}")"; then
         return 1
     fi
 
@@ -829,7 +865,7 @@ neo_payload_suggest_at_pause() {
     fi
 
     bundle="$(neo_payload_build_bundle "${project}" "${phase}" "${tool}")"
-    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")")"; then
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")" "${project}")"; then
         return 1
     fi
 
@@ -881,7 +917,7 @@ neo_payload_suggest_loop_step() {
     neo_payload_init_colors
 
     bundle="$(neo_payload_build_bundle "${project}" "${phase}" "${tool}")"
-    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")")"; then
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_suggest_system_prompt "${tool}")" "${project}")"; then
         return 1
     fi
 
@@ -925,7 +961,7 @@ neo_payload_analyze_failures_at_pause() {
     bundle="$(neo_payload_build_bundle "${project}" "${phase}")"
     bundle="${bundle}"$'\n\n'"$(neo_payload_failure_context_block "${project}")"
 
-    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_analyze_failures_system_prompt)")"; then
+    if ! response="$(neo_payload_call_ai "${bundle}" "$(neo_payload_analyze_failures_system_prompt)" "${project}")"; then
         return 1
     fi
 

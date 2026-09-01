@@ -65,11 +65,19 @@ batch="$(neo_conductor_build_bundle auto-proj foothold analyze-failures-batch)"
 priv="$(neo_conductor_build_bundle auto-proj privesc privesc-triage)"
 [[ "${priv}" == *"SUDO"* || "${priv}" == *"mission bundle"* ]] && ok "privesc-triage intent" || bad "privesc bundle"
 
-[[ "$(neo_conductor_loop_default_max)" == "5" ]] && ok "default max loops 5" || bad "default max"
+[[ "$(neo_conductor_loop_default_max auto-proj foothold)" == "3" ]] && ok "foothold default max loops 3" || bad "foothold max"
+[[ "$(neo_conductor_loop_default_max auto-proj privesc)" == "4" ]] && ok "privesc default max loops 4" || bad "privesc max"
 
 core="$(neo_conductor_mission_core_bundle auto-proj recon)"
 [[ "${core}" == *"SERVICES"* && "${core}" == *"mission.json"* ]] \
     && ok "expanded mission core bundle" || bad "mission core sections"
+
+# shellcheck source=../lib/neo-conductor-loop.sh
+source "${REAL_NEO}/lib/neo-conductor-loop.sh"
+meta_set engagement_mode professional 2>/dev/null || true
+neo_conductor_assisted_loop_enabled auto-proj && ok "assisted loop enabled (professional)" || bad "assisted loop"
+meta_set engagement_mode educational 2>/dev/null || true
+neo_conductor_assisted_loop_enabled auto-proj && bad "assisted loop should be off for guided" || ok "guided skips assisted loop"
 
 export NEO_TEST_NONINTERACTIVE=1
 neo_conductor_on_phase_entry auto-proj recon >/dev/null && ok "phase entry recon no-op" || bad "phase entry recon"

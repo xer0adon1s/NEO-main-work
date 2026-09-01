@@ -143,8 +143,16 @@ neo_operator_pane_offer_session_connect() {
             # shellcheck source=neo-exploit-framework.sh
             source "${NEO_LIB_DIR}/neo-exploit-framework.sh"
             if cmd="$(neo_msf_handler_command "${lhost}" "${lport}" "${payload}" 2>/dev/null)"; then
-                printf '\n[*] MSF handler ready for operator pane.\n'
-                if neo_operator_pane_confirm_yn 'Send MSF handler command to operator pane?' y; then
+                printf '\n[*] MSF handler → tmux pane C (neo-handler).\n'
+                # shellcheck source=neo-handler-pane.sh
+                source "${NEO_LIB_DIR}/neo-handler-pane.sh" 2>/dev/null || true
+                if declare -F neo_handler_pane_offer_msf >/dev/null 2>&1 && \
+                    neo_handler_pane_available 2>/dev/null; then
+                    if neo_operator_pane_confirm_yn 'Start MSF handler in handler pane (pane C)?' y; then
+                        neo_handler_pane_start_msf_listener "${lhost}" "${lport}" "${payload}" || true
+                        meta_set session_connect_offered 1 2>/dev/null || true
+                    fi
+                elif neo_operator_pane_confirm_yn 'Send MSF handler command to operator pane?' y; then
                     neo_operator_pane_send_command "${cmd}" || true
                     meta_set session_connect_offered 1 2>/dev/null || true
                 fi

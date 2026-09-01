@@ -40,6 +40,7 @@ neo_conductor_prompt_yn() {
 
 neo_conductor_resolve_mode() {
     local project="$1" mode engagement
+    neo_conductor_warn_aggressive_fallback 2>/dev/null || true
     OUTDIR="${NEO_HOME}/projects/${project}"
     NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
     # shellcheck source=script-lib.sh
@@ -60,7 +61,20 @@ neo_conductor_resolve_mode() {
 }
 
 neo_conductor_loop_default_max() {
-    printf '5'
+    local project="${1:-}" phase="${2:-foothold}"
+    # shellcheck source=neo-conductor-tuning.sh
+    source "${NEO_LIB_DIR}/neo-conductor-tuning.sh" 2>/dev/null || true
+    if declare -F neo_conductor_loop_max_for_phase >/dev/null 2>&1 && [[ -n "${project}" ]]; then
+        neo_conductor_loop_max_for_phase "${project}" "${phase}"
+    else
+        printf '%s' "${NEO_CONDUCTOR_MAX_LOOPS_DEFAULT:-5}"
+    fi
+}
+
+neo_conductor_warn_aggressive_fallback() {
+    [[ "${NEO_CONDUCTOR_MODE:-}" == "aggressive" && "${NEO_CONDUCTOR_AGGRESSIVE_WARNED:-0}" != "1" ]] || return 0
+    export NEO_CONDUCTOR_AGGRESSIVE_WARNED=1
+    printf '[neo] NEO_CONDUCTOR_MODE=aggressive is deferred — using assisted tuning profile.\n' >&2
 }
 
 neo_conductor_mission_core_bundle() {
@@ -191,7 +205,12 @@ neo_conductor_on_phase_entry() {
                     fi
                 fi
             fi
-            if neo_conductor_prompt_yn '[p] Payload suggestion for foothold?' y; then
+            # shellcheck source=neo-conductor-loop.sh
+            source "${NEO_LIB_DIR}/neo-conductor-loop.sh" 2>/dev/null || true
+            if declare -F neo_conductor_assisted_loop_enabled >/dev/null 2>&1 && \
+                neo_conductor_assisted_loop_enabled "${project}"; then
+                neo_conductor_run_assisted_loop "${project}" foothold || true
+            elif neo_conductor_prompt_yn '[p] Payload suggestion for foothold?' y; then
                 # shellcheck source=neo-payload.sh
                 source "${NEO_LIB_DIR}/neo-payload.sh" 2>/dev/null || true
                 if declare -F neo_payload_suggest_at_pause >/dev/null 2>&1; then
@@ -200,7 +219,12 @@ neo_conductor_on_phase_entry() {
             fi
             ;;
         privesc)
-            if neo_conductor_prompt_yn '[p] Privesc-focused payload suggestion?' y; then
+            if declare -F neo_conductor_assisted_loop_enabled >/dev/null 2>&1 && \
+                neo_conductor_assisted_loop_enabled "${project}"; then
+                # shellcheck source=neo-conductor-loop.sh
+                source "${NEO_LIB_DIR}/neo-conductor-loop.sh" 2>/dev/null || true
+                neo_conductor_run_assisted_loop "${project}" privesc || true
+            elif neo_conductor_prompt_yn '[p] Privesc-focused payload suggestion?' y; then
                 # shellcheck source=neo-payload.sh
                 source "${NEO_LIB_DIR}/neo-payload.sh" 2>/dev/null || true
                 if declare -F neo_payload_suggest_at_pause >/dev/null 2>&1; then

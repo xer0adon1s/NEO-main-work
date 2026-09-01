@@ -24,15 +24,15 @@ printf 'disclosure-lint-all-test.sh\n\n'
 clean="$(neo_ai_guard_output "" "CVE-2021-41773 Apache path traversal technique" "test")"
 [[ "${clean}" == *"CVE-2021"* ]] && ok "clean CVE text passes" || bad "clean CVE"
 
-if out="$(neo_ai_guard_output "" "This is the Reactor box on HackTheBox" "test" 2>/dev/null)"; then
-    bad "strict should refuse spoiler"
+if out="$(neo_ai_guard_output "" "On this HTB box the solution is /root/root.txt" "test" 2>/dev/null)"; then
+    bad "strict should refuse flag spoiler"
 else
-    ok "strict refuses box spoiler"
+    ok "strict refuses flag spoiler"
 fi
 
 export NEO_DISCLOSURE_STRICT=0
 warned="$(neo_ai_guard_output "" "HackTheBox box Reactor walkthrough" "test")"
-[[ "${warned}" == *"redacted"* || "${warned}" != *"Reactor"* ]] && ok "non-strict redacts" || bad "redact mode"
+[[ "${warned}" == *"[lab platform]"* || "${warned}" != *"HackTheBox"* ]] && ok "non-strict redacts" || bad "redact mode"
 
 bash -n "${NEO_DIR}/lib/neo-ai-guard.sh" && ok "syntax ai-guard" || bad "syntax"
 

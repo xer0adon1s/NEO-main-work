@@ -39,6 +39,12 @@ neo_borg_disclosure_check educational "Apache 2.4.49 path traversal CVE-2021-417
 neo_borg_disclosure_check educational "This is the Reactor box on HackTheBox" \
     && bad "box spoiler should fail" || ok "flags box spoiler"
 
+neo_borg_disclosure_check educational "SUID binary privesc via misconfigured sudoers" \
+    && ok "privesc technique passes educational" || bad "privesc path should pass"
+
+scrubbed="$(neo_borg_disclosure_scrub_educational 'On this HTB box, use CVE-2021-41773 for the solution on this machine')"
+[[ "${scrubbed}" != *"HTB box"* ]] && ok "scrub removes HTB box phrasing" || bad "scrub HTB"
+
 neo_borg_disclosure_check professional "This is the Reactor box on HackTheBox" \
     && ok "professional allows box names" || bad "professional should pass"
 

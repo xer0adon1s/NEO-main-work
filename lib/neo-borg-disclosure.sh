@@ -24,13 +24,13 @@ neo_borg_disclosure_mode() {
     esac
 }
 
+# Block obvious CTF box spoilers in educational mode. Technique/CVE/privesc paths are OK.
 neo_borg_disclosure_check() {
     local mode="$1" text="$2"
     [[ -n "${text}" ]] || return 1
     case "${mode}" in
         educational)
-            if grep -qiE \
-                '(hackthebox|htb[[:space:].]|tryhackme|thm[[:space:].]|box name|walkthrough for|walkthrough path|root flag|user flag|pass the hash|/home/[^[:space:]/]+/user\.txt|/root/root\.txt)' \
+            if grep -qiE '(hackthebox|htb[[:space:].:]|tryhackme|try hack me|thm[[:space:].:]|hackthebox\.(com|eu)|tryhackme\.com|walkthrough for (this |the )?(box|machine|room)|(on|for) this (htb|thm|ctf) (box|machine|room)|the solution (for|on) this (box|machine|room)|/home/[^[:space:]/]+/user\.txt|/root/root\.txt)' \
                 <<< "${text}"; then
                 return 1
             fi
@@ -39,6 +39,25 @@ neo_borg_disclosure_check() {
         *) return 1 ;;
     esac
     return 0
+}
+
+neo_borg_disclosure_scrub_educational() {
+    local text="$1"
+    [[ -n "${text}" ]] || { printf ''; return 0; }
+    text="$(sed -E \
+        -e 's/(HackTheBox|TryHackMe|Try Hack Me|HTB Machine|THM Room)/[lab platform]/gi' \
+        -e 's/(https?:\/\/)?(www\.|app\.)?hackthebox\.(com|eu)[^[:space:]]*/[lab link redacted]/gi' \
+        -e 's/(https?:\/\/)?(www\.)?tryhackme\.com[^[:space:]]*/[lab link redacted]/gi' \
+        -e 's/(on|for) this (HTB|THM|CTF) (box|machine|room)/for this lab target/gi' \
+        -e 's/the solution (for|on) this (box|machine|room)/a technique path/gi' \
+        <<< "${text}")"
+    printf '%s' "${text}"
+}
+
+neo_borg_disclosure_redact_educational() {
+    local text="$1"
+    neo_borg_disclosure_scrub_educational "${text}" | \
+        sed -E 's/(walkthrough for|walkthrough on)[^[:space:]\n]*/[walkthrough reference redacted]/gi'
 }
 
 neo_borg_disclosure_ai_rules() {
@@ -55,7 +74,9 @@ EOF
         *)
             cat <<'EOF'
 ## DISCLOSURE MODE: EDUCATIONAL
-Lab-learning tone. Teach techniques and CVEs; do NOT name specific HTB/THM boxes or spoil walkthrough paths.
+Lab-learning tone. Teach attack vectors, CVEs, and privesc techniques from evidence.
+Do NOT name HackTheBox/TryHackMe boxes or spoil full walkthrough solutions.
+Reference techniques and privesc paths — not "on this HTB box, do X to get root".
 EOF
             ;;
     esac
