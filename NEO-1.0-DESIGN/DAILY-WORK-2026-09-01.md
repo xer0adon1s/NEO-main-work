@@ -18,6 +18,7 @@
 | **Live recon orchestration** | **Verified** — babysteps against `192.0.2.1`, expected empty ports, no crash |
 | **LOCK & LOAD toolkit** | **Verified live** — awk fix at `neo-toolkit.sh:104` |
 | **Full mission loop** | **Not verified** — dry-run stopped mid-ELI5; foothold/privesc/post/`[b]`/`[t]`/`[o]`/`[f]` still open |
+| **Live VPN smoke (`scratch-tierb-test`)** | **Shelved → later phase** — offline verify green 2026-09-01; run with VPN + real HTB target when Block H opens (see `FEATURE-STATUS.md` § Deferred verification) |
 | **Piped-input automation** | **Do not use** for E2E — wrong tool; see § Dry-run methods |
 | **Tmux send-keys dry-run** | **Works** — already ran once; resume/extend, don't reinvent |
 
@@ -203,7 +204,7 @@ ad-hoc `CURSOR-REVIEW-LOG`, `CLAUDE-COLLAB`, `DAILY-RECAP-*`, `DRY-RUN-TRACE-*` 
 2. **Midday:** Block C or D (pick one — conductor *or* Borg, not both half-done)  
 3. **Afternoon:** Block E or F + update `FEATURE-STATUS.md` for anything live-verified  
 4. **Slack time:** Block I (changelog rename pass) — can slip to next session if lab runs long  
-5. **Evening (VPN):** Block H Box 1 from E2E checklist  
+5. **Evening (VPN):** Block H Box 1 from E2E checklist — **deferred** (see `FEATURE-STATUS.md` § Deferred verification; not until later live-lab phase)
 
 ---
 

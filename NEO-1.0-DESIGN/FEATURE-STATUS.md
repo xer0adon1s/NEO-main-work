@@ -146,6 +146,24 @@ Piped stdin automation (Cursor) is **not** valid evidence against tmux/workbench
 
 ---
 
+## Deferred verification (later phase)
+
+**Shelved 2026-09-01** — do **not** run until a dedicated live-lab phase (after offline
+verify is green and operator has VPN + target ready).
+
+| Item | Command | Prerequisite | Phase gate |
+|------|---------|--------------|------------|
+| **Live Tier B scratch mission** | `./neo.sh scratch-tierb-test <HTB_IP>` | HTB/THM VPN up (`tun0`); real reachable target; tmux session (not piped stdin) | **Block H / post–Phase 74** — not Phase 74 sign-off |
+| **P18 lab E2E checklist** | `NEO_P18_LAB=1 ./test/p18-lab-e2e.sh` | Same VPN + one full box run; manual checklist in script | **B12 live sign-off** |
+
+**Offline status (2026-09-01):** `linux-phase1-verify.sh` 6/6 pass; `neo-smoke-test.sh` 24/24;
+`scratch-tierb-test` against synthetic IP exercises real babysteps/ListenAssist but SSH privesc
+fails as expected without a live shell — **not** a substitute for VPN smoke.
+
+**Reminder:** Unset `NEO_TEST_NONINTERACTIVE` in the shell before live runs (Cursor/dev env may export it).
+
+---
+
 ## Related docs
 
 | Doc | Role |
