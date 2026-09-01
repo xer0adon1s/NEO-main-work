@@ -62,14 +62,16 @@ grep -q 'redis-unauth' "${NEO_HOME}/knowledge/README.md" && ok "collective READM
 ctx="$(neo_borg_collective_context "redis-unauth")"
 [[ "${ctx}" == *"Existing collective entry"* ]] && ok "collective context for slug" || bad "collective context"
 rm -rf "${tmp_root}"
+export NEO_HOME="${NEO_ROOT}"
+export NEO_DIR="${NEO_ROOT}"
 
-hud_frame="$(awk '/^neo_borg_hud_frame\(\)/,/^neo_borg_hud_start\(\)/' "${NEO_DIR}/lib/neo-borg.sh")"
+hud_frame="$(awk '/^neo_borg_hud_frame\(\)/,/^neo_borg_hud_start\(\)/' "${NEO_ROOT}/lib/neo-borg.sh")"
 ! grep -q 'resistance is futile' <<< "${hud_frame}" && ok 'HUD tagline not in tick loop' || bad 'HUD tagline in tick loop'
 
 tmp_proj="$(mktemp -d)"
 export NEO_HOME="${tmp_proj}/Neo"
-export NEO_DIR="${NEO_HOME}"
-mkdir -p "${NEO_HOME}/projects/multibox/assimilated/redis-unauth"
+export NEO_DIR="${NEO_ROOT}"
+mkdir -p "${NEO_HOME}/projects/multibox/assimilated/redis-unauth-on-6379"
 neo_borg_write_file "${NEO_HOME}/projects/multibox/Investigation-Notes.md" "$(cat <<'EOF'
 <!-- SECTION:AI-TRIAGE -->
 ## Attack paths
@@ -78,7 +80,7 @@ neo_borg_write_file "${NEO_HOME}/projects/multibox/Investigation-Notes.md" "$(ca
 <!-- /SECTION:AI-TRIAGE -->
 EOF
 )"
-neo_borg_write_file "${NEO_HOME}/projects/multibox/assimilated/redis-unauth/SUMMARY.md" "## Proposed wind-up actions\n1. \`[RUN:redis-cli PING]\`"
+neo_borg_write_file "${NEO_HOME}/projects/multibox/assimilated/redis-unauth-on-6379/SUMMARY.md" "## Proposed wind-up actions\n1. \`[RUN:redis-cli PING]\`"
 # shellcheck source=../lib/script-lib.sh
 source "${NEO_DIR}/lib/script-lib.sh"
 OUTDIR="${NEO_HOME}/projects/multibox"

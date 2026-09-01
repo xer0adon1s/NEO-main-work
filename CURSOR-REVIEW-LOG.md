@@ -2499,3 +2499,62 @@ After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5
 
 **EOD handoff:** `NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md` — full session recap + Linux test matrix + Claude review checklist.
 
+---
+
+# Phase 73 — P0 prototype lib batch (2026-09-01)
+
+## Operator prompt(s)
+
+> absolutely lets do as much P0 batch stuff as possible
+
+## What changed
+
+**P0 fixes across 16-lib prototype layer:**
+
+- **`lib/neo-feedback.sh`** — default stderr `[NEO] …` ack when `NEO_FEEDBACK=1` (not only `NEO_FEEDBACK_TRACE`); titles for `[o]`/`[e]`/`[a]`/`[f]`/`[d]`
+- **`lib/neo-borg-disclosure.sh`** — `engagement_mode` from `project.meta` when project passed; expanded educational spoiler patterns
+- **`lib/neo-ai-guard.sh`** — pass project into `neo_borg_disclosure_mode` (first arg)
+- **`lib/neo-operator-recon-ai.sh`** — 3-arg signature `(project, content, category)`; operator text in bundle (8k cap)
+- **`lib/neo-conductor-privesc.sh`** — `local bundle=` (no global leak)
+- **`lib/neo-report.sh`** — guarded disclosure source; `neo_report_system_prompt` uses meta-driven mode
+- **`lib/neo-conductor.sh`** — `neo_conductor_prompt_yn` honors default **y** vs **n**; **`neo_conductor_after_triage`** chains Borg (if pending) → payload (default n) + event emit
+
+**Tests:** `neo-feedback-test.sh` ack assertion; `borg-disclosure-test.sh` project.meta mode case
+
+## Verification deferred to home Linux
+
+`./test/neo-feedback-test.sh`, `./test/borg-disclosure-test.sh`, `./test/conductor-test.sh`, `./test/run-all.sh`
+
+---
+
+# Phase 74 — Pre-test P1 integration batch (2026-09-01)
+
+## Operator prompt(s)
+
+> is there any other work u can do on this project before we run tests, look for ANYTHING you can work on
+
+## What changed
+
+**Conductor + scan:**
+- **`lib/neo-conductor.sh`** — expanded `neo_conductor_mission_core_bundle` (SERVICES, BORG, PAYLOAD, mission.json); real **`neo_conductor_on_phase_entry`** (foothold/privesc/post gates); adaptive scan hook after triage
+- **`lib/neo-conductor-loop.sh`** — assisted loop opt-in prompt; event routing fix (`foothold.entry` / `privesc.entry` / `post.entry`)
+- **`lib/neo-adaptive-scan.sh`** — deep-targets file builder + post-triage Y/n TODO queue
+- **`lib/neo-conductor-privesc.sh`** — full AI privesc triage → **PRIVESC-PLAN** + AI-TRIAGE append (bundle includes privesc-facts/plan JSON)
+
+**Report + library:**
+- **`lib/neo-report.sh`** — real **`neo_report_generate`** (Claude call, REPORT section, artifact copy)
+- **`lib/neo-borg-library-ai.sh`** — **`neo_borg_library_ai_research`** + **`write_artifacts`** pipe return (`edu|prof`)
+- **`lib/neo-borg-library.sh`** — post-assimilate research hook + INDEX register stubs
+- **`lib/neo-borg-library-batch.sh`** — batch_run invokes harvest tool per slug
+
+**Other:**
+- **`lib/neo-handler-pane.sh`** — tmux pane C (mirror operator-pane pattern)
+- **`lib/neo-operator-recon-ai.sh`** — live AI summarize → INTERACT section
+- **`lib/neo-payload.sh`** — optional 3rd arg `project` for disclosure guard
+
+**Tests:** `borg-library-ai-test.sh` write_artifacts; `conductor-automation-test.sh` expanded core + phase entry + adaptive targets
+
+## Verification deferred to home Linux
+
+`./test/borg-library-ai-test.sh`, `./test/conductor-automation-test.sh`, `./test/neo-report-test.sh`, `./test/run-all.sh`, `./test/neo-diagnostic.sh`
+

@@ -582,7 +582,7 @@ neo_payload_provider_run_visible() {
 }
 
 neo_payload_call_ai() {
-    local bundle="$1" sys="$2"
+    local bundle="$1" sys="$2" project="${3:-}"
     local tmp_sys tmp_user tmp_out provider_out rc saved_provider response
 
     # shellcheck source=neo-provider.sh
@@ -612,7 +612,7 @@ neo_payload_call_ai() {
             # shellcheck source=neo-ai-guard.sh
             source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
             if declare -F neo_ai_guard_output >/dev/null 2>&1; then
-                response="$(neo_ai_guard_output "" "${response}" "payload-ai")" || {
+                response="$(neo_ai_guard_output "${project}" "${response}" "payload-ai")" || {
                     NEO_AI_PROVIDER="${saved_provider}"
                     return 1
                 }
@@ -632,7 +632,7 @@ neo_payload_call_ai() {
             # shellcheck source=neo-ai-guard.sh
             source "${NEO_DIR:-${NEO_HOME}}/lib/neo-ai-guard.sh" 2>/dev/null || true
             if declare -F neo_ai_guard_output >/dev/null 2>&1; then
-                response="$(neo_ai_guard_output "" "${response}" "payload-ai")" || {
+                response="$(neo_ai_guard_output "${project}" "${response}" "payload-ai")" || {
                     NEO_AI_PROVIDER="${saved_provider}"
                     return 1
                 }

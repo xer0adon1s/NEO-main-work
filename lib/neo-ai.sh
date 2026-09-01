@@ -73,8 +73,15 @@ neo_ai_load_api_key() {
 }
 
 neo_ai_save_api_key() {
-    local key="$1"
+    local key="$1" keyfile tmp kdir
     neo_secret_store ANTHROPIC_API_KEY "${key}" || return 1
+    keyfile="$(neo_ai_keyfile_path)"
+    kdir="$(dirname "${keyfile}")"
+    mkdir -p "${kdir}"
+    tmp="$(mktemp "${kdir}/.anthropic.key.XXXXXX")" || return 1
+    printf '%s\n' "${key}" > "${tmp}"
+    chmod 600 -- "${tmp}"
+    mv -f -- "${tmp}" "${keyfile}"
     ANTHROPIC_API_KEY="${key}"
     export ANTHROPIC_API_KEY
 }

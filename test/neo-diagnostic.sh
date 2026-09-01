@@ -75,8 +75,11 @@ fi
 printf '\n--- NEO 1.0 production integrity gate ---\n'
 if bash test/production-integrity-gate.sh >/tmp/neo-diag-integrity-gate.log 2>&1; then
     ok "production-integrity-gate ($(tail -1 /tmp/neo-diag-integrity-gate.log 2>/dev/null || echo pass))"
+elif grep -qE '\[ok\]|\[FAIL\]|pass |fail ' /tmp/neo-diag-integrity-gate.log 2>/dev/null; then
+    bad "production-integrity-gate ran but failed — see /tmp/neo-diag-integrity-gate.log"
+    tail -8 /tmp/neo-diag-integrity-gate.log >&2 || true
 else
-    note "production-integrity-gate not yet green (expected until Wave 3 stub replacement) — see /tmp/neo-diag-integrity-gate.log"
+    bad "production-integrity-gate crashed before running checks — see /tmp/neo-diag-integrity-gate.log"
     tail -8 /tmp/neo-diag-integrity-gate.log >&2 || true
 fi
 

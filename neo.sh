@@ -1118,8 +1118,13 @@ trap neo_trap_interrupt INT TERM
 
 if [[ "${NEO_REPORT_ONLY:-0}" == "1" ]]; then
     # shellcheck source=lib/neo-report.sh
-    source "${NEO_DIR}/lib/neo-report.sh"
-    neo_report_generate "${PROJECT}" || exit 1
+    source "${NEO_DIR}/lib/neo-report.sh" 2>/dev/null || true
+    if declare -F neo_report_generate >/dev/null 2>&1; then
+        neo_report_generate "${PROJECT}" || exit 1
+    else
+        echo "neo: final report unavailable (lib/neo-report.sh not loaded)" >&2
+        exit 1
+    fi
     exit 0
 fi
 
@@ -1221,8 +1226,9 @@ while (( idx < ${#PHASE_ORDER[@]} )); do
     next="$(next_phase_name "${phase}" 2>/dev/null)" || {
         printf '\nMission complete. Review projects/%s/Investigation-Notes.md\n' "${PROJECT}"
         # shellcheck source=lib/neo-report.sh
-        source "${NEO_DIR}/lib/neo-report.sh"
-        neo_report_offer_mission_complete "${PROJECT}" || true
+        source "${NEO_DIR}/lib/neo-report.sh" 2>/dev/null || true
+        declare -F neo_report_offer_mission_complete >/dev/null 2>&1 && \
+            neo_report_offer_mission_complete "${PROJECT}" || true
         neo_checkpoint_clear
         meta_set phase post 2>/dev/null || true
         exit 0

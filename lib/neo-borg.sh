@@ -736,7 +736,7 @@ $(neo_borg_disclosure_bundle_block "${project}")
 EOF
 )"
     if ((${#bundle} > NEO_AI_BUNDLE_MAX)); then
-        bundle="${bundle:0:NEO_AI_BUNDLE_MAX}"$'\n\n[bundle hard-truncated at NEO_AI_BUNDLE_MAX chars]"
+        bundle="${bundle:0:NEO_AI_BUNDLE_MAX}"$'\n\n[bundle hard-truncated at NEO_AI_BUNDLE_MAX chars]'
     fi
     printf '%s' "${bundle}"
 }

@@ -67,6 +67,20 @@ priv="$(neo_conductor_build_bundle auto-proj privesc privesc-triage)"
 
 [[ "$(neo_conductor_loop_default_max)" == "5" ]] && ok "default max loops 5" || bad "default max"
 
+core="$(neo_conductor_mission_core_bundle auto-proj recon)"
+[[ "${core}" == *"SERVICES"* && "${core}" == *"mission.json"* ]] \
+    && ok "expanded mission core bundle" || bad "mission core sections"
+
+export NEO_TEST_NONINTERACTIVE=1
+neo_conductor_on_phase_entry auto-proj recon >/dev/null && ok "phase entry recon no-op" || bad "phase entry recon"
+neo_conductor_on_phase_entry auto-proj foothold >/dev/null && ok "phase entry foothold noninteractive" || bad "phase entry foothold"
+
+# shellcheck source=../lib/neo-adaptive-scan.sh
+source "${REAL_NEO}/lib/neo-adaptive-scan.sh"
+notes_set_section PORTS $'```text\n22/tcp open ssh\n80/tcp open http\n```' 2>/dev/null || true
+targets="$(neo_adaptive_scan_build_targets_file auto-proj 2>/dev/null || true)"
+[[ -n "${targets}" && -f "${targets}" ]] && ok "adaptive deep-targets file" || bad "adaptive targets"
+
 export NEO_CONDUCTOR_MODE=aggressive
 mode="$(neo_conductor_resolve_mode auto-proj)"
 [[ "${mode}" == "assisted" ]] && ok "aggressive falls back to assisted" || bad "aggressive fallback got ${mode}"

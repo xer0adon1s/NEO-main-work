@@ -28,6 +28,24 @@ idx="$(neo_borg_library_research_index_excerpt 500)"
 [[ "${idx}" == *"borg-research-index"* || "${idx}" == *"cve_authoritative"* ]] \
     && ok "research index excerpt" || bad "index excerpt"
 
+lib_tmp="$(mktemp -d)"
+export NEO_DIR="${lib_tmp}"
+export NEO_HOME="${lib_tmp}"
+mkdir -p "${lib_tmp}/knowledge/library"
+# shellcheck source=../lib/neo-borg-library-ai.sh
+source "${NEO_ROOT}/lib/neo-borg-library-ai.sh"
+paths="$(neo_borg_library_ai_write_artifacts "redis test" "$(cat "${sample}")")"
+edu="${paths%%|*}"
+prof="${paths#*|}"
+[[ -f "${edu}" && -f "${prof}" ]] && ok "write_artifacts pipe paths" || bad "write_artifacts paths"
+[[ "${edu}" == *"educational.md" && "${prof}" == *"professional-steps.md" ]] \
+    && ok "artifact filenames" || bad "artifact names"
+rm -rf "${lib_tmp}"
+export NEO_HOME="${NEO_ROOT}"
+export NEO_DIR="${NEO_ROOT}"
+# shellcheck source=../lib/neo-borg-library-ai.sh
+source "${NEO_DIR}/lib/neo-borg-library-ai.sh"
+
 bash -n "${NEO_DIR}/lib/neo-borg-library-ai.sh" && ok "syntax library-ai" || bad "syntax"
 bash -n "${NEO_DIR}/tools/borg-library-harvest.sh" && ok "syntax harvest" || bad "harvest syntax"
 

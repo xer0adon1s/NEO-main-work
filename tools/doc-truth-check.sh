@@ -4,7 +4,7 @@
 set -uo pipefail
 
 NEO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-NEO_SOURCE_ROOT="${NEO_SOURCE_ROOT:-${NEO_ROOT}"
+NEO_SOURCE_ROOT="${NEO_SOURCE_ROOT:-${NEO_ROOT}}"
 # shellcheck source=../test/test-helper.sh
 source "${NEO_ROOT}/test/test-helper.sh"
 
@@ -18,7 +18,7 @@ check_version_file() {
     version="$(tr -d '[:space:]' < "${VERSION_FILE}")"
     [[ -n "${version}" ]] || { fail 'VERSION file empty'; return; }
     pass "VERSION file present (${version})"
-    grep -q "${version}" "${NEO_SOURCE_ROOT}/neo.sh" 2>/dev/null \
+    grep -qE 'NEO_VERSION|/VERSION' "${NEO_SOURCE_ROOT}/neo.sh" 2>/dev/null \
         && pass 'neo.sh references VERSION' \
         || fail 'neo.sh does not reference VERSION'
 }

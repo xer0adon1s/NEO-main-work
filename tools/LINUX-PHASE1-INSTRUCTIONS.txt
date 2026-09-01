@@ -1,0 +1,140 @@
+NEO — Linux verification run (home box)
+========================================
+Updated: 2026-09-01 (Phases 73–74)
+Hi! Run ONE command, then email ONE log file back. Takes about 15–30 minutes.
+
+WHAT THIS CHECKS
+----------------
+Automated tests only — no Hack The Box, no attacks, no API keys required.
+Covers everything through Phase 74 (P0 feedback/disclosure + P1 conductor/report/library).
+
+WHAT YOU NEED
+-------------
+• The NEO folder on Linux (must contain neo.sh)
+• Bash (normal on Linux)
+• Optional: git (if you pulled from GitHub)
+
+WHERE IS THE NEO FOLDER?
+------------------------
+Examples:
+  ~/NEO-main-work
+  ~/Desktop/NEO-main-work
+  ~/Neo
+
+The folder must contain neo.sh and a tools/ subfolder.
+
+STEP 0 — Get latest code (if using git)
+---------------------------------------
+  cd ~/NEO-main-work
+  git pull
+
+If you do not use git, make sure the operator sent you the latest zip/copy.
+
+STEP 1 — Run the verification script (ONE command)
+--------------------------------------------------
+Open Terminal, then paste (change path if needed):
+
+  cd ~/NEO-main-work && bash tools/linux-phase1-verify.sh
+
+If "Permission denied":
+  chmod +x tools/linux-phase1-verify.sh
+  cd ~/NEO-main-work && bash tools/linux-phase1-verify.sh
+
+STEP 2 — Email the log file back
+---------------------------------
+When finished, the script prints something like:
+
+  artifacts/linux-phase1-verify-20260901-123456.log
+
+That file is inside the NEO folder under artifacts/.
+
+Attach that .log file to an email and send it to the operator.
+
+WHAT THE SCRIPT RUNS (full list)
+--------------------------------
+You do NOT run these by hand — the script runs them for you.
+Listed here so the operator knows what was covered.
+
+  A. Preflight
+     - neo.sh --version
+     - optional setup.sh --check (may warn if vendor/ not installed — OK)
+
+  B. test/run-all.sh — full aggregate (~40 suites + bash -n on all .sh)
+     CORE / safety:
+       core-secrets-test.sh, mission-state-test.sh, secret-canary-test.sh
+       injection-payload-test.sh, workflow-scope-test.sh
+     Workbench / toolkit / MSF:
+       workbench-test.sh, toolkit-test.sh, exploit-framework-test.sh
+       plan-enum-hook-test.sh, privesc-rank-hook-test.sh
+       vendor-test.sh, session-adapter-test.sh, eli5-test.sh
+     Borg / library / disclosure:
+       borg-test.sh, borg-disclosure-test.sh, borg-library-ingest-test.sh
+       borg-library-ai-test.sh, disclosure-lint-all-test.sh
+       borg-v2-test.sh, borg-library-batch-test.sh
+     Conductor / menu / feedback (Phases 71–74):
+       conductor-test.sh, conductor-automation-test.sh
+       neo-feedback-test.sh, menu-routing-test.sh
+       payload-test.sh, neo-report-test.sh
+     Integration / smoke / tmux:
+       neo-boot-test.sh, interact-test.sh
+       neo-tmux-test.sh, neo-tmux-integration-test.sh
+       neo-smoke-test.sh
+     Notes / recon:
+       notes-lib-test.sh, recon-bundle-test.sh
+     Other:
+       production-integrity-gate.sh, p18-lab-e2e.sh (offline harness)
+       neo-provider-web-test.sh, tools/doc-truth-check.sh
+     Syntax: bash -n on every .sh in repo (except vendor/)
+
+  C. test/neo-diagnostic.sh — pre-review structural gate
+     - Required files + lib/ hygiene (all 16 prototype libs)
+     - babysteps.sh integrity check
+     - production-integrity-gate.sh
+     - Core unit suites (subset re-run for diagnostic banner)
+
+  D. tools/doc-truth-check.sh — docs match shipped files
+
+  E. Phase 73–74 focused re-check (individual suites)
+     - neo-feedback-test.sh          (Phase 73 — ack stderr)
+     - borg-disclosure-test.sh       (Phase 73 — meta engagement_mode)
+     - conductor-test.sh
+     - conductor-automation-test.sh  (Phase 74 — expanded bundle, adaptive scan)
+     - borg-library-ai-test.sh       (Phase 74 — write_artifacts pipe)
+     - neo-report-test.sh            (Phase 74 — report bundle/prompts)
+
+  F. Offline tool smoke (no Claude / no network required)
+     - tools/borg-library-harvest.sh --research "redis unauth" --dry-run
+     - tools/borg-library-harvest.sh --batch --dry-run (temp fixture project)
+
+NOTES
+-----
+• Red [FAIL] lines are OK — send the log either way.
+• Do not enter passwords unless Linux asks for your login.
+• This does NOT connect to Hack The Box or run exploits.
+• tmux integration tests need tmux installed (usually already there).
+• Some integrity-gate warnings about ListenAssist/FindPrivs stubs may be expected.
+
+TROUBLESHOOTING
+---------------
+"neo.sh not found"
+  → cd into the folder that contains neo.sh first.
+
+"bash: command not found"
+  → Try: /bin/bash tools/linux-phase1-verify.sh
+
+"tmux: command not found"
+  → Install: sudo apt install tmux   (Debian/Ubuntu)
+
+Script missing after email
+  → Save linux-phase1-verify.sh into NEO-main-work/tools/ then run Step 1.
+
+QUESTIONS?
+  → Text the operator with a photo of the terminal screen.
+
+FOR THE OPERATOR (after log arrives)
+------------------------------------
+On Linux, triage failures then optionally run live smoke:
+  ./neo.sh scratch-tierb-test <HTB_IP>     # educational, one box
+  NEO_P18_LAB=1 ./test/p18-lab-e2e.sh      # after a full lab run
+
+See NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md § Linux test matrix for details.

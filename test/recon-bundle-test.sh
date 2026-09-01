@@ -3,8 +3,13 @@
 
 set -euo pipefail
 
-NEO_HOME="${NEO_HOME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-NEO_DIR="${NEO_DIR:-${NEO_HOME}}"
+REAL_NEO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TESTDIR="$(mktemp -d /tmp/neo-bundle-test.XXXXXX)"
+trap 'rm -rf "${TESTDIR}"' EXIT
+export NEO_HOME="${TESTDIR}"
+export NEO_DIR="${REAL_NEO}"
+mkdir -p "${NEO_HOME}/templates"
+cp "${REAL_NEO}/templates/investigation-notes.md" "${NEO_HOME}/templates/"
 
 source "${NEO_DIR}/lib/notes-lib.sh"
 source "${NEO_DIR}/lib/neo-ai.sh"
@@ -31,12 +36,6 @@ assert "nmap trim drops SF- lines" test -z "$(grep '^SF-' <<< "${trimmed}" || tr
 assert "nmap trim drops HTML lines" test -z "$(grep '<!DOCTYPE' <<< "${trimmed}" || true)"
 assert "nmap trim keeps Service Info" grep -q 'Service Info' <<< "${trimmed}"
 
-TESTDIR="$(mktemp -d /tmp/neo-bundle-test.XXXXXX)"
-trap 'rm -rf "${TESTDIR}"' EXIT
-REAL_NEO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export NEO_HOME="${TESTDIR}"
-mkdir -p "${NEO_HOME}/templates"
-cp "${REAL_NEO}/templates/investigation-notes.md" "${NEO_HOME}/templates/"
 OUTDIR="${NEO_HOME}/projects/bundle-proj"
 notes_init "bundle-proj" "10.0.0.5" "${OUTDIR}"
 notes_set_section STATUS "test status"
@@ -68,6 +67,7 @@ assert "extract tools from response" test "$(neo_ai_extract_tools_from_response 
 assert "extract tools nikto" grep -qx nikto <<< "$(neo_ai_extract_tools_from_response "${sample_response}")"
 
 KEYDIR="${TESTDIR}/config"
+export NEO_SECRET_DIR="${TESTDIR}/secrets"
 export NEO_AI_KEYFILE="${KEYDIR}/anthropic.key"
 neo_ai_save_api_key "sk-ant-test-key-12345"
 assert "save api key" test -f "${NEO_AI_KEYFILE}"

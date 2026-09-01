@@ -55,6 +55,22 @@ lib/*
 !lib/neo-exploit-framework.sh
 !lib/neo-pipeline-hooks.sh
 !lib/neo-eli5.sh
+!lib/neo-conductor.sh
+!lib/neo-conductor-loop.sh
+!lib/neo-conductor-privesc.sh
+!lib/neo-report.sh
+!lib/neo-feedback.sh
+!lib/neo-ai-guard.sh
+!lib/neo-enum-ai.sh
+!lib/neo-adaptive-scan.sh
+!lib/neo-operator-recon-ai.sh
+!lib/neo-handler-pane.sh
+!lib/neo-borg-disclosure.sh
+!lib/neo-borg-library.sh
+!lib/neo-borg-library-ai.sh
+!lib/neo-borg-harvest.sh
+!lib/neo-borg-v2.sh
+!lib/neo-borg-library-batch.sh
 
 # Temp / editor
 *.swp

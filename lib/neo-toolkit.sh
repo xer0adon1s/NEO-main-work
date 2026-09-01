@@ -101,7 +101,7 @@ neo_toolkit_extract_paths_from_command() {
                 }
                 if ($i ~ /^--wordlist=/) { sub(/^--wordlist=/, "", $i); print $i; continue }
                 if ($i ~ /^(-w|-f|-U|-P)=/) { sub(/^[^=]+=/, "", $i); print $i; continue }
-                if ($i ~ ^(/|~|\$HOME/)) print $i
+                if ($i ~ /^(\/|~|\$HOME\/)/) print $i
                 if ($i ~ /[Ss]ec[Ll]ists|[Ww]ordlists|rockyou/) print $i
                 prev = $i
             }

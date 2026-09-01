@@ -28,6 +28,9 @@ source "${NEO_DIR}/lib/neo-menu.sh"
 out="$(neo_feedback_action_title analyze-failures)"
 [[ "${out}" == '[z] Diagnose failure' ]] && ok 'diagnose title' || bad "diagnose: ${out}"
 
+err="$(neo_feedback_ack_action assimilate '' 2>&1 >/dev/null || true)"
+[[ "${err}" == *"[NEO]"* ]] && [[ "${err}" == *"Borg"* ]] && ok 'default ack stderr' || bad "ack stderr: ${err}"
+
 bash -n "${NEO_DIR}/lib/neo-feedback.sh" && ok 'syntax neo-feedback.sh' || bad 'syntax'
 
 printf '\n%d passed, %d failed\n' "${pass}" "${fail}"

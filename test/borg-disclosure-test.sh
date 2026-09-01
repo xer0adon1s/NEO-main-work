@@ -25,6 +25,14 @@ export NEO_ENGAGEMENT_MODE=professional
     && ok "NEO_ENGAGEMENT_MODE=professional" || bad "env professional"
 unset NEO_ENGAGEMENT_MODE
 
+TESTDIR="$(mktemp -d /tmp/neo-disclosure-test.XXXXXX)"
+export NEO_HOME="${TESTDIR}"
+mkdir -p "${NEO_HOME}/projects/metabox"
+printf 'engagement_mode=professional\n' > "${NEO_HOME}/projects/metabox/project.meta"
+[[ "$(neo_borg_disclosure_mode metabox)" == "professional" ]] \
+    && ok "project.meta engagement_mode=professional" || bad "meta professional"
+rm -rf "${TESTDIR}"
+
 neo_borg_disclosure_check educational "Apache 2.4.49 path traversal CVE-2021-41773" \
     && ok "CVE technique text passes educational" || bad "CVE should pass"
 
