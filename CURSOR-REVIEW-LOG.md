@@ -2558,3 +2558,16 @@ After **`[p]`** payload suggest or workbench analyze: optional **Explain at ELI5
 
 `./test/borg-library-ai-test.sh`, `./test/conductor-automation-test.sh`, `./test/neo-report-test.sh`, `./test/run-all.sh`, `./test/neo-diagnostic.sh`
 
+---
+
+# Phase 74 follow-up — live VPN smoke shelved (2026-09-01)
+
+## Operator prompt
+
+> shelve live VPN test to later phase; make a note; commit
+
+## Status
+
+- **Offline:** `linux-phase1-verify.sh` 6/6; `neo-smoke-test.sh` 24/24; merge fixes in `86c277d`
+- **Live VPN smoke:** **deferred** — `./neo.sh scratch-tierb-test <HTB_IP>` and `NEO_P18_LAB=1 ./test/p18-lab-e2e.sh` tracked in `FEATURE-STATUS.md` § Deferred verification; not a Phase 74 gate
+
