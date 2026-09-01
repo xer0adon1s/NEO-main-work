@@ -4,6 +4,7 @@ End-to-end authorized engagement conductor — enum through post-exploitation.
 
 **Vision:** [`NEO-1.0-DESIGN/MISSION-STATEMENT.md`](NEO-1.0-DESIGN/MISSION-STATEMENT.md)  
 **Operator loop:** [`NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md`](NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md)  
+**Changelog:** [`MASTER-CHANGELOG.md`](MASTER-CHANGELOG.md) · **Doc index:** [`docs/INDEX.md`](docs/INDEX.md)  
 **Run:** `./neo.sh <project> [target]` (Linux attack box + tmux)
 
 NEO orchestrates the **whole box** (recon → foothold → privesc → post). Metasploit is one

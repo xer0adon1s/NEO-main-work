@@ -202,8 +202,9 @@ Ingest always also calls `notes_log_smart` with the full raw text.
 - [ ] Extension log entry below (include operator prompt reference if from a session request)
 
 When logging work triggered by the operator in Cursor chat, add a phase to
-**`CURSOR-REVIEW-LOG.md`** with verbatim **Operator prompt(s)** blockquote(s) —
-see Phase 19 convention in that file and **§ Operator prompt log** in `CLAUDE-COLLAB.md`.
+**`docs/collab/CURSOR-REVIEW-LOG.md`** with verbatim **Operator prompt(s)** blockquote(s) —
+see Phase 19 convention in that file and **§ Operator prompt log** in `docs/collab/CLAUDE-COLLAB.md`.
+Also add a short milestone to **`MASTER-CHANGELOG.md`** at repo root.
 
 ## Testing
 

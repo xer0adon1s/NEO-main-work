@@ -4,12 +4,10 @@ in this directory (same folder as this file).
 For NEO vision, repo layout, AI modes, BORG collective, wordlists, VPN paths,
 and Claude API setup, read **`README.md`**.
 
-Optional local briefing (gitignored, not on GitHub):
-
-- **`CLAUDE-COLLAB.md`** — co-lab agenda, operator prompt log (Prompts 1–38), Phases 1–58
-- **`CURSOR-REVIEW-LOG.md`** — dev changelog; every phase includes verbatim operator prompt(s)
-
-When you add features, log the operator's exact prompt in `CURSOR-REVIEW-LOG.md` (Phase 19 convention).
+**Changelog (all agents):** [`MASTER-CHANGELOG.md`](MASTER-CHANGELOG.md) — major milestones.  
+**Full phase log:** [`docs/collab/CURSOR-REVIEW-LOG.md`](docs/collab/CURSOR-REVIEW-LOG.md) — verbatim operator prompts (Phase 19).  
+**Co-lab brief:** [`docs/collab/CLAUDE-COLLAB.md`](docs/collab/CLAUDE-COLLAB.md) (optional local).  
+**Doc catalog:** [`docs/INDEX.md`](docs/INDEX.md).
 
 **Release:** NEO **v0.5** (`VERSION`; `neo.sh --version`).
 

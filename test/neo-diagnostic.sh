@@ -32,8 +32,12 @@ for f in neo.sh setup.sh phases.yaml registry.yaml VERSION AGENTS.md README.md \
     [[ -f "${f}" ]] && ok "exists: ${f}" || bad "missing: ${f}"
 done
 
-[[ -f CLAUDE-COLLAB.md ]] && ok "exists: CLAUDE-COLLAB.md (local)" || note "missing: CLAUDE-COLLAB.md (local co-lab brief)"
-[[ -f CURSOR-REVIEW-LOG.md ]] && ok "exists: CURSOR-REVIEW-LOG.md (local)" || note "missing: CURSOR-REVIEW-LOG.md (local dev log)"
+[[ -f docs/collab/CLAUDE-COLLAB.md ]] && ok "exists: docs/collab/CLAUDE-COLLAB.md" \
+    || note "missing: docs/collab/CLAUDE-COLLAB.md (co-lab brief)"
+[[ -f docs/collab/CURSOR-REVIEW-LOG.md ]] && ok "exists: docs/collab/CURSOR-REVIEW-LOG.md" \
+    || note "missing: docs/collab/CURSOR-REVIEW-LOG.md (dev log)"
+[[ -f MASTER-CHANGELOG.md ]] && ok "exists: MASTER-CHANGELOG.md" \
+    || note "missing: MASTER-CHANGELOG.md (agent milestone log)"
 
 # --- lib/ should only contain NEO scripts ---
 printf '\n--- lib/ hygiene ---\n'
