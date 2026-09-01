@@ -58,7 +58,8 @@ PY
 }
 
 neo_scope_target_allowed() {
-    local target="$1" host="${target%%:*}"
+    local target="$1" host
+    host="${target%%:*}"
     local cidr
     jq -e --arg host "${host}" '
       . as $s |

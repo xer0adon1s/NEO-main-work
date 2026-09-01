@@ -63,7 +63,7 @@ neo_workbench_extract_last_command() {
     [[ -f "${notes}" ]] || return 1
     cmd="$(awk '
         function flush_exact() {
-            if (exact_buf != "") { print exact_buf; exit }
+            if (exact_buf != "") { print exact_buf; exact_buf=""; exit }
         }
         function flush_last() {
             if (last_buf != "") { print last_buf; exit }
@@ -210,6 +210,9 @@ neo_workbench_try_loop_step() {
     fi
 
     printf '\nCommand:\n  %s\nTransport: %s\n' "${cmd}" "${transport}"
+    if [[ "${transport}" == operator_pane ]]; then
+        neo_workbench_confirm_yes 'Confirm send to operator pane (live target session)?' || return 1
+    fi
     if [[ "${assisted}" != true && "${transport}" == local_safe ]]; then
         neo_workbench_confirm_yes 'Second confirm (runs on attack box via argv)' || return 1
     fi

@@ -132,7 +132,9 @@ neo_pipeline_offer_plan_enum() {
         source "${NEO_DIR}/lib/neo-enum-ai.sh" 2>/dev/null || true
         declare -F neo_enum_ai_offer_after_plan >/dev/null 2>&1 && \
             neo_enum_ai_offer_after_plan "${project}" "${target}" || true
+        return 0
     fi
+    return 1
 }
 
 neo_pipeline_offer_operator_recon() {
@@ -192,7 +194,7 @@ neo_pipeline_offer_privesc_rank() {
     [[ -f "${facts}" ]] || return 0
 
     if ! neo_pipeline_prompt_yn 'Rank privesc hypotheses from FindPrivs evidence?' y; then
-        return 0
+        return 1
     fi
 
     bash "${NEO_DIR}/privesc/rank-privesc-plan.sh" --input "${facts}" --output "${plan}" || return 1

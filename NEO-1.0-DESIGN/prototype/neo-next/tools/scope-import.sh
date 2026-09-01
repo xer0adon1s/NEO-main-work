@@ -75,7 +75,9 @@ fi
 # Parse exclusions block in §3.1 (lines before next ###)
 exclusions=()
 while IFS= read -r line; do
-    [[ -n "${line}" && "${line}" != \#* ]] && exclusions+=("${line%%#*}" | sed 's/[[:space:]]*$//')
+    [[ -n "${line}" && "${line}" != \#* ]] || continue
+    line="$(sed 's/[[:space:]]*$//' <<< "${line%%#*}")"
+    [[ -n "${line}" ]] && exclusions+=("${line}")
 done < <(awk '/^### 3.1 Excluded hosts/{f=1;next} /^###/{if(f)exit} f && /^```/{if(!c){c=1;next}else{exit}} c' "${POLICY_FILE}")
 
 hosts_json="$(printf '%s\n' "${hosts[@]}" | jq -R -s 'split("\n")|map(select(length>0))')"

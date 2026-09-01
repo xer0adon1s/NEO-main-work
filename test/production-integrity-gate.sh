@@ -8,7 +8,8 @@ NEO_SOURCE_ROOT="${NEO_SOURCE_ROOT:-${NEO_ROOT}}"
 source "${NEO_ROOT}/test/test-helper.sh"
 
 require_substantive_script() {
-    local rel="$1" min_lines="$2" required_pattern="$3" file="${NEO_SOURCE_ROOT}/${rel}" count
+    local rel="$1" min_lines="$2" required_pattern="$3" count
+    local file="${NEO_SOURCE_ROOT}/${rel}"
     if [[ ! -f "${file}" ]]; then fail "production file missing: ${rel}"; return; fi
     count="$(wc -l < "${file}" | tr -d ' ')"
     (( count >= min_lines )) && pass "${rel} has substantive length" || fail "${rel} is only ${count} lines; expected >=${min_lines}"

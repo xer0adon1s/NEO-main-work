@@ -124,7 +124,7 @@ neo_menu_compose_pause_extras() {
     if declare -F neo_workbench_visible_phase >/dev/null 2>&1 \
         && neo_workbench_visible_phase "${phase}"; then
         NEO_PAUSE_HAS_WORKBENCH=true
-        run="${run}$(neo_workbench_menu_fragment)"
+        run="${run}$(neo_workbench_menu_fragment "${phase}" "${project}")"
     fi
 
     if declare -F neo_payload_analyze_failures_visible >/dev/null 2>&1 \

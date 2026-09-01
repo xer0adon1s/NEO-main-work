@@ -27,10 +27,7 @@ setup_worktree() {
 
     cp "${REAL_NEO}/templates/investigation-notes.md" "${WORKDIR}/templates/"
     cp "${REAL_NEO}/neo.sh" "${REAL_NEO}/phases.yaml" "${REAL_NEO}/registry.yaml" "${WORKDIR}/"
-    local neo_lib
-    for neo_lib in notes-lib.sh script-lib.sh neo-ai.sh neo-ai-analyze.sh neo-ai-cli.sh neo-splash.sh neo-hud.sh neo-vpn.sh neo-boot.sh neo-borg.sh neo-payload.sh neo-menu.sh neo-tmux.sh neo-interact.sh; do
-        cp "${REAL_NEO}/lib/${neo_lib}" "${WORKDIR}/lib/"
-    done
+    cp "${REAL_NEO}"/lib/*.sh "${WORKDIR}/lib/"
     cp "${REAL_NEO}/tools/status.sh" "${WORKDIR}/tools/"
 
     cat > "${WORKDIR}/recon/babysteps.sh" <<'STUB'

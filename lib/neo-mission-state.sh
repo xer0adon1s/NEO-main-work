@@ -33,9 +33,10 @@ neo_mission_init() {
 neo_mission_allowed_transition() {
     local from="$1" to="$2"
     case "${from}:${to}" in
-        preflight:recon|recon:operator_recon|operator_recon:triage|triage:borg_offer|\
+        preflight:recon|preflight:foothold_planning|recon:operator_recon|operator_recon:triage|triage:borg_offer|\
         borg_offer:borg_assimilation|borg_offer:foothold_planning|\
         borg_assimilation:foothold_planning|foothold_planning:foothold_attempt|\
+        foothold_planning:session_established|\
         foothold_attempt:foothold_planning|foothold_attempt:session_established|\
         session_established:post_foothold_enum|post_foothold_enum:privesc_planning|\
         privesc_planning:privesc_attempt|privesc_attempt:privesc_planning|\
@@ -56,7 +57,7 @@ neo_mission_transition() {
     tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
     jq --arg from "${from}" --arg to "${to}" --arg reason "${reason}" --arg now "$(neo_core_iso_timestamp)" \
         '.state=$to | .updated_at=$now | .history += [{at:$now,from:$from,to:$to,reason:$reason}]' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }
@@ -72,7 +73,7 @@ neo_mission_try_transition() {
     tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
     jq --arg from "${from}" --arg to "${to}" --arg reason "${reason}" --arg now "$(neo_core_iso_timestamp)" \
         '.state=$to | .updated_at=$now | .history += [{at:$now,from:$from,to:$to,reason:$reason}]' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }
@@ -151,16 +152,16 @@ neo_mission_record_session() {
     esac
     dir="$(dirname "${NEO_MISSION_FILE}")"
     tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
-    if [[ -n "${msf_id}" ]]; then
+    if [[ -n "${msf_id}" && "${msf_id}" =~ ^[0-9]+$ ]]; then
         jq --arg transport "${transport}" --arg user "${user}" --arg host "${host}" \
-            --arg shell "${shell_type}" --arg msf_id "${msf_id}" --arg now "$(neo_core_iso_timestamp)" \
+            --arg shell "${shell_type}" --argjson msf_id "${msf_id}" --arg now "$(neo_core_iso_timestamp)" \
             '.session={transport:$transport,user:$user,host:$host,shell:$shell,msf_session_id:$msf_id,confirmed_at:$now}' \
-            "${NEO_MISSION_FILE}" > "${tmp}"
+            "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     else
         jq --arg transport "${transport}" --arg user "${user}" --arg host "${host}" \
             --arg shell "${shell_type}" --arg now "$(neo_core_iso_timestamp)" \
             '.session={transport:$transport,user:$user,host:$host,shell:$shell,confirmed_at:$now}' \
-            "${NEO_MISSION_FILE}" > "${tmp}"
+            "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     fi
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
@@ -170,7 +171,7 @@ neo_mission_record_session() {
 neo_mission_record_msf_session() {
     local session_id="$1" transport="${2:-msf_meterpreter}" payload="${3:-}" state tmp dir
     [[ -f "${NEO_MISSION_FILE}" ]] || return 1
-    [[ -n "${session_id}" ]] || return 1
+    [[ -n "${session_id}" && "${session_id}" =~ ^[0-9]+$ ]] || return 1
     state="$(jq -r '.state' "${NEO_MISSION_FILE}")"
     case "${state}" in
         foothold_planning|foothold_attempt|session_established|post_foothold_enum|privesc_planning|privesc_attempt|privileged|post)
@@ -187,7 +188,7 @@ neo_mission_record_msf_session() {
     jq --arg transport "${transport}" --argjson msf_id "${session_id}" --arg payload "${payload}" \
         --arg now "$(neo_core_iso_timestamp)" \
         '.session={transport:$transport,user:"",host:"",shell:"msf",msf_session_id:$msf_id,payload:(if $payload=="" then null else $payload end),confirmed_at:$now}' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }
@@ -201,7 +202,7 @@ neo_mission_record_handler_plan() {
     jq --arg lhost "${lhost}" --argjson lport "${lport}" --arg payload "${payload}" \
         --arg backend "${backend}" --arg now "$(neo_core_iso_timestamp)" \
         '.handler_plan={backend:$backend,lhost:$lhost,lport:$lport,payload:$payload,recorded_at:$now}' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }
@@ -238,7 +239,7 @@ neo_mission_conductor_patch() {
     tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
     jq --arg f "${field}" --arg v "${value}" --arg now "$(neo_core_iso_timestamp)" \
         '.conductor = (.conductor // {}) | .conductor[$f] = $v | .updated_at = $now' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }
@@ -251,7 +252,7 @@ neo_mission_conductor_patch_int() {
     tmp="$(neo_core_secure_tmp "${dir}" .mission)" || return 1
     jq --arg f "${field}" --argjson v "${value}" --arg now "$(neo_core_iso_timestamp)" \
         '.conductor = (.conductor // {}) | .conductor[$f] = $v | .updated_at = $now' \
-        "${NEO_MISSION_FILE}" > "${tmp}"
+        "${NEO_MISSION_FILE}" > "${tmp}" || { rm -f -- "${tmp}"; return 1; }
     mv -f -- "${tmp}" "${NEO_MISSION_FILE}"
     chmod 600 -- "${NEO_MISSION_FILE}"
 }

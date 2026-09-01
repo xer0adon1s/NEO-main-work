@@ -48,8 +48,8 @@ prof="$(neo_report_system_prompt r)"
 [[ "${prof}" == *"client-deliverable"* ]] && ok "professional system prompt" || bad "professional prompt"
 unset NEO_ENGAGEMENT_MODE
 
-bash -n "${NEO_DIR}/lib/neo-report.sh" && ok "syntax neo-report" || bad "syntax"
-bash -n "${NEO_DIR}/tools/neo-report.sh" && ok "syntax tool" || bad "syntax tool"
+bash -n "${NEO_ROOT}/lib/neo-report.sh" && ok "syntax neo-report" || bad "syntax"
+bash -n "${NEO_ROOT}/tools/neo-report.sh" && ok "syntax tool" || bad "syntax tool"
 
 rm -rf "${tmp}"
 printf '\n%d passed, %d failed\n' "${pass}" "${fail}"
