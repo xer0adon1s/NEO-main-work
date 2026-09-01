@@ -1,7 +1,7 @@
 # Current State — Baseline (updated 2026-08-31)
 
-Status: **review_ready** with production integration substantially complete for 1.0-rc
-candidate. Remaining gate: **lab E2E** (P18) on home Linux.
+Status: **review_ready** (design). Production: Tier 0 + Tiers 1–3 foundation **implemented**;
+Tier A/B **prototyped, v0.6**. Remaining gate: **lab E2E** (P18) + human sign-off per `FEATURE-STATUS.md`.
 
 ## Repository profile
 
@@ -33,12 +33,13 @@ existing-shell path. Production integrity gate checks line count.
 | CS-007 | VPN pkill consent | **Resolved** — `neo-vpn-consent.sh` |
 | CS-008 | Moving dependencies | Documented in KNOWN-LIMITATIONS |
 
-## Integration waves complete (code)
+## Integration status (see FEATURE-STATUS.md)
 
-- Tier 0–2: CORE, safety, workflows
-- Tier 2.5: Operator workbench `[t]`/`[o]` including **post** phase
-- Tier 3–4 (prototyped): pipeline hooks, MSF foundation, neo-vendor, ELI5, session adapter
-- **Blocks 1.0.0-rc:** P18 E2E only (operator lab)
+- Tier 0–2: CORE, safety, workflows — **implemented**
+- Tier 2.5: Operator workbench `[t]`/`[o]` including **post** phase — **implemented**
+- Tier 3: pipeline hooks, ELI5, neo-vendor, doc-truth — **implemented** (tools); lab E2E pending
+- Tier A/B: conductor, feedback, report `[f]`, borg library AI, handler pane — **prototyped, v0.6**
+- **Blocks 1.0.0-rc:** integration Blocks C–E + P18 E2E + human sign-off
 
 ## Recommended verification
 

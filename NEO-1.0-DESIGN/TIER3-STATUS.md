@@ -6,7 +6,7 @@
 
 | ID | Item | Path |
 |----|------|------|
-| 3.1 | Doc truth checks | `tools/doc-truth-check.sh` |
+| 3.1 | Doc truth checks | `tools/doc-truth-check.sh` (existence + FEATURE-STATUS alignment; not “feature works”) |
 | 3.2 | Vendor manifest CLI | `tools/neo-vendor.sh`, `vendor/manifest.json` |
 | 3.3 | Enum plan reviewer | `recon/review-plan.sh` |
 | 3.4 | Release notes draft | `RELEASE-NOTES.md` |

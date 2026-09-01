@@ -4,8 +4,12 @@
 
 **Repo:** `NEO-main-work` (flattened work tree — not live personal NEO)  
 **Starting version:** v0.5 (`VERSION`)  
-**End-of-day target:** v0.6 prototype → v1.0-rc after Linux lab sign-off  
+**Prototype milestone:** **prototyped, v0.6** (Tier A/B lib files — not human-approved for live missions)  
+**End-of-day target:** v1.0-rc after lab E2E + operator sign-off on integrated features  
 **Environment:** Windows work PC (design + bash written; **no bash/tmux execution here**)
+
+> **Status truth:** See `NEO-1.0-DESIGN/FEATURE-STATUS.md`. Tier 0 + Tiers 1–3 foundation = **implemented**.
+> Tier A/B = **prototyped, v0.6** until integration + human sign-off.
 
 ---
 
@@ -19,15 +23,15 @@
 
 ## Executive summary
 
-Today was a **full-stack sprint** from NEO 1.0 design-only work through **production-tree prototypes**:
+Today was a **full-stack sprint** from NEO 1.0 design-only work through **production-tree code**:
 
-| Block | What happened |
-|-------|----------------|
-| **Morning — Codex + Cursor design** | Completed P01–P20 design bundle (`NEO-1.0-DESIGN/`), integration plan, scope policy (educational vs professional), agent roadmap, pushed to `NEO-main-work` GitHub repo |
-| **Midday — Tier 0 CORE** | 14 foundation libs/schemas landed in production `lib/` (secrets broker, evidence, actions, mission-state, scope, provider, bootstrap) |
-| **Afternoon — Tiers 1–3 + workbench** | Operator workbench `[t]`/`[o]`, LOCK & LOAD toolkit, pipeline hooks, MSF foundation, session adapter, ELI5 `[e]`, Borg library AI harvest |
-| **Late afternoon — Tier A conductor** | Unified AI bundle, post-triage sequencing, phase hooks, pause menu tuning, operator feedback UX |
-| **Evening — Tier B (Waves 1–5)** | Full long-form plan + implementation: conductor automation loop, privesc AI triage, adaptive scan, disclosure lint all surfaces, Borg v2 JSON, batch library harvest, P18 harness |
+| Block | What happened | Status |
+|-------|----------------|--------|
+| **Morning — Codex + Cursor design** | Completed P01–P20 design bundle (`NEO-1.0-DESIGN/`), integration plan, scope policy (educational vs professional), agent roadmap, pushed to `NEO-main-work` GitHub repo | design + docs |
+| **Midday — Tier 0 CORE** | 14 foundation libs/schemas in `lib/` (secrets broker, evidence, actions, mission-state, scope, provider, bootstrap) | **implemented** |
+| **Afternoon — Tiers 1–3 + workbench** | Operator workbench `[t]`/`[o]`, LOCK & LOAD toolkit, pipeline hooks, MSF foundation, session adapter, ELI5 `[e]` | **implemented** |
+| **Late afternoon — Tier A conductor** | `lib/neo-conductor.sh` + tests added; guarded wiring in `neo.sh` | **prototyped, v0.6** |
+| **Evening — Tier B (Waves 1–5)** | Long-form plan + 15 prototype lib files; offline tests green | **prototyped, v0.6** |
 
 **Safety invariant unchanged (OD-008):** nothing hits the target without operator approval. Conductor may auto-chain **AI calls** and **local prep**; execution stays in tmux pane B (or `local_safe` argv).
 
@@ -166,15 +170,16 @@ Codex had started the **NEO 1.0 design workspace** before usage limits. Cursor c
 
 ## Tier A — AI Conductor (proactive orchestration)
 
-**Doc:** `NEO-1.0-DESIGN/AI-CONDUCTOR.md`
+**Doc:** `NEO-1.0-DESIGN/AI-CONDUCTOR.md`  
+**Status:** **prototyped, v0.6** — lib file + offline tests; integration pending (Block C).
 
-| Feature | Implementation |
-|---------|----------------|
-| Unified mission bundle | `neo_conductor_build_bundle()` in `lib/neo-conductor.sh` |
-| Post-triage sequencing | Borg Y/n → payload Y/n after `neo_ai_finish_triage_run` |
-| Phase entry hooks | `neo_conductor_on_phase_entry` in `neo.sh` |
-| Pause nudges | `neo_menu_conductor_nudge` |
-| Wiring | `neo-ai.sh`, `neo-payload.sh`, `neo-borg.sh`, `neo-workbench.sh`, `neo-ai-cli.sh` |
+| Feature | Path / hook | Status |
+|---------|-------------|--------|
+| Unified mission bundle | `neo_conductor_build_bundle()` in `lib/neo-conductor.sh` | prototyped, v0.6 |
+| Post-triage sequencing | after `neo_ai_finish_triage_run` | prototyped, v0.6 |
+| Phase entry hooks | `neo_conductor_on_phase_entry` in `neo.sh` | prototyped, v0.6 |
+| Pause nudges | `neo_menu_conductor_nudge` | prototyped, v0.6 |
+| Wiring targets | `neo-ai.sh`, `neo-payload.sh`, `neo-borg.sh`, … | guarded / partial |
 
 **Tests:** `test/conductor-test.sh`
 
@@ -183,7 +188,7 @@ Codex had started the **NEO 1.0 design workspace** before usage limits. Cursor c
 ## Tier B — AI Conductor Automation (Waves 1–5)
 
 **Master plan:** `NEO-1.0-DESIGN/TIER-B-PLAN.md`  
-**Status:** Waves 1–5 **implemented (prototype)**; B12 live E2E = harness only until lab.
+**Status:** Waves 1–5 **prototyped, v0.6** (lib files + offline tests); B12 live E2E = harness only until lab + human sign-off.
 
 ### Operator decisions locked (#1–8)
 
@@ -277,7 +282,9 @@ Auto-wrap: `lib/neo-tmux.sh` (Phases 56–59 from prior session; unchanged today
 
 ## Complete file inventory
 
-### New production libs (today / this sprint)
+### New libs (this sprint) — see FEATURE-STATUS.md for implemented vs prototyped
+
+**Implemented (Tier 0 + foundation):**
 
 ```
 lib/neo-core.sh
@@ -290,13 +297,16 @@ lib/neo-provider.sh
 lib/neo-1.0-bootstrap.sh
 lib/neo-windup-actions.sh
 lib/neo-operator-pane.sh
-lib/neo-handler-pane.sh
 lib/neo-workbench.sh
 lib/neo-toolkit.sh
 lib/neo-exploit-framework.sh
 lib/neo-pipeline-hooks.sh
 lib/neo-eli5.sh
-lib/neo-report.sh
+```
+
+**Prototyped, v0.6 (Tier A/B — not human-approved for live missions):**
+
+```
 lib/neo-conductor.sh
 lib/neo-conductor-loop.sh
 lib/neo-conductor-privesc.sh
@@ -305,9 +315,11 @@ lib/neo-adaptive-scan.sh
 lib/neo-operator-recon-ai.sh
 lib/neo-feedback.sh
 lib/neo-ai-guard.sh
+lib/neo-report.sh
+lib/neo-handler-pane.sh
 lib/neo-borg-v2.sh
 lib/neo-borg-library-batch.sh
-lib/neo-borg-disclosure.sh      (extended Wave 4)
+lib/neo-borg-disclosure.sh
 lib/neo-borg-library.sh
 lib/neo-borg-library-ai.sh
 lib/neo-borg-harvest.sh
@@ -374,7 +386,9 @@ chmod +x test/*.sh tools/*.sh neo.sh
 ./test/run-all.sh
 ```
 
-Expected: all suites green; `bash -n` over all `.sh` passes. Note any `production-integrity-gate` stub warnings (ListenAssist/FindPrivs stubs may still fail gate by design until Wave 3 stub replacement on live NEO).
+Expected (2026-08-31 post-fix): `./test/run-all.sh` → **Aggregate suites failed: 0**; `bash -n` clean.
+Tier A/B prototype files may pass offline unit tests — that does **not** mean integrated in live missions.
+See `FEATURE-STATUS.md`. Optional: `./test/neo-diagnostic.sh` may fail `setup.sh --check` until vendor tools installed.
 
 ### Full diagnostic (pre-review gate)
 
@@ -624,8 +638,8 @@ Do NOT merge to live NEO yet. Output: prioritized bug list (P0/P1/P2), file:line
 
 ## Version / release notes
 
-- **Shipped in tree:** v0.5 baseline + v0.6 prototype features (not tagged yet)
-- **Tag `1.0.0-rc`:** Operator decision after `./test/run-all.sh` + `./test/neo-diagnostic.sh` green + at least one P18 box with conductor loop
+- **Shipped in tree:** v0.5 baseline + **prototyped, v0.6** Tier A/B lib files (not tagged)
+- **Tag `1.0.0-rc`:** Operator decision after lab E2E + features promoted to **implemented** in `FEATURE-STATUS.md`
 
 ---
 

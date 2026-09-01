@@ -106,11 +106,11 @@ Work in this order. Each item should end with a test or manual repro note.
 
 ### Block B — Doc truth alignment (1–2 hr)
 
-- [ ] **B1.** Update `NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md` — change "expect all green" to reflect actual gate; note prototypes vs production
-- [ ] **B2.** Update `TIER-B-PLAN.md` wave markers — distinguish **prototype** vs **integrated**
-- [ ] **B3.** Trim `AGENTS.md` extension log entries that claim undelivered files (or mark "prototype 2026-08-31")
-- [ ] **B4.** Run `tools/doc-truth-check.sh` after edits; wire into pre-commit or nightly if desired
-- [ ] **B5.** Fix `registry.yaml` — only list libs that exist or mark `status: prototype`
+- [x] **B1.** Update `NEO-1.0-DESIGN/DAILY-RECAP-2026-08-31.md` — change "expect all green" to reflect actual gate; note prototypes vs production
+- [x] **B2.** Update `TIER-B-PLAN.md` wave markers — distinguish **prototype** vs **integrated**
+- [x] **B3.** Trim `AGENTS.md` extension log entries that claim undelivered files (or mark "prototype 2026-08-31")
+- [x] **B4.** Run `tools/doc-truth-check.sh` after edits; wire into pre-commit or nightly if desired
+- [x] **B5.** Fix `registry.yaml` — only list libs that exist or mark `status: prototype`
 
 ### Block C — Conductor integration (3–4 hr)
 
@@ -154,12 +154,31 @@ Work in this order. Each item should end with a test or manual repro note.
 
 ### Block H — Integration smoke (1 hr)
 
-- [ ] **H1.** `./neo.sh <lab-proj> <target>` — verify pause menu shows `[t]`/`[o]`/`[b]`/`[f]` as appropriate
+- [x] **H0.** Partial live dry-run — `DRY-RUN-TRACE-2026-08-31.md` (Claude, tmux send-keys):
+  boot, scope, recon, `claude -p` triage, LOCK & LOAD verified; stopped mid-ELI5
+- [ ] **H1.** Finish dry-run — `[b]`/`[t]`/`[o]`/`[f]`, foothold→post, mission-complete
 - [ ] **H2.** Assimilate one vector — confirm no syntax dump
 - [ ] **H3.** Complete mission to post — confirm no crash on mission-complete report offer
 - [ ] **H4.** Commit with message referencing review + prototype milestone
 
 ---
+
+## Live dry-run (2026-08-31 evening) — Claude + Cursor reconciliation
+
+**Full trace:** `NEO-1.0-DESIGN/DRY-RUN-TRACE-2026-08-31.md`  
+**Tomorrow plan:** `NEO-1.0-DESIGN/DAILY-WORK-2026-09-01.md`
+
+Claude ran `./neo.sh dryrun-sim-01 192.0.2.1` in a **tmux send-keys** session (adaptive,
+not piped stdin). Cursor's piped-input attempt is a **different, weaker harness** — it
+cannot drive `[o]`/`[t]` and desynced on interactive prompts; that failure is not evidence
+NEO's loop is broken.
+
+**Live-verified:** AI triage (`claude -p`), recon orchestration, scope intake, toolkit awk fix.  
+**Not yet live-verified:** Borg, workbench, ELI5 complete, foothold→post, report offer.  
+**Convergent P2:** first-boot VPN decline hard-exits even with CLI target — bump to Block 0
+in tomorrow doc (document vs `--no-vpn` flag).
+
+**Code tweak (Cursor):** `NEO_STATE_ROOT` added to `NEO_TMUX_ENV_FORWARD` in `lib/neo-tmux.sh`.
 
 ## Original Claude findings (reference)
 
@@ -173,7 +192,7 @@ Full P0/P1/P2 detail, repro steps, and "solid" checklist remain in the sub-repor
 4. ~~Fix `doc-truth-check.sh`~~ ✅
 5. ~~Guard `neo-report.sh` sources~~ ✅
 6. ~~Recreate missing 16 files~~ ✅ prototypes
-7. **Tomorrow:** Blocks B–H — integrate prototypes, align docs, lab smoke
+7. **Tomorrow:** `DAILY-WORK-2026-09-01.md` — finish dry-run (Block 0), then Blocks C–G integrate prototypes
 
 ---
 

@@ -95,7 +95,8 @@ check_final_report() {
     grep -q 'SECTION:REPORT' "${NEO_SOURCE_ROOT}/templates/investigation-notes.md" 2>/dev/null \
         && pass 'template REPORT section' \
         || fail 'template missing REPORT section'
-    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-report.sh" ]] && pass 'lib/neo-report.sh present' \
+    [[ -f "${NEO_SOURCE_ROOT}/lib/neo-report.sh" ]] \
+        && pass 'lib/neo-report.sh present (prototyped, v0.6 — not implemented)' \
         || fail 'lib/neo-report.sh missing'
     [[ -f "${NEO_SOURCE_ROOT}/tools/neo-report.sh" ]] && pass 'tools/neo-report.sh present' \
         || fail 'tools/neo-report.sh missing'
@@ -115,10 +116,10 @@ check_borg_library() {
         && pass 'knowledge/library/INDEX.yaml' \
         || fail 'library INDEX missing'
     [[ -f "${NEO_SOURCE_ROOT}/lib/neo-borg-library-ai.sh" ]] \
-        && pass 'neo-borg-library-ai.sh (AI harvest)' \
+        && pass 'neo-borg-library-ai.sh present (prototyped, v0.6)' \
         || fail 'neo-borg-library-ai.sh missing'
     [[ -f "${NEO_SOURCE_ROOT}/tools/borg-library-harvest.sh" ]] \
-        && pass 'borg-library-harvest.sh present' \
+        && pass 'borg-library-harvest.sh present (prototyped, v0.6)' \
         || fail 'borg-library-harvest.sh missing'
     grep -q 'neo_scope_sync_project_meta' "${NEO_SOURCE_ROOT}/lib/neo-scope.sh" 2>/dev/null \
         && pass 'scope syncs engagement_mode to meta' \
@@ -130,11 +131,44 @@ check_conductor_documented() {
         && pass 'AI-CONDUCTOR.md present' \
         || fail 'AI-CONDUCTOR.md missing'
     [[ -f "${NEO_SOURCE_ROOT}/lib/neo-conductor.sh" ]] \
-        && pass 'neo-conductor.sh present' \
+        && pass 'neo-conductor.sh present (prototyped, v0.6)' \
         || fail 'neo-conductor.sh missing'
     grep -q 'NEO_CONDUCTOR' "${AGENTS}" 2>/dev/null \
         && pass 'AGENTS.md documents NEO_CONDUCTOR' \
         || fail 'AGENTS.md missing NEO_CONDUCTOR'
+}
+
+check_feature_status_board() {
+    local board="${NEO_SOURCE_ROOT}/NEO-1.0-DESIGN/FEATURE-STATUS.md"
+    [[ -f "${board}" ]] && pass 'FEATURE-STATUS.md present' \
+        || fail 'FEATURE-STATUS.md missing (canonical status board)'
+    grep -q 'prototyped, v0.6' "${board}" 2>/dev/null \
+        && pass 'FEATURE-STATUS labels prototyped v0.6' \
+        || fail 'FEATURE-STATUS missing prototyped v0.6 labels'
+    local lib
+    for lib in neo-conductor.sh neo-feedback.sh neo-report.sh neo-handler-pane.sh \
+               neo-conductor-loop.sh neo-borg-library-ai.sh; do
+        grep -q "${lib}" "${board}" 2>/dev/null \
+            && pass "FEATURE-STATUS lists ${lib}" \
+            || fail "FEATURE-STATUS missing ${lib}"
+    done
+}
+
+check_no_false_implemented_claims() {
+    local bad=0
+    if grep -qE 'Waves 1–5 \*\*implemented\*\*' "${NEO_SOURCE_ROOT}/NEO-1.0-DESIGN/TIER-B-PLAN.md" 2>/dev/null; then
+        fail 'TIER-B-PLAN still claims Waves implemented without prototyped label'
+        bad=1
+    else
+        pass 'TIER-B-PLAN does not overclaim implemented'
+    fi
+    if grep -q 'Tier A implemented' "${NEO_SOURCE_ROOT}/NEO-1.0-DESIGN/AI-CONDUCTOR.md" 2>/dev/null; then
+        fail 'AI-CONDUCTOR still claims Tier A implemented'
+        bad=1
+    else
+        pass 'AI-CONDUCTOR does not overclaim Tier A implemented'
+    fi
+    return "${bad}"
 }
 
 check_version_file
@@ -148,5 +182,7 @@ check_pipeline_hooks
 check_final_report
 check_borg_library
 check_conductor_documented
+check_feature_status_board
+check_no_false_implemented_claims
 
 finish_tests

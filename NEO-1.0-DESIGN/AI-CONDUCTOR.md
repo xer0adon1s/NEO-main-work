@@ -1,6 +1,7 @@
 # AI Conductor — NEO proactive orchestration
 
-**Status:** Tier A implemented (v0.5+).  
+**Status:** Tier A **prototyped, v0.6** (design spec + lib stub; integration pending).  
+**Canonical labels:** `NEO-1.0-DESIGN/FEATURE-STATUS.md`  
 **Related:** `MISSION-STATEMENT.md`, `OPERATOR-WORKBENCH.md`, `projects/08-ai-provider-interface/DESIGN.md`
 
 ---
@@ -125,7 +126,7 @@ Conductor Y/n prompts name the matching pause letter so operator learns the mapp
 
 ## Tier B+ (v0.6 — Waves 1–5)
 
-**Implemented:**
+**Prototyped, v0.6** (files + offline tests; not human-approved for live missions):
 - Workbench automation loop (`lib/neo-conductor-loop.sh`) — guided vs assisted by `engagement_mode`
 - Variable attempt cap (default 5) + batch failure review (`analyze-failures-batch`)
 - AI privesc triage (`lib/neo-conductor-privesc.sh`) — jq ranker feeds bundle; operator sees **PRIVESC-PLAN** only

@@ -90,7 +90,7 @@ neo_tmux_switch_client_or_die() {
 # reason: passing multiple raw argv tokens to `tmux new-session` gets space-joined and
 # re-split by tmux's own shell layer, which breaks on any argument containing spaces.
 NEO_TMUX_ENV_FORWARD=(
-    NEO_HOME NEO_DIR NEO_SPLASH NEO_HUD NEO_AI NEO_AI_MODE NEO_AI_MODEL NEO_AI_MAX_TOKENS
+    NEO_HOME NEO_DIR NEO_STATE_ROOT NEO_SPLASH NEO_HUD NEO_AI NEO_AI_MODE NEO_AI_MODEL NEO_AI_MAX_TOKENS
     NEO_AI_HUD NEO_AI_TIMER NEO_AI_WAIT_TIMER_SEC NEO_BORG_HUD NEO_TMUX_WRAP
     NEO_DEEP_RECON NEO_SESSION_PROMPT NEO_VPN_WAIT NEO_BOOT_INTRO_SEC
     NEO_ASK_CONTEXT_LINES NEO_ANALYZE_TERM_LINES

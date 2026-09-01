@@ -47,17 +47,19 @@ borg:
 # Pause-menu library (not a standalone script — wired from neo.sh)
 neo-conductor:
   file: lib/neo-conductor.sh
+  integration_status: prototyped_v0.6
   runs: local
   phase: any
   init_project: false
-  notes: Unified mission AI bundles; proactive Borg/payload sequencing; phase hooks (NEO_CONDUCTOR=1)
+  notes: Unified mission AI bundles; proactive Borg/payload sequencing; phase hooks (NEO_CONDUCTOR=1). Prototype — see FEATURE-STATUS.md.
 
 neo-feedback:
   file: lib/neo-feedback.sh
+  integration_status: prototyped_v0.6
   runs: local
   phase: any
   init_project: false
-  notes: Pause-menu ack + working indicators (NEO_FEEDBACK=1); AI timer uses progress bar
+  notes: Pause-menu ack + working indicators (NEO_FEEDBACK=1). Prototype — see FEATURE-STATUS.md.
 
 neo-payload:
   file: lib/neo-payload.sh
@@ -321,10 +323,11 @@ borg-library-ingest:
 
 borg-library-harvest:
   file: tools/borg-library-harvest.sh
+  integration_status: prototyped_v0.6
   runs: local
   phase: meta
   init_project: false
-  notes: AI-driven library research (--research); NEO_BORG_HARVEST=1 for optional NVD/URL context
+  notes: AI-driven library research (--research); depends on prototype libs; NEO_BORG_HARVEST=1 for optional NVD/URL context
 
 neo-report-export:
   file: tools/neo-report-export.sh
@@ -335,9 +338,10 @@ neo-report-export:
 
 neo-report:
   file: tools/neo-report.sh
+  integration_status: implemented
   runs: local
   phase: post
   init_project: false
   owns:
     REPORT: set
-  notes: Human-readable final report; educational vs professional via disclosure mode
+  notes: Standalone final-report CLI (implemented). lib/neo-report.sh pause integration = prototyped_v0.6 — see FEATURE-STATUS.md.

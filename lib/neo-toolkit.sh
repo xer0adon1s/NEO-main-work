@@ -205,11 +205,25 @@ neo_toolkit_install_tool() {
 }
 
 neo_toolkit_install_seclists() {
-    local dest="${NEO_TOOLKIT_SECLISTS_DEST:-${HOME}/wordlists/SecLists}" ans pkg
+    local setup="${NEO_HOME}/setup.sh" ans
+    if [[ -f "${setup}" ]]; then
+        read -r -p '    Install baseline (SecLists + distro tools) via ./setup.sh ? [y/N] ' ans
+        if [[ "${ans}" =~ ^[yY]$ ]]; then
+            (cd "${NEO_HOME}" && bash ./setup.sh --baseline-only)
+            neo_toolkit_seclists_root >/dev/null && return 0
+        fi
+    fi
+    local dest="${NEO_TOOLKIT_SECLISTS_DEST:-${HOME}/wordlists/SecLists}" 
     if command -v pacman >/dev/null 2>&1; then
         read -r -p '    Install SecLists via: sudo pacman -S --needed seclists ? [y/N] ' ans
         if [[ "${ans}" =~ ^[yY]$ ]]; then
             sudo pacman -S --needed seclists && return 0
+        fi
+        if command -v yay >/dev/null 2>&1; then
+            read -r -p '    Install SecLists via: yay -S --needed seclists (AUR) ? [y/N] ' ans
+            if [[ "${ans}" =~ ^[yY]$ ]]; then
+                yay -S --needed --noconfirm seclists && return 0
+            fi
         fi
     fi
     if command -v apt-get >/dev/null 2>&1; then

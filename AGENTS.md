@@ -8,6 +8,26 @@ and (when output is huge) files under `artifacts/`.
 Keep entries concrete and short. Update `registry.yaml` and the
 Extension log when you add a script.
 
+## Feature status (read first)
+
+**Canonical board:** `NEO-1.0-DESIGN/FEATURE-STATUS.md`
+
+| Label | Meaning |
+|-------|---------|
+| **implemented** | Human operator signed off; works in live mission flow |
+| **prototyped, v0.6** | File + offline tests may exist; **not** approved for live use |
+| **design only** | Spec only — no production integration |
+
+Do **not** write “implemented”, “landed”, “complete”, or “shipped” for Tier A/B or the
+16 prototype libs unless `FEATURE-STATUS.md` says **implemented** with a sign-off row.
+Update `registry.yaml` `integration_status` when status changes.
+
+**First-time setup (`setup.sh`):** after clone, run `bash setup.sh` — scans baseline
+distro tools (nmap, gobuster, rustscan, SecLists, jq, tmux, …) and `vendor/` PEASS/pspy
+scripts. Missing items are reported and offered for install via pacman/apt (AUR via
+yay/paru when needed) and curl download into `vendor/`. `bash setup.sh --check` is
+audit-only (used by `./test/neo-diagnostic.sh`).
+
 ## The four pieces
 
 1. **`templates/investigation-notes.md`** — blank master template. Edit when
@@ -260,14 +280,13 @@ at any pause runs `claude -p` when Claude Code is installed.
 
 Menus are composed in workflow order: **plan → run → learn → deliver** (`neo_menu_compose_pause_extras` in `lib/neo-menu.sh`). **`[p]`** on recon, foothold (until shell), privesc, post; **`[t]`/`[o]`** on those phases; **`[z]`** foothold only after `foothold_attempted` or workbench try. Conductor nudges use the same letters (`NEO_CONDUCTOR=1`). Dispatch: **`neo_menu_classify()`**.
 
-**Operator feedback (`NEO_FEEDBACK=1`, default):** pause letters that start work print an immediate
-acknowledgement (`lib/neo-feedback.sh`); AI calls show a stderr progress bar + countdown
-(`neo-ai-analyze.sh`); Borg keeps its ASCII HUD during assimilation. Disable with `NEO_FEEDBACK=0`.
+**Operator feedback (`NEO_FEEDBACK=1`, default):** **prototyped, v0.6** — `lib/neo-feedback.sh`
+exists (trace-only ack when `NEO_FEEDBACK_TRACE=1`); full progress-bar UX not integrated.
+Disable with `NEO_FEEDBACK=0`. See `FEATURE-STATUS.md`.
 
-**AI conductor (`NEO_CONDUCTOR=1`, default):** after recon triage, offers `[b]` Borg research
-(if pending vectors, default Y) then `[p]` payload suggestion (default **n** — use pause menu).
-Foothold/privesc entry offers `[p]` (default Y). Pause nudges list only visible letters in
-workflow order. Design: `NEO-1.0-DESIGN/AI-CONDUCTOR.md`. Disable with `NEO_CONDUCTOR=0` or
+**AI conductor (`NEO_CONDUCTOR=1`, default):** **prototyped, v0.6** — `lib/neo-conductor.sh`
++ guarded hooks in `neo.sh`; post-triage sequencing and phase entry are stubs until integration
+(Block C). Design: `NEO-1.0-DESIGN/AI-CONDUCTOR.md`. Disable with `NEO_CONDUCTOR=0` or
 `ai_triage=manual`.
 
 **Operator workbench (P20):** NEO's conductor pane owns stdin during pauses — run suggested commands in the **operator tmux pane** (`[o]` then `[t]`), not by pasting into the menu. Safe single-line attack-box commands may run via typed argv (`local_safe` transport). Loop: suggest → try (y/N) → capture → AI analyze → repeat until foothold → `[c]` continues pipeline. See **`NEO-1.0-DESIGN/OPERATOR-WORKBENCH.md`**.
@@ -400,33 +419,25 @@ wind-up loop for **`[b]` Assimilate with Borg** is unchanged and separate.
 - 2026-08-31 — **Borg multi-vector + payload integration (Phase 64):** `[b]org` menu gated when
  all enum/triage vectors assimilated; multi-pick (`a`, `1,3`) assimilation; `[p]` Borg-guided
  mode (option 0) pipes dossiers + wind-up actions into AI suggest; ELI5 after suggest unchanged.
-- 2026-08-31 — **Borg library disclosure (Phase 65):** post-assimilate payload hook; multi-slug
- focus picker; STATUS Borg blurb; red-herring skip; `neo-borg-disclosure.sh` + check tool;
- `knowledge/library/` scaffold; design `BORG-RESEARCH-LIBRARY.md`.
-- 2026-08-31 — **Final report (Phase 67):** `lib/neo-report.sh` — educational book-report vs
- professional pentest deliverable; `[f]` at post phase; mission-end prompt; `--report` flag;
- `REPORT` section + `artifacts/final-report-*.md`.
+- 2026-08-31 — **Borg library disclosure (Phase 65):** **prototyped, v0.6** — `neo-borg-disclosure.sh`
+ + check tool; `knowledge/library/` scaffold; design `BORG-RESEARCH-LIBRARY.md`.
+- 2026-08-31 — **Final report (Phase 67):** **prototyped, v0.6** — `lib/neo-report.sh` stub;
+ `[f]` / `--report` degrade gracefully; full generate not integrated. `tools/neo-report.sh` = implemented CLI.
 - 2026-08-31 — **Borg library ingest (Phase 66):** `tools/borg-library-ingest.sh`, walkthrough
  schema, seed entries in `knowledge/library/`; scope intake → `engagement_mode` in meta;
  professional reports pull library CVE cross-refs; educational report hard-fail on disclosure lint.
-- 2026-08-31 — **AI conductor (Tier A / Phase 69):** `lib/neo-conductor.sh` — unified mission bundle,
- proactive Borg→payload sequencing after triage; foothold/privesc phase hooks; pause nudges;
- design `NEO-1.0-DESIGN/AI-CONDUCTOR.md`.
-- 2026-08-31 — **Operator feedback (Phase 71):** `lib/neo-feedback.sh` — ack on pause letters;
- AI timer progress bar; wired through `neo.sh` pause menus + conductor offers.
+- 2026-08-31 — **AI conductor (Tier A / Phase 69):** **prototyped, v0.6** — `lib/neo-conductor.sh`
+ file added; integration pending. Design `NEO-1.0-DESIGN/AI-CONDUCTOR.md`.
+- 2026-08-31 — **Operator feedback (Phase 71):** **prototyped, v0.6** — `lib/neo-feedback.sh`
+ file added; ack/progress bar not fully wired.
 - 2026-08-31 — **AI conductor tuning (Phase 70):** pause menu labels + workflow groups
   (plan/run/learn/deliver); conductor letter-aligned Y/n prompts; dedupe payload offers per phase.
-- 2026-08-31 — **Borg library AI harvest (Phase 68):** `lib/neo-borg-library-ai.sh`;
- `--research` drives Claude + `borg_research_index`; mechanical fetch is context-only;
- `borg_research_index` wired into Borg assimilate bundle.
-- 2026-08-31 — **Tier B conductor automation (Waves 1–2):** `neo-conductor-loop.sh` workbench
-  playbooks (guided/educational vs assisted/professional), variable loop cap, batch failure review;
-  `neo-conductor-privesc.sh` AI triage; `neo-handler-pane.sh` pane C; Borg library hook;
-  `test/conductor-automation-test.sh`.
-- 2026-08-31 — **Tier B Wave 3:** `neo-adaptive-scan.sh` targeted deep enum; `neo-operator-recon-ai.sh`
-  structure operator text; MSF AI post suggest; babysteps `--targets-file`; locked decisions
-  #6–8 (enum no-remove, aggressive deferred, P08 wave 4).
-- 2026-08-31 — **Tier B Waves 4–5:** `neo-ai-guard.sh` disclosure lint on triage/Borg/payload/ELI5;
-  `neo_provider_web_research_bundle_block`; Borg v2 JSON (`neo-borg-v2.sh`, `borg/borg-v2.sh`);
-  batch library harvest (`neo-borg-library-batch.sh`, harvest `--batch`); `test/p18-lab-e2e.sh` harness.
+- 2026-08-31 — **Borg library AI harvest (Phase 68):** **prototyped, v0.6** — `lib/neo-borg-library-ai.sh`.
+- 2026-08-31 — **Tier B Waves 1–2:** **prototyped, v0.6** — `neo-conductor-loop.sh`, `neo-conductor-privesc.sh`,
+  `neo-handler-pane.sh`, Borg library hook files; offline tests only.
+- 2026-08-31 — **Tier B Wave 3:** **prototyped, v0.6** — `neo-adaptive-scan.sh`, `neo-operator-recon-ai.sh`;
+  babysteps `--targets-file` may be **implemented** — see `FEATURE-STATUS.md`.
+- 2026-08-31 — **Tier B Waves 4–5:** **prototyped, v0.6** — `neo-ai-guard.sh`, `neo-borg-v2.sh` (integration),
+  `neo-borg-library-batch.sh`, `neo-borg-harvest.sh`; standalone `borg/borg-v2.sh` = **implemented**.
+- 2026-08-31 — **Feature status board:** `NEO-1.0-DESIGN/FEATURE-STATUS.md` — canonical implemented vs prototyped labels.
 - 2026-08-31 — **Phase 63 batch:** Borg HUD spam fix; SCOPE/PROGRESS/CURRENT-STATE doc sync;

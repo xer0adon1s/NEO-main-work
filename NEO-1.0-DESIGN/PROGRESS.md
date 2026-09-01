@@ -1,36 +1,34 @@
 # NEO 1.0 Design Progress
 
-Last updated: 2026-08-31 (post attack-plan waves + ELI5 + doc sync)
+Last updated: 2026-08-31 (feature status alignment — see FEATURE-STATUS.md)
 
 ## Summary
 
 | Metric | Count |
 |--------|-------|
 | Projects total | 21 (P01–P21) |
-| review_ready | 19 |
+| review_ready | 19 (**design** review only — not production shipped) |
 | in_progress | 2 (P20 workbench, P21 MSF foundation) |
-| Prototype / production libs | 20+ under `lib/` |
-| Unit test suites | 20+ in `test/run-all.sh` |
-| Shipped version | `0.5` → target `1.0.0-rc` after lab E2E |
+| Lib files under `lib/` | 30+ (16 Tier A/B = **prototyped, v0.6**) |
+| Unit test suites | 38+ in `test/run-all.sh` |
+| Shipped version | `0.5` → **prototyped, v0.6** milestone → `1.0.0-rc` after lab E2E + sign-off |
 
 ## Project status
 
-| ID | Title | Status | Production |
-|----|-------|--------|------------|
-| P01 | Baseline | review_ready | Traceability YAML, WORKFLOW-MAP |
-| P02 | ListenAssist | review_ready | Full script + MSF handler (P21) |
-| P03 | FindPrivs transport | review_ready | Wrapper + ingest |
-| P04 | Borg assimilation | review_ready | v1 pause + v2 `--v2` |
-| P05–P19 | (see MASTER-MANIFEST) | review_ready | Integrated per tier |
-| P20 | Operator workbench | **in_progress** | Core loop + post phase; lab E2E pending |
-| P21 | Exploit framework (MSF) | **in_progress** | Foundation + session adapter prototyped |
+| ID | Title | Design status | Production status |
+|----|-------|---------------|-------------------|
+| P01 | Baseline | review_ready | Traceability YAML, WORKFLOW-MAP — **implemented** |
+| P02 | ListenAssist | review_ready | Full script + MSF handler (P21) — **implemented** |
+| P03 | FindPrivs transport | review_ready | Wrapper + ingest — **implemented** |
+| P04 | Borg assimilation | review_ready | Core `[b]` **implemented**; v2/library-AI layers **prototyped, v0.6** |
+| P05–P19 | (see MASTER-MANIFEST) | review_ready | Per FEATURE-STATUS.md |
+| P20 | Operator workbench | **in_progress** | Core loop **implemented**; conductor-driven loop **prototyped, v0.6** |
+| P21 | Exploit framework (MSF) | **in_progress** | Foundation **implemented**; handler pane C **prototyped, v0.6** |
 
 ## Landed since initial PROGRESS (2026-08-31)
 
-- Attack Plan Waves 1–4: post workbench, pipeline hooks, MSF handler, neo-vendor
-- Phase 61: session adapter, MSF post menu
-- Phase 62: ELI5 `[e]` educational tutor
-- Phase 63: Borg HUD spam fix, doc truth sweep, vendor rollback, diagnostic expansion
+- Attack Plan Waves 1–4: post workbench, pipeline hooks, MSF handler, neo-vendor — **implemented**
+- Tier A/B lib files (2026-08-31 evening): **prototyped, v0.6** — see FEATURE-STATUS.md
 
 ## Blockers
 

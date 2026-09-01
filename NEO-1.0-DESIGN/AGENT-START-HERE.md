@@ -10,13 +10,13 @@
 
 | Area | Path | Status |
 |------|------|--------|
-| **v0.5 production reference** | repo root (`neo.sh`, `lib/`, `recon/`, …) | Read-only reference — **unchanged** during design |
-| **NEO 1.0 design workspace** | `NEO-1.0-DESIGN/` | **Complete** — 20 projects (P01–P20) |
+| **v0.5 + v0.6 prototype libs** | repo root (`neo.sh`, `lib/`, `recon/`, …) | Tier 0–3 foundation **implemented**; Tier A/B **prototyped, v0.6** — see `FEATURE-STATUS.md` |
+| **NEO 1.0 design workspace** | `NEO-1.0-DESIGN/` | Design docs complete; production status in FEATURE-STATUS.md |
 | **1.0 prototype code** | `NEO-1.0-DESIGN/prototype/neo-next/` | Runnable on Linux; not wired to `neo.sh` |
 | **Planning history** | `CLAUDE-COLLAB.md`, `CURSOR-REVIEW-LOG.md` | Operator context |
 | **Professional scope template** | `NEO-1.0-DESIGN/templates/scope-policy-template.md` | Fill → `scope-import.sh` |
 
-**Start reading:** `NEO-1.0-DESIGN/AI-HANDOFF.md` → `OPERATOR-DECISIONS.md` → `MASTER-MANIFEST.yaml`
+**Start reading:** **`NEO-1.0-DESIGN/DAILY-WORK-2026-09-01.md`** (tomorrow workload) → `AI-HANDOFF.md` → `OPERATOR-DECISIONS.md`
 
 ---
 

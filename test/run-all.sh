@@ -39,6 +39,8 @@ run_suite 'privesc-rank-hook-test' "${NEO_ROOT}/test/privesc-rank-hook-test.sh" 
 
 run_suite 'vendor-test' "${NEO_ROOT}/test/vendor-test.sh" || true
 
+run_suite 'setup-baseline-test' "${NEO_ROOT}/test/setup-baseline-test.sh" || true
+
 run_suite 'session-adapter-test' "${NEO_ROOT}/test/session-adapter-test.sh" || true
 
 run_suite 'eli5-test' "${NEO_ROOT}/test/eli5-test.sh" || true

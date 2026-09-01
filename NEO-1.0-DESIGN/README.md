@@ -66,8 +66,8 @@ the source snapshot.
 
 ## Status
 
-**Design phase complete (2026-08-31).** All 19 projects are `review_ready`, including P13
-engagement scope (educational HTB/THM labs + professional authorized assessments).
+**Design phase complete (2026-08-31).** Project YAMLs use `review_ready` = **design review only**,
+not production shipped. Production truth: **`FEATURE-STATUS.md`** (implemented vs **prototyped, v0.6**).
 
 | Doc | Purpose |
 |-----|---------|
@@ -78,7 +78,8 @@ engagement scope (educational HTB/THM labs + professional authorized assessments
 | `UPGRADE-FROM-0.5.md` | Migration guide |
 | `OPERATOR-WORKBENCH.md` | **Core product loop — every phase** |
 | `MISSION-STATEMENT.md` | **End-to-end vision — full engagement conductor** |
-| `SCOPE-STATUS.md` | **Tier + project status board (complete / prototyped / …)** |
+| `FEATURE-STATUS.md` | **Canonical implemented vs prototyped, v0.6 labels** |
+| `SCOPE-STATUS.md` | Tier + project status board |
 | `AGENT-START-HERE.md` | **Home lab agent roadmap — read this first at home** |
 
 Prototype code lives in `prototype/neo-next/`. Run tests on a Linux host:

@@ -1,6 +1,7 @@
 # Tier B — AI Conductor Automation & Phase Intelligence
 
-**Status:** Waves 1–5 **implemented** (v0.6 prototype); P18 live lab E2E (B12) is harness + checklist — run with `NEO_P18_LAB=1` on Linux HTB.  
+**Status:** Waves 1–5 **prototyped, v0.6** (lib files + offline tests; integration + human sign-off pending).  
+**Canonical labels:** `NEO-1.0-DESIGN/FEATURE-STATUS.md`  
 **Builds on:** `AI-CONDUCTOR.md` (Tier A), `OPERATOR-WORKBENCH.md`, `WORKFLOW-MAP.md`  
 **Version target:** v0.6 → v1.0-rc (Tier B is the bridge)
 
@@ -464,9 +465,9 @@ Wave 2 — Intelligence on evidence (B2, B3, B7)
     ↓
 Wave 3 — Targeted execution + MSF (B4, B5, B6, session adapter)
     ↓
-Wave 4 — Safety + provider (B8, B9) ✅
+Wave 4 — Safety + provider (B8, B9) [prototyped, v0.6]
     ↓
-Wave 5 — Structure at scale (B10, B11) ✅
+Wave 5 — Structure at scale (B10, B11) [prototyped, v0.6]
     ║
     ╚══ P18 lab E2E (B12) — harness offline; live with NEO_P18_LAB=1
 ```
@@ -480,7 +481,7 @@ Wave 5 — Structure at scale (B10, B11) ✅
 3. `NEO_CONDUCTOR_MODE=assisted` + meta persistence
 4. Mission.json `conductor` block + loop caps
 5. `test/conductor-automation-test.sh`
-6. Doc update in `AI-CONDUCTOR.md` → “Tier B implemented”
+6. Doc update in `AI-CONDUCTOR.md` → “Tier B **prototyped, v0.6**” (not “implemented” until sign-off)
 
 **Operator-visible win:** foothold phase feels like pair-programming with AI.
 

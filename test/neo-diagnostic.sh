@@ -93,11 +93,12 @@ done < <(find . -path ./vendor -prune -o -path ./lib/node_modules -prune -o \
 (( syn_fail == 0 )) && ok "all tracked .sh syntax clean (vendor/pruned paths skipped)"
 
 # --- Vendor ---
-printf '\n--- setup.sh --check ---\n'
-if ./setup.sh --check >/dev/null 2>&1; then
-    ok "vendor tools (6/6)"
+printf '\n--- setup.sh --check (baseline + vendor) ---\n'
+if ./setup.sh --check >/tmp/neo-diag-setup.log 2>&1; then
+    ok "baseline toolset ($(grep -c '\[ok\]' /tmp/neo-diag-setup.log 2>/dev/null || echo ready))"
 else
-    bad "setup.sh --check failed"
+    bad "setup.sh --check — missing tools (run ./setup.sh to install)"
+    tail -12 /tmp/neo-diag-setup.log >&2 || true
 fi
 
 # --- Tests ---

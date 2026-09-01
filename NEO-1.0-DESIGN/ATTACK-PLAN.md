@@ -208,7 +208,8 @@ NEO-1.0-DESIGN/*              # Wave 5
 | 2 | Complete* | **Complete** (helpers wired) |
 | 2.5 | Prototyped | **Complete** except 2.5.7 lab |
 | 3 | Incomplete | **Prototyped** except 3.12–3.13 blocked |
-| 4 | Not started | **Prototyped** (4.1–4.8 code landed) |
+| 4 | Not started | **prototyped, v0.6** (Tier A/B lib files; integration pending) |
+| **A/B** | — | **prototyped, v0.6** — conductor, feedback, report `[f]`, borg library AI |
 | 5 | Deferred | Deferred |
 
 \* helpers existed but unwired

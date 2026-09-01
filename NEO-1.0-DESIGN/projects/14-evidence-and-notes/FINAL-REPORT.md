@@ -1,6 +1,6 @@
 # Final Report — Design Document
 
-**Status:** implemented (prototype) · **Phase:** 67 · **Depends:** P08 AI provider, P13 disclosure, P14 notes
+**Status:** **prototyped, v0.6** · **Phase:** 67 · **Depends:** P08 AI provider, P13 disclosure, P14 notes
 
 ## Problem
 

@@ -113,7 +113,7 @@ Priority order for `neo_borg_disclosure_mode(project)`:
 | Borg wind-up `[RUN:…]` from dossier | Allowed (adapt to target IP) | Allowed |
 | ELI5 / Payload / Borg AI rules block | `neo_borg_disclosure_ai_rules()` | same function, different text |
 
-### 4.3 Check function (implemented)
+### 4.3 Check function (**prototyped, v0.6**)
 
 | Tool | Purpose |
 |------|---------|
@@ -143,14 +143,14 @@ Professional mode **always passes** the linter (full intel allowed).
 
 ### Phase A — Schema + tooling (current)
 
-- [x] `knowledge/library/README.md` layout
-- [x] `lib/neo-borg-library.sh` paths + CVE grep lookup
-- [x] Disclosure module + CLI check
-- [x] `schemas/library-walkthrough.schema.json`
-- [x] `tools/borg-library-ingest.sh` (manual ingest + `--check-only`)
-- [x] Seed entries: `redis-unauth-rce` method + `htb:apache-path-traversal-example` path
-- [x] `lib/neo-borg-library-ai.sh` — **AI-first** library synthesis (Claude + research index)
-- [x] `tools/borg-library-harvest.sh` — `--research TOPIC` (mechanical fetch = AI context only)
+- [x] `knowledge/library/README.md` layout — **implemented**
+- [~] `lib/neo-borg-library.sh` — **prototyped, v0.6**
+- [~] Disclosure module + CLI check — **prototyped, v0.6**
+- [x] `schemas/library-walkthrough.schema.json` — **implemented**
+- [x] `tools/borg-library-ingest.sh` (manual ingest + `--check-only`) — **implemented**
+- [x] Seed entries — **implemented**
+- [~] `lib/neo-borg-library-ai.sh` — **prototyped, v0.6**
+- [~] `tools/borg-library-harvest.sh` — **prototyped, v0.6**
 - [ ] Provider-native web search (`NEO_PROVIDER_WEB_RESEARCH=1`) when API supports it
 
 ### Phase B — Curated seed (human + AI assist)
@@ -165,7 +165,7 @@ Sources (from `borg_research_index.yaml` + operator additions):
 | Course PDFs (OSCP/OSWE) | **Operator-local only** — not in public git; path in `.gitignore` |
 | MITRE ATT&CK / HackTricks | `library/methods/` technique docs (already technique-first) |
 
-### Phase C — AI-driven harvest (implemented prototype)
+### Phase C — AI-driven harvest (**prototyped, v0.6**)
 
 ```
 borg-library-harvest --research "TOPIC"
@@ -192,7 +192,7 @@ When `[b]org` runs:
 2. **Query library** by CVEs/techniques in vector string — professional only.
 3. Merge with `borg_research_index` “where to look” URLs — not full text.
 4. AI writes dossier with disclosure rules attached.
-5. Optional: post-assimilate **Borg-guided payload suggest** (implemented Phase 65).
+5. Optional: post-assimilate **Borg-guided payload suggest** (**prototyped, v0.6**).
 
 ---
 
