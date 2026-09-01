@@ -79,6 +79,7 @@ neo_borg_library_index_register_method() {
     line="# registered method slug=${slug} cve=${cve:-none} at=${ts}"
     grep -Fq "slug=${slug}" "${idx}" 2>/dev/null && return 0
     printf '%s\n' "${line}" >> "${idx}"
+
     return 0
 }
 
@@ -90,5 +91,6 @@ neo_borg_library_index_register_walkthrough() {
     line="# registered walkthrough box=${box} path=${path} at=${ts}"
     grep -Fq "path=${path}" "${idx}" 2>/dev/null && return 0
     printf '%s\n' "${line}" >> "${idx}"
+
     return 0
 }

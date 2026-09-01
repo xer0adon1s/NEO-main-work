@@ -36,6 +36,7 @@ neo_conductor_prompt_yn() {
             esac
             ;;
     esac
+    esac
 }
 
 neo_conductor_resolve_mode() {
@@ -272,5 +273,7 @@ neo_conductor_after_triage() {
     if declare -F neo_conductor_on_event >/dev/null 2>&1; then
         neo_conductor_on_event recon.triage_complete "${project}" "${phase}" || true
     fi
+
+    return 0
     return 0
 }

@@ -71,30 +71,14 @@ neo_report_system_prompt() {
             printf '%s' 'Write a learning report (book report style) explaining what was tried, what worked, what failed, and key lessons. Use markdown headings. Teaching tone — help the operator understand the mission arc.'
             ;;
     esac
-}
-
-neo_report_save() {
-    local project="$1" body="$2" ts artifact safe_ts
-    OUTDIR="${NEO_HOME}/projects/${project}"
-    NOTES_FILE="${OUTDIR}/Investigation-Notes.md"
-    # shellcheck source=script-lib.sh
-    source "${NEO_LIB_DIR}/script-lib.sh" 2>/dev/null || true
-    ts="$(date '+%Y-%m-%d %H:%M:%S')"
-    safe_ts="$(date '+%Y%m%d-%H%M%S')"
-    notes_set_section REPORT "${body}" 2>/dev/null || return 1
-    mkdir -p "${OUTDIR}/artifacts"
-    artifact="${OUTDIR}/artifacts/final-report-${safe_ts}.md"
-    printf '%s\n' "${body}" > "${artifact}"
-    notes_log report "=== final report ${ts} ===
-artifact: ${artifact}
-${body}" 2>/dev/null || true
-    printf '[*] Report saved → REPORT section + %s\n' "${artifact}"
-    return 0
+            ;;
+    esac
 }
 
 neo_report_at_pause() {
     local project="$1" _phase="$2"
     neo_report_generate "${project}"
+
 }
 
 neo_report_offer_mission_complete() {
@@ -135,5 +119,7 @@ neo_report_generate() {
     fi
 
     neo_report_save "${project}" "${response}"
+    return 0
+}
     return 0
 }

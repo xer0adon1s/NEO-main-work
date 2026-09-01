@@ -142,3 +142,4 @@ neo_borg_library_ai_write_artifacts() {
     fi
     printf '%s|%s' "${edu_file}" "${prof_file}"
 }
+}

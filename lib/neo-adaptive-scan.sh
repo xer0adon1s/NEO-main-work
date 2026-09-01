@@ -67,7 +67,6 @@ neo_adaptive_scan_offer_after_triage() {
     fi
     return 0
 }
-
 neo_adaptive_scan_after_babysteps() {
     local project="$1" target="$2"
     neo_adaptive_scan_recommend "${project}" "${target}"

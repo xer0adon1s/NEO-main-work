@@ -70,4 +70,5 @@ neo_handler_pane_capture() {
     body="$(tmux capture-pane -t "${pane}" -p -S "-${lines}" 2>/dev/null || true)"
     [[ -n "${body}" ]] || return 1
     printf '%s' "${body}"
+
 }

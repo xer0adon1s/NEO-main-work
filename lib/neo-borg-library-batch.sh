@@ -59,6 +59,7 @@ neo_borg_library_batch_run() {
     done < "${queue}"
     return "${rc}"
 }
+}
 
 neo_borg_library_batch_offer() {
     local project="$1"

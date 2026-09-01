@@ -6,34 +6,6 @@ NEO_DIR="${NEO_DIR:-$(cd "${NEO_LIB_DIR}/.." && pwd)}"
 # shellcheck source=neo-conductor.sh
 source "${NEO_LIB_DIR}/neo-conductor.sh"
 
-neo_conductor_privesc_plan_root() {
-    local project="$1"
-    printf '%s/projects/%s/privesc' \
-        "${NEO_STATE_ROOT:-${XDG_STATE_HOME:-${HOME}/.local/state}/neo}" "${project}"
-}
-
-neo_conductor_privesc_system_prompt() {
-    cat <<'EOF'
-You are a privesc triage assistant for authorized lab work only.
-Review WHOAMI, SUDO, SUID, CAPS, CRON, FILES evidence plus privesc-facts.json and jq ranker output.
-
-Write operator-facing markdown with exactly these sections:
-
-## Summary
-2-3 sentences on the most likely privesc paths grounded in the evidence.
-
-## Ranked next steps
-Numbered list — each step one concrete command or check (lab-safe, copy-paste ready).
-
-## Caveats
-What to verify before running destructive or irreversible commands.
-
-Rules:
-- Ground every recommendation in bundle evidence; do not invent CVEs or misconfigurations not present.
-- Prefer checks over exploitation until a path is confirmed.
-EOF
-}
-
 neo_conductor_privesc_after_ingest() {
     local project="$1" bundle response ts facts plan facts_text plan_text plan_root
     neo_conductor_skip_interactive && return 0
@@ -85,6 +57,8 @@ ${response}" 2>/dev/null || true
 ${response}" 2>/dev/null || true
     meta_set conductor_privesc_triage_done 1 2>/dev/null || true
     printf '[*] Privesc plan saved → PRIVESC-PLAN section.\n'
+    return 0
+}
     return 0
 }
 

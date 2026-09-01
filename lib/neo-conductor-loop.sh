@@ -18,10 +18,10 @@ neo_conductor_on_event() {
             declare -F neo_conductor_privesc_after_ingest >/dev/null 2>&1 && \
                 neo_conductor_privesc_after_ingest "${project}" || true
             ;;
-        recon.triage_complete)
+        recon.triage_complete|foothold.entry|privesc.entry|post.entry)
+            neo_conductor_on_phase_entry "${project}" "${phase}" || true
             ;;
-        foothold.entry|privesc.entry|post.entry)
-            neo_conductor_on_phase_entry "${project}" "${phase:-${event%%.*}}}" || true
+
             ;;
         *)
             ;;
