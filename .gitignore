@@ -58,6 +58,7 @@ lib/*
 !lib/neo-conductor.sh
 !lib/neo-conductor-loop.sh
 !lib/neo-conductor-privesc.sh
+!lib/neo-conductor-tuning.sh
 !lib/neo-report.sh
 !lib/neo-feedback.sh
 !lib/neo-ai-guard.sh

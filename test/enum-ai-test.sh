@@ -26,10 +26,7 @@ cp "${NEO_ROOT}/templates/investigation-notes.md" "${NEO_HOME}/templates/"
 source "${NEO_ROOT}/lib/notes-lib.sh"
 OUTDIR="${NEO_HOME}/projects/enum-proj"
 notes_init "enum-proj" "10.10.10.5" "${OUTDIR}"
-notes_set_section PORTS <<'EOF'
-80/tcp open http
-22/tcp open ssh
-EOF
+notes_set_section PORTS $'```text\n80/tcp open http\n22/tcp open ssh\n```' 2>/dev/null || true
 
 plan_root="${NEO_STATE_ROOT}/projects/enum-proj/enum-plans"
 mkdir -p "${plan_root}/actions"

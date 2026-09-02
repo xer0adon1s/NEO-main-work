@@ -77,6 +77,7 @@ source "${REAL_NEO}/lib/neo-conductor-loop.sh"
 meta_set engagement_mode professional 2>/dev/null || true
 neo_conductor_assisted_loop_enabled auto-proj && ok "assisted loop enabled (professional)" || bad "assisted loop"
 meta_set engagement_mode educational 2>/dev/null || true
+sed -i '/^conductor_mode=/d' "${OUTDIR}/project.meta" 2>/dev/null || true
 neo_conductor_assisted_loop_enabled auto-proj && bad "assisted loop should be off for guided" || ok "guided skips assisted loop"
 
 export NEO_TEST_NONINTERACTIVE=1
